@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { auth } from "../firebase/firebaseConfig";
-import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
-import { useNavigate, Link } from "react-router-dom";
+import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, setPersistence, browserLocalPersistence, browserSessionPersistence } from "firebase/auth";
+import { useNavigate, Link, Navigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 import { Mail, Lock, LogIn, ArrowRight, Sun, Moon, Phone, MessageSquare } from "lucide-react";
 import { useTheme } from "../context/ThemeContext";
 import toast from "react-hot-toast";
@@ -11,22 +12,45 @@ function Login() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [authMode, setAuthMode] = useState("email");
+  const [rememberMe, setRememberMe] = useState(
+    localStorage.getItem("rememberMe") === "true"
+  );
 
   const navigate = useNavigate();
   const { isDarkMode, toggleTheme } = useTheme();
+  const { user } = useAuth(); // to check if already logged in
+
+  useEffect(() => {
+    const savedEmail = localStorage.getItem("rememberedEmail");
+    if (savedEmail && rememberMe) {
+      setEmail(savedEmail);
+    }
+  }, [rememberMe]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError("");
+    const trimmedEmail = email.trim();
     try {
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      // Set persistence based on remember me BEFORE signing in
+      const persistenceType = rememberMe ? browserLocalPersistence : browserSessionPersistence;
+      await setPersistence(auth, persistenceType);
+
+      const userCredential = await signInWithEmailAndPassword(auth, trimmedEmail, password);
 
       if (!userCredential.user.emailVerified) {
         await auth.signOut();
         toast.error("Please verify your email before logging in. Check your inbox.");
         return;
+      }
+
+      if (rememberMe) {
+        localStorage.setItem("rememberedEmail", trimmedEmail);
+        localStorage.setItem("rememberMe", "true");
+      } else {
+        localStorage.removeItem("rememberedEmail");
+        localStorage.setItem("rememberMe", "false");
       }
 
       toast.success("Welcome back!");
@@ -42,6 +66,10 @@ function Login() {
     try {
       setLoading(true);
       setError("");
+
+      const persistenceType = rememberMe ? browserLocalPersistence : browserSessionPersistence;
+      await setPersistence(auth, persistenceType);
+
       const provider = new GoogleAuthProvider();
       await signInWithPopup(auth, provider);
       toast.success("Welcome back!");
@@ -54,6 +82,10 @@ function Login() {
   };
 
 
+
+  if (user) {
+    return <Navigate to="/dashboard" replace />;
+  }
 
   return (
     <div className="flex min-h-screen bg-slate-50 dark:bg-slate-900 font-sans transition-colors duration-300">
@@ -104,6 +136,7 @@ function Login() {
                 <input
                   type="email"
                   placeholder="Enter your email"
+                  value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="w-full pl-11 pr-4 py-3.5 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 dark:focus:border-indigo-500 transition-all duration-200"
                   required
@@ -133,6 +166,20 @@ function Login() {
                   required
                 />
               </div>
+            </div>
+
+            {/* Remember Me Checkbox */}
+            <div className="flex items-center">
+              <input
+                id="rememberMe"
+                type="checkbox"
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
+                className="w-4 h-4 text-indigo-600 bg-slate-100 border-slate-300 rounded focus:ring-indigo-500 dark:focus:ring-indigo-600 dark:ring-offset-slate-900 focus:ring-2 dark:bg-slate-700 dark:border-slate-600 cursor-pointer"
+              />
+              <label htmlFor="rememberMe" className="ml-2 text-sm font-medium text-slate-700 dark:text-slate-300 cursor-pointer select-none">
+                Remember me
+              </label>
             </div>
 
             {/* Submit Button */}

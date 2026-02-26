@@ -68,8 +68,10 @@ function Register() {
 
     setLoading(true);
 
+    const trimmedEmail = email.trim();
+
     try {
-      await createUserWithEmailAndPassword(auth, email, password);
+      await createUserWithEmailAndPassword(auth, trimmedEmail, password);
       await sendEmailVerification(auth.currentUser);
       await auth.signOut();
       toast.success("Account created! Please check your email and verify your account before logging in.");
