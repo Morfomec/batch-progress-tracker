@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { auth } from "../firebase/firebaseConfig";
+import { auth, db } from "../firebase/firebaseConfig";
 import { createUserWithEmailAndPassword, sendEmailVerification, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
 import { Link, useNavigate } from "react-router-dom";
 import { Mail, Lock, UserPlus, Eye, EyeOff, CheckCircle2, Sun, Moon, Phone, MessageSquare } from "lucide-react";
 import { useTheme } from "../context/ThemeContext";
@@ -95,7 +96,23 @@ function Register() {
     try {
       setLoading(true);
       const provider = new GoogleAuthProvider();
-      await signInWithPopup(auth, provider);
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
+
+      const userDocRef = doc(db, "users", user.uid);
+      const userDocSnap = await getDoc(userDocRef);
+
+      if (!userDocSnap.exists()) {
+        await setDoc(userDocRef, {
+          fullName: user.displayName || "Google User",
+          nickName: user.displayName ? user.displayName.split(" ")[0] : "User",
+          email: user.email,
+          createdAt: serverTimestamp(),
+          themePreference: "system",
+          privacyMode: false,
+        });
+      }
+
       toast.success("Account created successfully!");
       navigate("/dashboard");
     } catch (err) {

@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
-import { auth } from "../firebase/firebaseConfig";
+import { auth, db } from "../firebase/firebaseConfig";
 import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, setPersistence, browserLocalPersistence, browserSessionPersistence } from "firebase/auth";
+import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
 import { useNavigate, Link, Navigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { Mail, Lock, LogIn, ArrowRight, Sun, Moon, Phone, MessageSquare } from "lucide-react";
@@ -71,7 +71,25 @@ function Login() {
       await setPersistence(auth, persistenceType);
 
       const provider = new GoogleAuthProvider();
-      await signInWithPopup(auth, provider);
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
+
+      // Check if user document exists in Firestore
+      const userDocRef = doc(db, "users", user.uid);
+      const userDocSnap = await getDoc(userDocRef);
+
+      // If it's a new Google user, automatically create a default profile so they aren't stuck on profile setup
+      if (!userDocSnap.exists()) {
+        await setDoc(userDocRef, {
+          fullName: user.displayName || "Google User",
+          nickName: user.displayName ? user.displayName.split(" ")[0] : "User",
+          email: user.email,
+          createdAt: serverTimestamp(),
+          themePreference: "system",
+          privacyMode: false,
+        });
+      }
+
       toast.success("Welcome back!");
       navigate("/dashboard");
     } catch (err) {
