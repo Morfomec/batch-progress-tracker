@@ -10,6 +10,7 @@ import JoinGroup from "./pages/JoinGroup";
 import ProfileSetup from "./pages/ProfileSetup";
 import Settings from "./pages/Settings";
 import ForgotPassword from "./pages/ForgotPassword";
+import AuthAction from "./pages/AuthAction";
 import PeerProfile from "./pages/PeerProfile";
 import MyProfile from "./pages/MyProfile";
 import Peers from "./pages/Peers";
@@ -43,6 +44,7 @@ function App() {
         <Route path="/" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/auth/action" element={<AuthAction />} />
 
         <Route
           path="/profile-setup"
