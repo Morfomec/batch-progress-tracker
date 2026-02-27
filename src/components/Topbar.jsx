@@ -2,10 +2,10 @@ import { useState, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
-import { Moon, Sun, User as UserIcon, Settings, LogOut } from "lucide-react";
+import { Moon, Sun, User as UserIcon, Settings, LogOut, Menu } from "lucide-react";
 import { auth } from "../firebase/firebaseConfig";
 
-function Topbar() {
+function Topbar({ onMenuClick }) {
   const { user, userProfile } = useAuth();
   const { isDarkMode, toggleTheme } = useTheme();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -28,10 +28,25 @@ function Topbar() {
   }, []);
 
   return (
-    <header className="h-[90px] bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b-2 border-slate-200 dark:border-slate-800 flex items-center justify-end px-8 shadow-sm transition-colors duration-300 sticky top-0 z-50">
+    <header className="h-[90px] bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b-2 border-slate-200 dark:border-slate-800 flex items-center justify-between px-4 sm:px-8 shadow-sm transition-colors duration-300 sticky top-0 z-50">
+
+      {/* Hamburger Menu (Mobile Only) */}
+      <div className="flex items-center lg:hidden">
+        <button
+          onClick={onMenuClick}
+          className="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors shadow-sm"
+        >
+          <Menu className="w-6 h-6" />
+        </button>
+      </div>
+
+      {/* LOGO (Mobile Only, optional space filler) */}
+      <h1 className="lg:hidden text-xl font-bold text-slate-900 dark:text-white truncate px-2">
+        BatchTracker
+      </h1>
 
       {/* RIGHT USER */}
-      <div className="flex items-center gap-6">
+      <div className="flex items-center gap-4 sm:gap-6 ml-auto">
 
         {/* THEME TOGGLE */}
         <div className="pr-8 border-r-2 border-slate-200 dark:border-slate-800">

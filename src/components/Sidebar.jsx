@@ -1,11 +1,11 @@
-import { Users, UserCircle, Settings, LogOut, ChevronLeft, LayoutDashboard, CheckCircle2, ChevronDown, User as UserIcon, PlusCircle, UserPlus, BookOpen, ShieldAlert, Activity } from "lucide-react";
+import { Users, UserCircle, Settings, LogOut, ChevronLeft, LayoutDashboard, CheckCircle2, ChevronDown, User as UserIcon, PlusCircle, UserPlus, BookOpen, ShieldAlert, Activity, X } from "lucide-react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { signOut } from "firebase/auth";
 import { auth } from "../firebase/firebaseConfig";
 import { useAuth } from "../context/AuthContext";
 import { useState } from "react";
 
-function Sidebar({ groupContext = {} }) {
+function Sidebar({ groupContext = {}, onClose }) {
   const navigate = useNavigate();
   const location = useLocation();
   const { isAdmin } = useAuth();
@@ -34,14 +34,21 @@ function Sidebar({ groupContext = {} }) {
     <aside className="w-80 bg-white dark:bg-slate-950 border-r-2 border-slate-200 dark:border-slate-800 flex flex-col h-screen fixed sm:relative z-20 transition-colors duration-300">
 
       {/* BRANDING */}
-      <div className="p-6 border-b-2 border-slate-100 dark:border-slate-800 flex items-center gap-3">
-        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 dark:from-indigo-600 dark:to-purple-700 flex items-center justify-center shadow-md shadow-indigo-200 dark:shadow-none animate-bounce" style={{ animationDuration: '3s' }}>
-          <BookOpen className="w-5 h-5 text-white" />
+      <div className="p-6 border-b-2 border-slate-100 dark:border-slate-800 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 dark:from-indigo-600 dark:to-purple-700 flex items-center justify-center shadow-md shadow-indigo-200 dark:shadow-none animate-bounce" style={{ animationDuration: '3s' }}>
+            <BookOpen className="w-5 h-5 text-white" />
+          </div>
+          <div className="animate-pulse" style={{ animationDuration: '4s' }}>
+            <h1 className="font-extrabold text-lg text-slate-800 dark:text-slate-100 leading-tight tracking-tight">Batch Tracker</h1>
+            <p className="text-[10px] font-bold text-indigo-500 dark:text-indigo-400 uppercase tracking-widest mt-0.5">Continuous Learning</p>
+          </div>
         </div>
-        <div className="animate-pulse" style={{ animationDuration: '4s' }}>
-          <h1 className="font-extrabold text-lg text-slate-800 dark:text-slate-100 leading-tight tracking-tight">Batch Tracker</h1>
-          <p className="text-[10px] font-bold text-indigo-500 dark:text-indigo-400 uppercase tracking-widest mt-0.5">Continuous Learning</p>
-        </div>
+        {onClose && (
+          <button onClick={onClose} className="lg:hidden p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-slate-700 dark:hover:text-slate-300">
+            <X className="w-5 h-5" />
+          </button>
+        )}
       </div>
 
       {/* NAVIGATION */}
@@ -103,6 +110,7 @@ function Sidebar({ groupContext = {} }) {
                 <Link
                   key={item.name}
                   to={item.path}
+                  onClick={() => onClose && onClose()}
                   className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${isActive
                     ? "bg-indigo-50 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 shadow-sm dark:shadow-none"
                     : "text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-900 hover:text-slate-900 dark:hover:text-slate-200"
@@ -118,6 +126,7 @@ function Sidebar({ groupContext = {} }) {
             {isAdmin && (
               <Link
                 to="/admin"
+                onClick={() => onClose && onClose()}
                 className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 mt-2 ${location.pathname.startsWith('/admin')
                   ? "bg-rose-50 dark:bg-rose-900/40 text-rose-700 dark:text-rose-300 shadow-sm dark:shadow-none border border-rose-200 dark:border-rose-800"
                   : "text-slate-600 dark:text-slate-400 hover:bg-rose-50 dark:hover:bg-slate-900 hover:text-rose-700 dark:hover:text-rose-400"
@@ -139,6 +148,7 @@ function Sidebar({ groupContext = {} }) {
               <Link
                 key={item.name}
                 to={item.path}
+                onClick={() => onClose && onClose()}
                 className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 border border-transparent hover:border-slate-200 dark:hover:border-slate-700 text-slate-700 dark:text-slate-300 ${item.bgHover}`}
               >
                 <item.icon className={`w-5 h-5 ${item.color}`} />
