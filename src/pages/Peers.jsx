@@ -12,7 +12,10 @@ function Peers() {
 
     useEffect(() => {
         const fetchPeers = async () => {
-            if (!group) return;
+            if (!group) {
+                setLoading(false);
+                return;
+            }
 
             try {
                 // Fetch all users to get details
@@ -73,9 +76,12 @@ function Peers() {
 
     if (!group) {
         return (
-            <div className="flex flex-col items-center justify-center p-12 text-slate-500 dark:text-slate-400">
-                <UsersIcon className="w-12 h-12 mb-4 opacity-50" />
-                <p className="text-lg font-medium">No Group selected</p>
+            <div className="min-h-screen bg-transparent p-4 sm:p-6 lg:p-8 flex items-center justify-center transition-colors duration-300">
+                <div className="flex flex-col items-center justify-center p-12 text-slate-500 dark:text-slate-400 bg-white dark:bg-slate-900 rounded-3xl shadow-xl border border-slate-100 dark:border-slate-800 w-full max-w-2xl">
+                    <UsersIcon className="w-16 h-16 mb-6 text-slate-300 dark:text-slate-600" />
+                    <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100 mb-2">No Batch Mates Yet</h2>
+                    <p className="text-lg text-center max-w-sm">You need to join or create a group to see your peers here.</p>
+                </div>
             </div>
         );
     }

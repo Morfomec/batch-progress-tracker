@@ -15,7 +15,11 @@ function MyProgress() {
     const [loading, setLoading] = useState(true);
 
     const fetchProgress = useCallback(async () => {
-        if (!group || !user) return;
+        if (!group) {
+            setLoading(false);
+            return;
+        }
+        if (!user) return;
         setLoading(true);
         try {
             const q = query(
@@ -120,7 +124,17 @@ function MyProgress() {
                     </div>
 
                     <div className="p-8">
-                        {loading ? (
+                        {!group ? (
+                            <div className="text-center py-16 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-dashed border-slate-200 dark:border-slate-700">
+                                <div className="w-16 h-16 bg-white dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm">
+                                    <History className="w-8 h-8 text-slate-400 dark:text-slate-500" />
+                                </div>
+                                <h3 className="text-lg font-semibold text-slate-700 dark:text-slate-200">No Group Assigned</h3>
+                                <p className="text-slate-500 dark:text-slate-400 mt-1 max-w-sm mx-auto">
+                                    You are not part of any group yet. Join a group to start tracking your progress!
+                                </p>
+                            </div>
+                        ) : loading ? (
                             <div className="flex justify-center py-12">
                                 <div className="w-10 h-10 border-4 border-indigo-200 border-t-indigo-600 dark:border-indigo-900 dark:border-t-indigo-400 rounded-full animate-spin"></div>
                             </div>
