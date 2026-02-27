@@ -109,43 +109,46 @@ function Login() {
       setPersistence(auth, persistenceType).catch(console.error);
 
       const provider = new GoogleAuthProvider();
+      // Force account selection to ensure the popup gets proper interaction and doesn't silently fail
+      provider.setCustomParameters({
+        prompt: 'select_account'
+      });
 
-      // Check if mobile device (including iPads masquerading as Mac desktop)
-      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+      // We will use popup for all devices. Redirect is too flaky on iOS Safari due to ITP.
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
 
-      if (isMobile) {
-        // Use redirect for mobile to avoid popup blockers and "firebase: error" 
-        signInWithRedirect(auth, provider).catch(err => {
-          console.error("Redirect logic error:", err);
-          toast.error(err.message || "Failed to start Google Sign in");
-          setLoading(false);
+      const userDocRef = doc(db, "users", user.uid);
+      const userDocSnap = await getDoc(userDocRef);
+
+      if (!userDocSnap.exists()) {
+        await setDoc(userDocRef, {
+          fullName: user.displayName || "Google User",
+          nickName: user.displayName ? user.displayName.split(" ")[0] : "User",
+          email: user.email,
+          createdAt: serverTimestamp(),
+          themePreference: "system",
+          privacyMode: false,
         });
-        // Do not setLoading(false) here, as the page will navigate away
-      } else {
-        // Use popup for desktop
-        const result = await signInWithPopup(auth, provider);
-        const user = result.user;
-
-        const userDocRef = doc(db, "users", user.uid);
-        const userDocSnap = await getDoc(userDocRef);
-
-        if (!userDocSnap.exists()) {
-          await setDoc(userDocRef, {
-            fullName: user.displayName || "Google User",
-            nickName: user.displayName ? user.displayName.split(" ")[0] : "User",
-            email: user.email,
-            createdAt: serverTimestamp(),
-            themePreference: "system",
-            privacyMode: false,
-          });
-        }
-
-        toast.success("Welcome back!");
-        navigate("/dashboard");
       }
+
+      toast.success("Welcome back!");
+      navigate("/dashboard");
+
     } catch (err) {
       console.error(err);
-      toast.error(err.message || "Failed to sign in with Google");
+
+      // Handle strict popup blockers (e.g., iOS Safari first tap, in-app browsers)
+      if (err.code === 'auth/popup-blocked') {
+        toast.error("Popup blocked! Please allow popups for this site or try again.");
+      } else if (err.code === 'auth/unauthorized-domain') {
+        toast.error("Domain not authorized for OAuth. Check Firebase settings.");
+      } else if (err.code === 'auth/popup-closed-by-user') {
+        // Silently ignore or show mild message if user simply closed the popup
+        toast.error("Google sign-in cancelled.");
+      } else {
+        toast.error(err.message || "Failed to sign in with Google");
+      }
       setLoading(false);
     }
   };
