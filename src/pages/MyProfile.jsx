@@ -1,15 +1,17 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useAuth } from "../context/AuthContext";
 import { db } from "../firebase/firebaseConfig";
 import { doc, updateDoc } from "firebase/firestore";
-import { User, Save, Link as LinkIcon, Camera } from "lucide-react";
+import { User, Save, Link as LinkIcon, Camera, Loader2 } from "lucide-react";
 
 function MyProfile() {
     const { user, userProfile } = useAuth();
+    const fileInputRef = useRef(null);
 
     const [fullName, setFullName] = useState("");
     const [nickName, setNickName] = useState("");
     const [loading, setLoading] = useState(false);
+    const [uploadingImage, setUploadingImage] = useState(false);
     const [successMsg, setSuccessMsg] = useState("");
 
     useEffect(() => {
@@ -41,6 +43,67 @@ function MyProfile() {
         }
     };
 
+    const handleImageUpload = async (e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        // Basic validation
+        if (!file.type.startsWith("image/")) {
+            alert("Please select an image file.");
+            return;
+        }
+
+        if (file.size > 5 * 1024 * 1024) {
+            alert("File is too large. Maximum size is 5MB.");
+            return;
+        }
+
+        setUploadingImage(true);
+        setSuccessMsg("");
+
+        try {
+            const formData = new FormData();
+            formData.append("file", file);
+            formData.append("upload_preset", "react_firebase_project_upload");
+
+            // Cloudinary upload URL requires the cloud name (defrohr5n)
+            const uploadUrl = "https://api.cloudinary.com/v1_1/defrohr5n/image/upload";
+
+            const res = await fetch(uploadUrl, {
+                method: "POST",
+                body: formData,
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                throw new Error(data.error?.message || "Cloudinary upload failed");
+            }
+
+            const newPhotoURL = data.secure_url;
+
+            // Update user document in Firestore
+            const userRef = doc(db, "users", user.uid);
+            await updateDoc(userRef, {
+                photoURL: newPhotoURL
+            });
+
+            // Local userProfile context will auto-update via onSnapshot in AuthContext
+            setSuccessMsg("Profile photo updated successfully!");
+            setTimeout(() => setSuccessMsg(""), 3000);
+
+        } catch (error) {
+            console.error("Error uploading image:", error);
+            alert("Failed to upload image. " + error.message);
+        } finally {
+            setUploadingImage(false);
+            // Reset input so the same file can be selected again if needed
+            if (fileInputRef.current) {
+                fileInputRef.current.value = "";
+            }
+        }
+    };
+
     return (
         <div className="min-h-screen p-4 sm:p-6 lg:p-8 transition-colors duration-300">
             <div className="max-w-[1600px] w-full mx-auto space-y-8">
@@ -64,9 +127,21 @@ function MyProfile() {
                                 )}
                             </div>
 
-                            {/* Placeholder for future Cloudinary Upload */}
-                            <button className="absolute bottom-0 right-0 w-10 h-10 bg-white text-indigo-600 rounded-full shadow-lg flex items-center justify-center hover:scale-110 transition-transform">
-                                <Camera className="w-5 h-5" />
+                            {/* Photo Upload Area */}
+                            <input
+                                type="file"
+                                accept="image/*"
+                                className="hidden"
+                                ref={fileInputRef}
+                                onChange={handleImageUpload}
+                            />
+                            <button
+                                onClick={() => !uploadingImage && fileInputRef.current?.click()}
+                                disabled={uploadingImage}
+                                className={`absolute bottom-0 right-0 w-10 h-10 bg-white text-indigo-600 rounded-full shadow-lg flex items-center justify-center transition-transform ${uploadingImage ? 'opacity-75 cursor-not-allowed' : 'hover:scale-110'}`}
+                                aria-label="Upload profile picture"
+                            >
+                                {uploadingImage ? <Loader2 className="w-5 h-5 animate-spin" /> : <Camera className="w-5 h-5" />}
                             </button>
                         </div>
 
