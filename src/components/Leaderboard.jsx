@@ -134,7 +134,7 @@ function Leaderboard({ groupId }) {
                                                 user.rank === 3 ? 'bg-gradient-to-br from-amber-700 to-amber-800' :
                                                     'bg-gradient-to-br from-indigo-400 to-purple-500 dark:from-indigo-600 dark:to-purple-700'
                                             }`}>
-                                            {user.userName.charAt(0).toUpperCase()}
+                                            {(user.userName || "U").charAt(0).toUpperCase()}
                                         </div>
                                         <div>
                                             <p className={`font-bold hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors ${user.rank <= 3 ? 'text-slate-800 dark:text-slate-100' : 'text-slate-700 dark:text-slate-300'}`}>

@@ -121,7 +121,7 @@ function AdminDashboard() {
                             >
                                 <div className="flex items-center gap-4">
                                     <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold shadow-sm group-hover/row:scale-105 transition-transform">
-                                        {group.groupName.charAt(0).toUpperCase()}
+                                        {(group.groupName || "G").charAt(0).toUpperCase()}
                                     </div>
                                     <div>
                                         <p className="font-bold text-slate-800 dark:text-slate-100 text-lg">{group.groupName}</p>

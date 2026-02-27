@@ -36,8 +36,13 @@ class ErrorBoundary extends React.Component {
                         <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-3">
                             Oops! Something went wrong.
                         </h1>
-                        <p className="text-slate-600 dark:text-slate-400 mb-8 leading-relaxed">
+                        <p className="text-slate-600 dark:text-slate-400 mb-2 leading-relaxed">
                             We're sorry, but an unexpected error occurred. Don't worry, your data is safe. Try refreshing the page.
+                        </p>
+                        <p className="text-red-600 dark:text-red-400 font-mono text-sm mb-8 whitespace-pre-wrap text-left break-words">
+                            {this.state.error && this.state.error.toString()}
+                            <br />
+                            {this.state.error && this.state.error.stack}
                         </p>
 
                         <div className="flex flex-col gap-3">

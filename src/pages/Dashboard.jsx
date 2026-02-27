@@ -728,7 +728,7 @@ function Dashboard() {
                                                 <div key={userStats.userId} className="flex items-center justify-between p-4 rounded-xl border border-transparent bg-slate-50/50 dark:bg-slate-900/30 transition-all duration-300 hover:shadow-md hover:scale-[1.01] hover:bg-slate-50 dark:hover:bg-slate-800/50">
                                                     <div className="flex items-center gap-3">
                                                         <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 dark:from-indigo-600 dark:to-purple-700 flex items-center justify-center text-white font-bold shadow-sm">
-                                                            {userStats.userName.charAt(0).toUpperCase()}
+                                                            {(userStats.userName || "U").charAt(0).toUpperCase()}
                                                         </div>
                                                         <div>
                                                             <span className="font-bold text-slate-700 dark:text-slate-300">{userStats.userName}</span>
@@ -795,7 +795,7 @@ function Dashboard() {
                                                 <td className="px-6 py-5">
                                                     <Link to={`/dashboard/profile/${item.userId}`} className="flex items-center gap-4 group-hover:opacity-90 transition-opacity">
                                                         <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 dark:from-indigo-600 dark:to-purple-700 flex items-center justify-center text-white font-bold shadow-sm">
-                                                            {item.userName.charAt(0).toUpperCase()}
+                                                            {(item.userName || "U").charAt(0).toUpperCase()}
                                                         </div>
                                                         <div>
                                                             <span className="font-semibold text-slate-900 dark:text-slate-100 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">{item.userName}</span>
