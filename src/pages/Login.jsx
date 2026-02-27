@@ -104,17 +104,23 @@ function Login() {
       setError("");
 
       const persistenceType = rememberMe ? browserLocalPersistence : browserSessionPersistence;
-      await setPersistence(auth, persistenceType);
+      // Do not await setPersistence here to keep the synchronous user interaction context alive 
+      // for iOS Safari, otherwise the popup/redirect will be blocked as "without user interaction"
+      setPersistence(auth, persistenceType).catch(console.error);
 
       const provider = new GoogleAuthProvider();
 
-      // Check if mobile device
-      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+      // Check if mobile device (including iPads masquerading as Mac desktop)
+      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 
       if (isMobile) {
         // Use redirect for mobile to avoid popup blockers and "firebase: error" 
-        await signInWithRedirect(auth, provider);
-        // The rest is handled in the useEffect for getRedirectResult
+        signInWithRedirect(auth, provider).catch(err => {
+          console.error("Redirect logic error:", err);
+          toast.error(err.message || "Failed to start Google Sign in");
+          setLoading(false);
+        });
+        // Do not setLoading(false) here, as the page will navigate away
       } else {
         // Use popup for desktop
         const result = await signInWithPopup(auth, provider);
