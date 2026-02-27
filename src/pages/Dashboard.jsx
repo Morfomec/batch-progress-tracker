@@ -361,26 +361,36 @@ function Dashboard() {
                 }
             });
 
+            const batchStartDate = group.createdAt?.toDate ? group.createdAt.toDate() : new Date(group.createdAt || Date.now());
+
             const timelineArray = Object.values(allTimelinesMap).map(stats => {
+                // 1. Calculate official date for Module N
+                let officialDate = new Date(batchStartDate);
+                const nCycles = Math.floor(stats.highestModule / 6);
+                const nSingles = stats.highestModule % 6;
+                officialDate.setDate(officialDate.getDate() + (nCycles * 49));
+                for (let i = 0; i < nSingles; i++) {
+                    officialDate.setDate(officialDate.getDate() + 8);
+                    if (officialDate.getDay() === 0) officialDate.setDate(officialDate.getDate() + 1);
+                }
+
+                // 2 & 3. Calculate Base End Date from that official module date
+                let expectedDate = new Date(officialDate);
                 const remainingModules = Math.max(0, 52 - stats.highestModule);
-
-                let expectedDate = stats.latestDate ? new Date(stats.latestDate) : new Date();
-
                 if (remainingModules > 0) {
                     const fullCycles = Math.floor(remainingModules / 6);
                     const singleModules = remainingModules % 6;
-
-                    // Step 3: Add cycle days (49 days for 6 modules)
                     expectedDate.setDate(expectedDate.getDate() + (fullCycles * 49));
-
-                    // Step 4: Handle remainder modules individually
-                    for (let i = 0; i < singleModules + stats.delays; i++) {
+                    for (let i = 0; i < singleModules; i++) {
                         expectedDate.setDate(expectedDate.getDate() + 8);
-                        // Shift if landing on Sunday (0)
-                        if (expectedDate.getDay() === 0) {
-                            expectedDate.setDate(expectedDate.getDate() + 1);
-                        }
+                        if (expectedDate.getDay() === 0) expectedDate.setDate(expectedDate.getDate() + 1);
                     }
+                }
+
+                // 4. Add Delays / Reschedules logic explicitly
+                for (let i = 0; i < stats.delays; i++) {
+                    expectedDate.setDate(expectedDate.getDate() + 8);
+                    if (expectedDate.getDay() === 0) expectedDate.setDate(expectedDate.getDate() + 1);
                 }
 
                 return {
@@ -503,26 +513,36 @@ function Dashboard() {
             finalUpdatesAfterSubmit.sort((a, b) => b.createdAt.toMillis() - a.createdAt.toMillis());
             setLatestUpdates(finalUpdatesAfterSubmit);
 
+            const batchStartDate = group.createdAt?.toDate ? group.createdAt.toDate() : new Date(group.createdAt || Date.now());
+
             const timelineArray = Object.values(allTimelinesMap).map(stats => {
+                // 1. Calculate official date for Module N
+                let officialDate = new Date(batchStartDate);
+                const nCycles = Math.floor(stats.highestModule / 6);
+                const nSingles = stats.highestModule % 6;
+                officialDate.setDate(officialDate.getDate() + (nCycles * 49));
+                for (let i = 0; i < nSingles; i++) {
+                    officialDate.setDate(officialDate.getDate() + 8);
+                    if (officialDate.getDay() === 0) officialDate.setDate(officialDate.getDate() + 1);
+                }
+
+                // 2 & 3. Calculate Base End Date from that official module date
+                let expectedDate = new Date(officialDate);
                 const remainingModules = Math.max(0, 52 - stats.highestModule);
-
-                let expectedDate = stats.latestDate ? new Date(stats.latestDate) : new Date();
-
                 if (remainingModules > 0) {
                     const fullCycles = Math.floor(remainingModules / 6);
                     const singleModules = remainingModules % 6;
-
-                    // Step 3: Add cycle days (49 days for 6 modules)
                     expectedDate.setDate(expectedDate.getDate() + (fullCycles * 49));
-
-                    // Step 4: Handle remainder individually + delays
-                    for (let i = 0; i < singleModules + stats.delays; i++) {
+                    for (let i = 0; i < singleModules; i++) {
                         expectedDate.setDate(expectedDate.getDate() + 8);
-                        // Shift if landing on Sunday (0)
-                        if (expectedDate.getDay() === 0) {
-                            expectedDate.setDate(expectedDate.getDate() + 1);
-                        }
+                        if (expectedDate.getDay() === 0) expectedDate.setDate(expectedDate.getDate() + 1);
                     }
+                }
+
+                // 4. Add Delays / Reschedules logic explicitly
+                for (let i = 0; i < stats.delays; i++) {
+                    expectedDate.setDate(expectedDate.getDate() + 8);
+                    if (expectedDate.getDay() === 0) expectedDate.setDate(expectedDate.getDate() + 1);
                 }
 
                 return {
