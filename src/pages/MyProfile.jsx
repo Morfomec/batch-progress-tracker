@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useAuth } from "../context/AuthContext";
 import { db } from "../firebase/firebaseConfig";
 import { doc, updateDoc } from "firebase/firestore";
-import { User, Save, Link as LinkIcon, Camera, Loader2 } from "lucide-react";
+import { User, Save, Camera, Loader2, Trash2, Smile } from "lucide-react";
 
 function MyProfile() {
     const { user, userProfile } = useAuth();
@@ -10,14 +10,18 @@ function MyProfile() {
 
     const [fullName, setFullName] = useState("");
     const [nickName, setNickName] = useState("");
+    const [emoji, setEmoji] = useState("");
     const [loading, setLoading] = useState(false);
     const [uploadingImage, setUploadingImage] = useState(false);
     const [successMsg, setSuccessMsg] = useState("");
+
+    const EMOJI_OPTIONS = ["🚀", "🔥", "✨", "🌟", "💡", "🎯", "🏆", "🎮", "💻", "🧠", "⚡", "🔮", "👑", "😎", "👾", "🦊", "🐯", "💎", "🐉", "🍔"];
 
     useEffect(() => {
         if (userProfile) {
             setFullName(userProfile.fullName || "");
             setNickName(userProfile.nickName || "");
+            setEmoji(userProfile.emoji || "");
         }
     }, [userProfile]);
 
@@ -31,6 +35,7 @@ function MyProfile() {
             await updateDoc(userRef, {
                 fullName,
                 nickName,
+                emoji,
             });
 
             setSuccessMsg("Profile updated successfully!");
@@ -104,6 +109,27 @@ function MyProfile() {
         }
     };
 
+    const handleRemoveImage = async () => {
+        if (!userProfile?.photoURL) return;
+
+        setUploadingImage(true);
+        setSuccessMsg("");
+
+        try {
+            const userRef = doc(db, "users", user.uid);
+            await updateDoc(userRef, {
+                photoURL: ""
+            });
+            setSuccessMsg("Profile photo removed.");
+            setTimeout(() => setSuccessMsg(""), 3000);
+        } catch (error) {
+            console.error("Error removing image:", error);
+            alert("Failed to remove image.");
+        } finally {
+            setUploadingImage(false);
+        }
+    };
+
     return (
         <div className="min-h-screen p-4 sm:p-6 lg:p-8 transition-colors duration-300">
             <div className="max-w-[1600px] w-full mx-auto space-y-8">
@@ -114,8 +140,8 @@ function MyProfile() {
                     <div className="relative z-10 flex flex-col sm:flex-row items-center sm:items-end gap-6">
 
                         {/* Avatar / Photo Upload Area */}
-                        <div className="relative group">
-                            <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-full border-4 border-white/20 bg-indigo-900/50 flex items-center justify-center text-4xl font-bold shadow-xl overflow-hidden backdrop-blur-md">
+                        <div className="relative group flex-shrink-0">
+                            <div className="w-32 h-32 sm:w-40 sm:h-40 rounded-full border-4 border-white/20 bg-indigo-900/50 flex items-center justify-center text-5xl font-bold shadow-2xl overflow-hidden backdrop-blur-md ring-4 ring-white/10">
                                 {userProfile?.photoURL ? (
                                     <img src={userProfile.photoURL} alt="Profile" className="w-full h-full object-cover" />
                                 ) : (
@@ -135,14 +161,26 @@ function MyProfile() {
                                 ref={fileInputRef}
                                 onChange={handleImageUpload}
                             />
-                            <button
-                                onClick={() => !uploadingImage && fileInputRef.current?.click()}
-                                disabled={uploadingImage}
-                                className={`absolute bottom-0 right-0 w-10 h-10 bg-white text-indigo-600 rounded-full shadow-lg flex items-center justify-center transition-transform ${uploadingImage ? 'opacity-75 cursor-not-allowed' : 'hover:scale-110'}`}
-                                aria-label="Upload profile picture"
-                            >
-                                {uploadingImage ? <Loader2 className="w-5 h-5 animate-spin" /> : <Camera className="w-5 h-5" />}
-                            </button>
+                            <div className="absolute bottom-1 right-1 flex flex-col gap-2">
+                                {userProfile?.photoURL && (
+                                    <button
+                                        onClick={handleRemoveImage}
+                                        disabled={uploadingImage}
+                                        className="w-10 h-10 bg-white/10 backdrop-blur-md text-red-400 hover:bg-red-500 hover:text-white rounded-full shadow-lg flex items-center justify-center transition-all duration-300"
+                                        aria-label="Remove profile picture"
+                                    >
+                                        <Trash2 className="w-4 h-4" />
+                                    </button>
+                                )}
+                                <button
+                                    onClick={() => !uploadingImage && fileInputRef.current?.click()}
+                                    disabled={uploadingImage}
+                                    className={`w-12 h-12 bg-white text-indigo-600 rounded-full shadow-xl flex items-center justify-center transition-transform ${uploadingImage ? 'opacity-75 cursor-not-allowed' : 'hover:scale-110 hover:-translate-y-1 hover:shadow-indigo-500/50'}`}
+                                    aria-label="Upload profile picture"
+                                >
+                                    {uploadingImage ? <Loader2 className="w-6 h-6 animate-spin" /> : <Camera className="w-6 h-6" />}
+                                </button>
+                            </div>
                         </div>
 
                         <div className="text-center sm:text-left mb-2">
@@ -155,35 +193,61 @@ function MyProfile() {
                 </div>
 
                 {/* Profile Form */}
-                <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl rounded-[2rem] shadow-2xl border border-slate-200/50 dark:border-white/5 p-8 transition-colors duration-300">
-                    <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2 mb-6">
-                        <User className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+                <div className="bg-slate-900/50 backdrop-blur-2xl rounded-3xl border border-slate-700/50 shadow-2xl p-6 sm:p-8 transition-colors duration-300">
+                    <h2 className="text-xl font-bold text-white flex items-center gap-2 mb-6">
+                        <User className="w-5 h-5 text-indigo-400" />
                         Personal Information
                     </h2>
 
-                    <form onSubmit={handleSave} className="space-y-6">
+                    <form onSubmit={handleSave} className="space-y-8">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
-                                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Full Name</label>
+                                <label className="block text-sm font-semibold text-slate-300 mb-2">Full Name</label>
                                 <input
                                     type="text"
                                     value={fullName}
                                     onChange={(e) => setFullName(e.target.value)}
-                                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl focus:ring-2 focus:ring-indigo-500/50 outline-none transition"
+                                    className="w-full px-4 py-3 bg-slate-800/80 border border-slate-700/50 text-white rounded-xl focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500/50 outline-none transition-all placeholder-slate-500/80"
                                     required
+                                    placeholder="Jane Doe"
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Nick Name</label>
+                                <label className="block text-sm font-semibold text-slate-300 mb-2">Nick Name</label>
                                 <input
                                     type="text"
                                     value={nickName}
                                     onChange={(e) => setNickName(e.target.value)}
-                                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl focus:ring-2 focus:ring-indigo-500/50 outline-none transition"
+                                    className="w-full px-4 py-3 bg-slate-800/80 border border-slate-700/50 text-white rounded-xl focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500/50 outline-none transition-all placeholder-slate-500/80"
                                     required
+                                    placeholder="Jane"
                                 />
-                                <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">Used on leaderboards and recent activity.</p>
+                                <p className="mt-2 text-xs text-slate-400">Used on leaderboards and recent activity.</p>
                             </div>
+                        </div>
+
+                        {/* Emoji Selection */}
+                        <div className="pt-2">
+                            <h3 className="block text-sm font-semibold text-slate-300 mb-4 flex items-center gap-2">
+                                <Smile className="w-4 h-4 text-purple-400" />
+                                Choose Your Emoji Sign
+                            </h3>
+                            <div className="grid grid-cols-5 sm:grid-cols-10 gap-3">
+                                {EMOJI_OPTIONS.map((emj) => (
+                                    <button
+                                        key={emj}
+                                        type="button"
+                                        onClick={() => setEmoji(emj)}
+                                        className={`w-12 h-12 flex items-center justify-center text-2xl rounded-2xl transition-all duration-300 ${emoji === emj
+                                                ? 'bg-indigo-500 border border-indigo-400 shadow-lg shadow-indigo-500/40 scale-110'
+                                                : 'bg-slate-800 border border-transparent hover:bg-slate-700 hover:scale-105 opacity-80 hover:opacity-100'
+                                            }`}
+                                    >
+                                        {emj}
+                                    </button>
+                                ))}
+                            </div>
+                            <p className="mt-3 text-xs text-slate-400">This will be displayed next to your name globally.</p>
                         </div>
 
                         <div className="pt-4 flex flex-col sm:flex-row items-center gap-4">

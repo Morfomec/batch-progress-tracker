@@ -302,20 +302,24 @@ function Dashboard() {
                 ...doc.data()
             }));
 
-            // Fetch users to map the latest name
+            // Fetch users to map the latest name and emojis
             const usersSnap = await getDocs(collection(db, "users"));
-            const nameMap = {};
+            const userDocsMap = {};
             usersSnap.docs.forEach(d => {
                 const data = d.data();
-                nameMap[d.id] = data?.nickName || data?.fullName || data?.displayName || data?.email || "Unknown";
+                userDocsMap[d.id] = {
+                    name: data?.nickName || data?.fullName || data?.displayName || data?.email || "Unknown",
+                    emoji: data?.emoji || ""
+                };
             });
 
             const map = {};
             all.forEach(entry => {
                 if (!map[entry.userId]) {
-                    // Override the static name with the dynamic one if available
-                    if (nameMap[entry.userId]) {
-                        entry.userName = nameMap[entry.userId];
+                    // Override the static name and add emoji if available
+                    if (userDocsMap[entry.userId]) {
+                        entry.userName = userDocsMap[entry.userId].name;
+                        entry.emoji = userDocsMap[entry.userId].emoji;
                     }
                     map[entry.userId] = entry;
                 }
@@ -327,9 +331,11 @@ function Dashboard() {
             // Timeline Calculation for all group members
             const allTimelinesMap = {};
             (group.members || []).forEach(memberId => {
+                const userInfo = userDocsMap[memberId] || {};
                 allTimelinesMap[memberId] = {
                     userId: memberId,
-                    userName: nameMap[memberId] || "Unknown Student",
+                    userName: userInfo.name || "Unknown Student",
+                    emoji: userInfo.emoji || "",
                     highestModule: 0,
                     delays: 0,
                     latestDate: null
@@ -338,9 +344,11 @@ function Dashboard() {
 
             all.forEach(entry => {
                 if (!allTimelinesMap[entry.userId]) {
+                    const userInfo = userDocsMap[entry.userId] || {};
                     allTimelinesMap[entry.userId] = {
                         userId: entry.userId,
-                        userName: nameMap[entry.userId] || entry.userName || "Unknown",
+                        userName: userInfo.name || entry.userName || "Unknown",
+                        emoji: userInfo.emoji || "",
                         highestModule: 0,
                         delays: 0,
                         latestDate: null
@@ -448,19 +456,24 @@ function Dashboard() {
             const all = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
             const usersSnap = await getDocs(collection(db, "users"));
-            const nameMap = {};
+            const userDocsMap = {};
             usersSnap.docs.forEach(d => {
                 const data = d.data();
-                nameMap[d.id] = data?.nickName || data?.fullName || data?.displayName || data?.email || "Unknown";
+                userDocsMap[d.id] = {
+                    name: data?.nickName || data?.fullName || data?.displayName || data?.email || "Unknown",
+                    emoji: data?.emoji || ""
+                };
             });
 
             const map = {};
             const allTimelinesMap = {};
 
             (group.members || []).forEach(memberId => {
+                const userInfo = userDocsMap[memberId] || {};
                 allTimelinesMap[memberId] = {
                     userId: memberId,
-                    userName: nameMap[memberId] || "Unknown Student",
+                    userName: userInfo.name || "Unknown Student",
+                    emoji: userInfo.emoji || "",
                     highestModule: 0,
                     delays: 0,
                     latestDate: null
@@ -469,16 +482,19 @@ function Dashboard() {
 
             all.forEach(entry => {
                 if (!map[entry.userId]) {
-                    if (nameMap[entry.userId]) {
-                        entry.userName = nameMap[entry.userId];
+                    if (userDocsMap[entry.userId]) {
+                        entry.userName = userDocsMap[entry.userId].name;
+                        entry.emoji = userDocsMap[entry.userId].emoji;
                     }
                     map[entry.userId] = entry;
                 }
 
                 if (!allTimelinesMap[entry.userId]) {
+                    const userInfo = userDocsMap[entry.userId] || {};
                     allTimelinesMap[entry.userId] = {
                         userId: entry.userId,
-                        userName: nameMap[entry.userId] || entry.userName || "Unknown",
+                        userName: userInfo.name || entry.userName || "Unknown",
+                        emoji: userInfo.emoji || "",
                         highestModule: 0,
                         delays: 0,
                         latestDate: null
@@ -731,7 +747,10 @@ function Dashboard() {
                                                             {(userStats.userName || "U").charAt(0).toUpperCase()}
                                                         </div>
                                                         <div>
-                                                            <span className="font-bold text-slate-700 dark:text-slate-300">{userStats.userName}</span>
+                                                            <span className="font-bold text-slate-700 dark:text-slate-300 flex items-center gap-2">
+                                                                {userStats.userName}
+                                                                {userStats.emoji && <span className="text-lg">{userStats.emoji}</span>}
+                                                            </span>
                                                             <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mt-0.5">
                                                                 {Math.max(0, 52 - userStats.highestModule)} Modules Left
                                                             </p>

@@ -17,11 +17,14 @@ function Leaderboard({ groupId }) {
 
                 const usersSnap = await getDocs(collection(db, "users"));
                 const privacyMap = {};
-                const nameMap = {};
+                const userDocsMap = {};
                 usersSnap.docs.forEach(d => {
                     const data = d.data();
                     privacyMap[d.id] = data?.privacyMode || false;
-                    nameMap[d.id] = data?.nickName || data?.fullName || data?.displayName || data?.email || "Unknown";
+                    userDocsMap[d.id] = {
+                        name: data?.nickName || data?.fullName || data?.displayName || data?.email || "Unknown",
+                        emoji: data?.emoji || ""
+                    };
                 });
 
                 const totalsMap = {};
@@ -30,9 +33,11 @@ function Leaderboard({ groupId }) {
                     if (privacyMap[entry.userId]) return;
 
                     if (!totalsMap[entry.userId]) {
+                        const userInfo = userDocsMap[entry.userId] || {};
                         totalsMap[entry.userId] = {
                             userId: entry.userId,
-                            userName: nameMap[entry.userId] || entry.userName || "Unknown",
+                            userName: userInfo.name || entry.userName || "Unknown",
+                            emoji: userInfo.emoji || "",
                             totalScore: 0
                         };
                     }
@@ -137,8 +142,9 @@ function Leaderboard({ groupId }) {
                                             {(user.userName || "U").charAt(0).toUpperCase()}
                                         </div>
                                         <div>
-                                            <p className={`font-bold hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors ${user.rank <= 3 ? 'text-slate-800 dark:text-slate-100' : 'text-slate-700 dark:text-slate-300'}`}>
+                                            <p className={`font-bold flex items-center gap-1.5 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors ${user.rank <= 3 ? 'text-slate-800 dark:text-slate-100' : 'text-slate-700 dark:text-slate-300'}`}>
                                                 {user.userName}
+                                                {user.emoji && <span className="text-lg leading-none">{user.emoji}</span>}
                                             </p>
                                         </div>
                                     </Link>
