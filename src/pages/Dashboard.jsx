@@ -545,42 +545,49 @@ function Dashboard() {
 
     return (
         <div className="min-h-screen bg-transparent p-4 sm:p-6 lg:p-8 transition-colors duration-300">
-            <div className="max-w-7xl mx-auto space-y-8">
+            <div className="max-w-[1600px] w-full mx-auto space-y-8">
 
                 {/* 1. Group Info Header Card */}
-                <div className="bg-gradient-to-r from-indigo-500 to-purple-600 dark:from-indigo-600 dark:to-purple-800 rounded-3xl p-8 text-white shadow-xl relative overflow-hidden">
-                    <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+                {/* 1. Sleek Group Info Header Card */}
+                <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl rounded-[2rem] p-8 text-slate-800 dark:text-white border border-slate-200/50 dark:border-white/5 shadow-2xl relative overflow-hidden">
+                    <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-indigo-500/10 dark:bg-indigo-500/20 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/3 pointer-events-none" />
+                    <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-purple-500/10 dark:bg-purple-500/20 rounded-full blur-[60px] translate-y-1/3 -translate-x-1/3 pointer-events-none" />
                     <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
                         <div>
-                            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/20 backdrop-blur-sm border border-white/20 text-indigo-50 text-xs font-semibold tracking-wide uppercase mb-4">
+                            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 text-indigo-600 dark:text-indigo-400 text-xs font-bold tracking-widest uppercase mb-4">
                                 <Target className="w-4 h-4" /> Active Batch
                             </div>
                             {group ? (
                                 <div>
-                                    <div className="flex items-center gap-3 mb-2">
-                                        <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight">{group.groupName}</h1>
-                                    </div>
-                                    <div className="flex flex-wrap items-center gap-2 mt-3">
-                                        <p className="text-indigo-100/80 text-sm font-medium">Batch Code:</p>
+                                    <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight bg-gradient-to-br from-slate-900 to-slate-600 dark:from-white dark:to-slate-400 bg-clip-text text-transparent mb-4">{group.groupName}</h1>
+                                    <div className="flex flex-wrap items-center gap-3 mt-3">
+                                        <p className="text-slate-500 dark:text-slate-400 text-sm font-medium">Batch Code:</p>
                                         <button
                                             onClick={handleCopyCode}
-                                            className="flex items-center gap-2 bg-black/20 hover:bg-black/30 text-white px-3 py-1.5 rounded-lg text-sm font-bold tracking-widest transition-colors border border-white/10 uppercase font-mono"
+                                            className="flex items-center gap-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 px-3 py-1.5 rounded-lg text-sm font-bold tracking-widest transition-colors border border-slate-200 dark:border-slate-700 uppercase font-mono"
                                             title="Click to copy invite code"
                                         >
                                             {group.groupCode || group.id}
-                                            {copiedContent ? <CheckCircle2 className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4 text-indigo-200" />}
+                                            {copiedContent ? <CheckCircle2 className="w-4 h-4 text-emerald-500" /> : <Copy className="w-4 h-4 text-slate-400" />}
                                         </button>
                                     </div>
                                 </div>
                             ) : (
-                                <p className="text-xl text-indigo-100">You are not in any group yet.</p>
+                                <p className="text-xl text-slate-500 dark:text-slate-400">You are not in any group yet.</p>
                             )}
                         </div>
                         {group && (
-                            <div className="flex gap-4">
-                                <Link to="/dashboard/peers" className="bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/20 text-center min-w-[120px] hover:bg-white/20 transition-all duration-300 group cursor-pointer block">
-                                    <div className="text-3xl font-bold mb-1 group-hover:scale-110 transition-transform">{group.members?.length || 0}</div>
-                                    <div className="text-indigo-100 text-xs font-medium uppercase tracking-wider group-hover:text-white transition-colors">Total Mates</div>
+                            <div className="flex flex-col sm:flex-row gap-4 items-stretch md:items-center w-full md:w-auto mt-6 md:mt-0">
+                                <button
+                                    onClick={() => setShowForm(true)}
+                                    className="px-6 py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-2xl shadow-lg shadow-indigo-600/20 transition-all hover:scale-[1.02] flex items-center justify-center gap-2 border border-indigo-500"
+                                >
+                                    <PlusCircle className="w-5 h-5" />
+                                    Log Weekly Progress
+                                </button>
+                                <Link to="/dashboard/peers" className="bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-4 border border-slate-200 dark:border-slate-700 text-center min-w-[120px] hover:bg-slate-100 dark:hover:bg-slate-800 transition-all duration-300 group cursor-pointer block flex-shrink-0">
+                                    <div className="text-3xl font-black mb-1 group-hover:scale-110 transition-transform text-slate-800 dark:text-white">{group.members?.length || 0}</div>
+                                    <div className="text-slate-500 dark:text-slate-400 text-[10px] font-bold uppercase tracking-widest group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">Total Mates</div>
                                 </Link>
                             </div>
                         )}
@@ -589,60 +596,46 @@ function Dashboard() {
 
                 {group && (
                     <div className="space-y-8">
-                        {/* 2. Top Row: Action / Form */}
-                        <div className="w-full">
+                        {/* Modal for Logging Progress */}
+                        {showForm && (
+                            <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
+                                <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" onClick={() => setShowForm(false)}></div>
 
-                            {!showForm ? (
-                                <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-lg border border-slate-200 dark:border-slate-800 p-8 flex flex-col items-center justify-center text-center h-full min-h-[300px] transition-colors duration-300">
-                                    <div className="w-20 h-20 bg-indigo-50 dark:bg-indigo-900/30 rounded-full flex items-center justify-center mb-6">
-                                        <Activity className="w-10 h-10 text-indigo-600 dark:text-indigo-400" />
-                                    </div>
-                                    <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100 mb-2">Track Your Journey</h2>
-                                    <p className="text-slate-500 dark:text-slate-400 mb-8 max-w-sm">
-                                        Stay accountable. Add your latest module progress and LinkedIn activity here.
-                                    </p>
-                                    <button
-                                        onClick={() => setShowForm(true)}
-                                        className="w-full sm:w-auto px-8 py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl shadow-lg shadow-indigo-200 dark:shadow-none transition-all duration-200 flex items-center justify-center gap-2"
-                                    >
-                                        <PlusCircle className="w-5 h-5" />
-                                        Log Weekly Progress
-                                    </button>
-                                </div>
-                            ) : (
-                                <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-lg border border-slate-200 dark:border-slate-800 p-8 animate-fadeIn transition-colors duration-300">
+                                <div className="relative w-full max-w-lg bg-white dark:bg-slate-900 rounded-[2rem] shadow-2xl border border-slate-200 dark:border-slate-800 p-8 animate-fadeIn transform transition-all scale-100">
                                     <div className="flex justify-between items-center mb-6">
-                                        <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
-                                            <PlusCircle className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
-                                            Weekly Progress
+                                        <h3 className="text-2xl font-extrabold text-slate-800 dark:text-white flex items-center gap-3">
+                                            <div className="p-2 bg-indigo-50 dark:bg-indigo-500/10 rounded-xl text-indigo-600 dark:text-indigo-400">
+                                                <Activity className="w-6 h-6" />
+                                            </div>
+                                            Log Progress
                                         </h3>
-                                        <button onClick={() => setShowForm(false)} className="text-sm font-medium text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300">
-                                            Cancel
+                                        <button onClick={() => setShowForm(false)} className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 bg-slate-50 dark:bg-slate-800 rounded-full transition-colors">
+                                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
                                         </button>
                                     </div>
 
-                                    <form onSubmit={handleSubmit} className="space-y-4">
+                                    <form onSubmit={handleSubmit} className="space-y-5 relative">
                                         <div>
-                                            <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Module Number</label>
+                                            <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2">Module Number</label>
                                             <input
                                                 type="number"
                                                 name="moduleNo"
                                                 placeholder="e.g. 25"
                                                 value={formData.moduleNo}
                                                 onChange={handleChange}
-                                                className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 outline-none transition"
+                                                className="w-full px-5 py-3.5 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50 text-slate-900 dark:text-white rounded-xl focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 outline-none transition font-medium"
                                                 required
                                             />
                                         </div>
 
-                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                                             <div>
-                                                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Exam Status</label>
+                                                <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2">Exam Status</label>
                                                 <select
                                                     name="examStatus"
                                                     value={formData.examStatus}
                                                     onChange={handleChange}
-                                                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl focus:ring-2 focus:ring-indigo-500/50 outline-none transition appearance-none"
+                                                    className="w-full px-5 py-3.5 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50 text-slate-900 dark:text-white rounded-xl focus:ring-2 focus:ring-indigo-500/50 outline-none transition appearance-none font-medium"
                                                     required
                                                 >
                                                     <option value="">Select status</option>
@@ -653,12 +646,12 @@ function Dashboard() {
                                             </div>
 
                                             <div>
-                                                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">LinkedIn Activity</label>
+                                                <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2">LinkedIn Activity</label>
                                                 <select
                                                     name="linkedinActivity"
                                                     value={formData.linkedinActivity}
                                                     onChange={handleChange}
-                                                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl focus:ring-2 focus:ring-indigo-500/50 outline-none transition appearance-none"
+                                                    className="w-full px-5 py-3.5 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50 text-slate-900 dark:text-white rounded-xl focus:ring-2 focus:ring-indigo-500/50 outline-none transition appearance-none font-medium"
                                                     required
                                                 >
                                                     <option value="">Select activity</option>
@@ -670,42 +663,42 @@ function Dashboard() {
                                             </div>
                                         </div>
 
-                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                                             <div>
-                                                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Connection Count</label>
+                                                <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2">Connection Count</label>
                                                 <input
                                                     type="number"
                                                     name="linkedinCount"
                                                     placeholder="Total connections"
                                                     value={formData.linkedinCount}
                                                     onChange={handleChange}
-                                                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl focus:ring-2 focus:ring-indigo-500/50 outline-none transition"
+                                                    className="w-full px-5 py-3.5 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50 text-slate-900 dark:text-white rounded-xl focus:ring-2 focus:ring-indigo-500/50 outline-none transition font-medium"
                                                 />
                                             </div>
                                             <div>
-                                                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Post Link (Optional)</label>
+                                                <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2">Post Link (Optional)</label>
                                                 <input
                                                     type="text"
                                                     name="postLink"
                                                     placeholder="URL"
                                                     value={formData.postLink}
                                                     onChange={handleChange}
-                                                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl focus:ring-2 focus:ring-indigo-500/50 outline-none transition"
+                                                    className="w-full px-5 py-3.5 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50 text-slate-900 dark:text-white rounded-xl focus:ring-2 focus:ring-indigo-500/50 outline-none transition font-medium"
                                                 />
                                             </div>
                                         </div>
 
                                         <button
                                             type="submit"
-                                            className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3.5 mt-2 rounded-xl font-semibold transition-colors shadow-lg shadow-indigo-200 dark:shadow-none flex items-center justify-center gap-2"
+                                            className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-4 mt-4 rounded-xl font-bold transition-all hover:scale-[1.01] shadow-xl shadow-indigo-600/20 flex items-center justify-center gap-2"
                                         >
                                             <Target className="w-5 h-5" />
                                             Submit Progress
                                         </button>
                                     </form>
                                 </div>
-                            )}
-                        </div>
+                            </div>
+                        )}
 
                         {/* 3. Bottom Row: Leaderboard (Left) & Timeline (Right) */}
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
@@ -713,7 +706,7 @@ function Dashboard() {
                             <Leaderboard groupId={group.id} />
 
                             {/* Timeline Card */}
-                            <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-lg border border-slate-200 dark:border-slate-800 overflow-hidden relative h-full flex flex-col transition-colors duration-300">
+                            <div className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl rounded-[2rem] shadow-xl border border-slate-200/50 dark:border-white/5 overflow-hidden relative h-full flex flex-col transition-colors duration-300">
                                 <div className="px-6 py-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between shrink-0">
                                     <h2 className="text-xl font-bold bg-gradient-to-r from-slate-800 to-indigo-900 dark:from-slate-100 dark:to-indigo-300 bg-clip-text text-transparent flex items-center gap-2">
                                         <Calendar className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
@@ -764,8 +757,8 @@ function Dashboard() {
                 )}
 
                 {/* 4. Batch Progress History */}
-                <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-lg border border-slate-200 dark:border-slate-800 overflow-hidden transition-colors duration-300">
-                    <div className="px-8 py-6 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/50 flex items-center justify-between">
+                <div className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl rounded-[2rem] shadow-xl border border-slate-200/50 dark:border-white/5 overflow-hidden transition-colors duration-300">
+                    <div className="px-8 py-6 border-b border-slate-100/50 dark:border-slate-800/50 bg-slate-50/50 dark:bg-slate-800/30 flex items-center justify-between">
                         <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100 flex items-center gap-3">
                             <BarChart className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
                             Recent Batch Activity

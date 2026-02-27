@@ -90,12 +90,12 @@ function Leaderboard({ groupId }) {
     };
 
     return (
-        <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-lg border border-slate-200 dark:border-slate-800 overflow-hidden relative h-full flex flex-col transition-colors duration-300">
+        <div className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl rounded-[2rem] shadow-xl border border-slate-200/50 dark:border-white/5 overflow-hidden relative h-full flex flex-col transition-colors duration-300">
 
             {/* Soft decorative background glow */}
             <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-50 dark:bg-indigo-900/20 rounded-full blur-3xl opacity-50 -z-10 translate-x-1/3 -translate-y-1/3" />
 
-            <div className="px-6 py-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+            <div className="px-6 py-6 border-b border-slate-100/50 dark:border-slate-800/50 flex items-center justify-between">
                 <h2 className="text-xl font-bold bg-gradient-to-r from-slate-800 to-indigo-900 dark:from-slate-100 dark:to-indigo-300 bg-clip-text text-transparent flex items-center gap-2">
                     <Award className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
                     Leaderboard
