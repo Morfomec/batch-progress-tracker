@@ -79,7 +79,7 @@ function PeerProfile() {
 
     return (
         <div className="min-h-screen bg-transparent p-4 sm:p-6 lg:p-8 transition-colors duration-300">
-            <div className="max-w-7xl mx-auto space-y-8">
+            <div className="max-w-[1600px] w-full mx-auto space-y-8">
 
                 {/* Back Button */}
                 <button
@@ -91,7 +91,7 @@ function PeerProfile() {
                 </button>
 
                 {/* Profile Header Card */}
-                <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-xl border border-slate-200 dark:border-slate-800 overflow-hidden relative transition-colors duration-300">
+                <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl rounded-[2rem] shadow-2xl border border-slate-200/50 dark:border-white/5 overflow-hidden relative transition-colors duration-300">
                     {/* Header Background */}
                     <div className="h-32 sm:h-48 bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-600 dark:from-indigo-900 dark:via-purple-900 dark:to-indigo-950 relative overflow-hidden">
                         <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
@@ -164,8 +164,8 @@ function PeerProfile() {
                 </div>
 
                 {/* Progress History */}
-                <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-lg border border-slate-200 dark:border-slate-800 overflow-hidden transition-colors duration-300">
-                    <div className="px-8 py-6 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/50 flex items-center gap-3">
+                <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl rounded-[2rem] shadow-2xl border border-slate-200/50 dark:border-white/5 overflow-hidden transition-colors duration-300">
+                    <div className="px-8 py-6 border-b border-slate-100/50 dark:border-slate-800/50 bg-slate-50/50 dark:bg-slate-800/30 flex items-center gap-3">
                         <Activity className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
                         <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100">
                             Activity in {group.groupName}

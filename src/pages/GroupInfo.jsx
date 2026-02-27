@@ -77,10 +77,10 @@ function GroupInfo() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-4 sm:p-6 lg:p-8 animate-fadeIn transition-colors duration-300">
+    <div className="max-w-[1600px] w-full mx-auto p-4 sm:p-6 lg:p-8 animate-fadeIn transition-colors duration-300">
 
       {/* Header Card */}
-      <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-xl shadow-slate-200/50 dark:shadow-none border border-slate-100 dark:border-slate-800 overflow-hidden mb-8 transition-colors duration-300">
+      <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl rounded-[2rem] shadow-2xl border border-slate-200/50 dark:border-white/5 overflow-hidden mb-8 transition-colors duration-300">
         <div className="bg-gradient-to-r from-slate-900 to-indigo-900 dark:from-slate-800 dark:to-indigo-950 px-8 py-10 text-white relative overflow-hidden flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
           <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/20 rounded-full blur-3xl" />
           <div className="relative z-10">
@@ -145,7 +145,7 @@ function GroupInfo() {
       </div>
 
       {/* Members Section Note */}
-      <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-xl shadow-slate-200/50 dark:shadow-none border border-slate-100 dark:border-slate-800 p-8 transition-colors duration-300">
+      <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl rounded-[2rem] shadow-2xl border border-slate-200/50 dark:border-white/5 p-8 transition-colors duration-300">
         <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100 mb-6 flex items-center gap-3">
           <Users className="w-6 h-6 text-indigo-500 dark:text-indigo-400" />
           Batch Members Target

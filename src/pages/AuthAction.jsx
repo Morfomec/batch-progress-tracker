@@ -113,7 +113,7 @@ function AuthAction() {
     if (actionStatus === "error") {
         return (
             <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex flex-col items-center justify-center p-4">
-                <div className="w-full max-w-md bg-white dark:bg-slate-800 rounded-3xl shadow-xl border border-slate-100 dark:border-slate-700 p-8 text-center animate-fadeIn">
+                <div className="w-full max-w-md bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl rounded-[2rem] shadow-2xl border border-slate-200/50 dark:border-white/5 p-8 text-center animate-fadeIn transition-colors duration-300">
                     <div className="w-16 h-16 bg-red-50 dark:bg-red-900/20 rounded-2xl flex items-center justify-center mx-auto mb-6">
                         <ShieldAlert className="w-8 h-8 text-red-500" />
                     </div>
@@ -143,7 +143,7 @@ function AuthAction() {
                     </button>
                 </div>
 
-                <div className="w-full max-w-md bg-white dark:bg-slate-800 rounded-3xl shadow-xl border border-slate-100 dark:border-slate-700 p-8 text-center animate-fadeIn">
+                <div className="w-full max-w-md bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl rounded-[2rem] shadow-2xl border border-slate-200/50 dark:border-white/5 p-8 text-center animate-fadeIn transition-colors duration-300">
                     <div className="w-16 h-16 bg-emerald-50 dark:bg-emerald-900/20 rounded-2xl flex items-center justify-center mx-auto mb-6">
                         {mode === "verifyEmail" ? (
                             <MailCheck className="w-8 h-8 text-emerald-500" />
@@ -181,7 +181,7 @@ function AuthAction() {
                     </button>
                 </div>
 
-                <div className="w-full max-w-md bg-white dark:bg-slate-800 rounded-3xl shadow-xl border border-slate-100 dark:border-slate-700 p-8 animate-fadeIn">
+                <div className="w-full max-w-md bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl rounded-[2rem] shadow-2xl border border-slate-200/50 dark:border-white/5 p-8 animate-fadeIn transition-colors duration-300">
                     <div className="w-16 h-16 bg-indigo-50 dark:bg-indigo-900/20 rounded-2xl flex items-center justify-center mb-6">
                         <KeyRound className="w-8 h-8 text-indigo-600 dark:text-indigo-400" />
                     </div>

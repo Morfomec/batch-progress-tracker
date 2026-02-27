@@ -185,8 +185,8 @@ function AdminGroupDetails() {
     }
 
     return (
-        <div className="min-h-screen p-4 sm:p-6 lg:p-8">
-            <div className="max-w-7xl mx-auto space-y-8">
+        <div className="min-h-screen p-4 sm:p-6 lg:p-8 transition-colors duration-300">
+            <div className="max-w-[1600px] w-full mx-auto space-y-8">
 
                 <div>
                     <Link to="/admin" className="inline-flex items-center gap-2 text-sm font-medium text-slate-500 hover:text-rose-600 transition-colors">
@@ -196,7 +196,7 @@ function AdminGroupDetails() {
                 </div>
 
                 {/* Header */}
-                <div className="bg-white dark:bg-slate-900 rounded-3xl p-8 border border-slate-200 dark:border-slate-800 shadow-sm flex items-center justify-between">
+                <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl rounded-[2rem] p-8 border border-slate-200/50 dark:border-white/5 shadow-2xl flex items-center justify-between transition-colors duration-300">
                     <div>
                         <h1 className="text-3xl font-extrabold text-slate-800 dark:text-slate-100">{groupData?.groupName || "Unknown Group"}</h1>
                         <p className="text-sm font-medium text-slate-400 mt-1">Group ID: {groupId}</p>
@@ -223,7 +223,7 @@ function AdminGroupDetails() {
 
                 {/* Historical Form */}
                 {showHistoricalForm && (
-                    <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-sm border border-rose-200 dark:border-rose-900/50 p-8 animate-fadeIn">
+                    <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl rounded-[2rem] shadow-2xl border border-rose-200/50 dark:border-rose-900/50 p-8 animate-fadeIn transition-colors duration-300">
                         <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2 mb-6 border-b border-slate-100 dark:border-slate-800 pb-4">
                             <Calendar className="w-5 h-5 text-rose-500" />
                             Admin Backfill
@@ -316,8 +316,8 @@ function AdminGroupDetails() {
                 )}
 
                 {/* Records Table */}
-                <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden">
-                    <div className="px-6 py-5 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/50">
+                <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl rounded-[2rem] shadow-2xl border border-slate-200/50 dark:border-white/5 overflow-hidden transition-colors duration-300">
+                    <div className="px-6 py-5 border-b border-slate-100/50 dark:border-slate-800/50 bg-slate-50/50 dark:bg-slate-800/30">
                         <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100">All Progress Records</h2>
                     </div>
 

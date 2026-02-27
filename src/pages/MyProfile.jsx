@@ -43,7 +43,7 @@ function MyProfile() {
 
     return (
         <div className="min-h-screen p-4 sm:p-6 lg:p-8 transition-colors duration-300">
-            <div className="max-w-4xl mx-auto space-y-8">
+            <div className="max-w-[1600px] w-full mx-auto space-y-8">
 
                 {/* Header */}
                 <div className="bg-gradient-to-r from-indigo-500 to-purple-600 dark:from-indigo-600 dark:to-purple-800 rounded-3xl p-8 text-white shadow-xl relative overflow-hidden">
@@ -80,7 +80,7 @@ function MyProfile() {
                 </div>
 
                 {/* Profile Form */}
-                <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-lg border border-slate-200 dark:border-slate-800 p-8 transition-colors duration-300">
+                <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl rounded-[2rem] shadow-2xl border border-slate-200/50 dark:border-white/5 p-8 transition-colors duration-300">
                     <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2 mb-6">
                         <User className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
                         Personal Information

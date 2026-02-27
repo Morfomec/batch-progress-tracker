@@ -88,10 +88,10 @@ function Peers() {
 
     return (
         <div className="min-h-screen bg-transparent p-4 sm:p-6 lg:p-8 transition-colors duration-300">
-            <div className="max-w-7xl mx-auto space-y-8 animate-fadeIn">
+            <div className="max-w-[1600px] w-full mx-auto space-y-8 animate-fadeIn">
 
                 {/* Header */}
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 bg-white dark:bg-slate-900 rounded-3xl p-8 shadow-xl shadow-slate-200/50 dark:shadow-none border border-slate-100 dark:border-slate-800 transition-colors duration-300">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl rounded-[2rem] p-8 shadow-2xl border border-slate-200/50 dark:border-white/5 transition-colors duration-300">
                     <div className="flex items-center gap-4">
                         <div className="w-14 h-14 bg-indigo-50 dark:bg-indigo-900/30 rounded-2xl flex items-center justify-center shadow-sm">
                             <UsersIcon className="w-7 h-7 text-indigo-600 dark:text-indigo-400" />
@@ -132,7 +132,7 @@ function Peers() {
                             <Link
                                 key={peer.id}
                                 to={`/dashboard/profile/${peer.id}`}
-                                className="bg-white dark:bg-slate-900 rounded-2xl p-4 sm:p-5 border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md transition-all duration-300 group flex items-center justify-between gap-4"
+                                className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl rounded-[2rem] p-4 sm:p-6 border border-slate-200/50 dark:border-white/5 shadow-xl hover:-translate-y-1 transition-all duration-300 group flex items-center justify-between gap-4"
                             >
                                 <div className="flex items-center gap-5">
                                     <div className="w-8 flex justify-center text-lg font-bold text-slate-400 dark:text-slate-500">

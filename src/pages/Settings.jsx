@@ -66,24 +66,24 @@ function Settings() {
 
     return (
         <div className="min-h-screen p-4 sm:p-6 lg:p-8 transition-colors duration-300">
-            <div className="max-w-7xl mx-auto space-y-8">
+            <div className="max-w-[1600px] w-full mx-auto space-y-8">
 
                 {/* Header */}
-                <div className="bg-gradient-to-r from-slate-900 to-indigo-900 dark:from-slate-800 dark:to-indigo-950 rounded-3xl p-8 text-white shadow-xl relative overflow-hidden">
-                    <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/20 rounded-full blur-3xl translate-x-1/3 -translate-y-1/3" />
+                <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl rounded-[2rem] p-8 shadow-2xl border border-slate-200/50 dark:border-white/5 relative overflow-hidden transition-colors duration-300">
+                    <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-indigo-500/10 dark:bg-indigo-500/20 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/3 pointer-events-none" />
                     <div className="relative z-10 flex items-center gap-4">
-                        <div className="w-14 h-14 bg-white/10 rounded-2xl flex items-center justify-center backdrop-blur-md border border-white/20">
-                            <SettingsIcon className="w-7 h-7 text-indigo-300" />
+                        <div className="w-14 h-14 bg-indigo-50 dark:bg-indigo-900/30 rounded-2xl flex items-center justify-center backdrop-blur-md shadow-sm border border-indigo-100 dark:border-indigo-800">
+                            <SettingsIcon className="w-7 h-7 text-indigo-600 dark:text-indigo-400" />
                         </div>
                         <div>
-                            <h1 className="text-3xl font-bold tracking-tight">Account Settings</h1>
-                            <p className="text-indigo-200 mt-1">Manage your app preferences and security.</p>
+                            <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">Account Settings</h1>
+                            <p className="text-slate-500 dark:text-slate-400 mt-1">Manage your app preferences and security.</p>
                         </div>
                     </div>
                 </div>
 
                 {/* Preferences Settings Form */}
-                <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-lg border border-slate-200 dark:border-slate-800 p-8 transition-colors duration-300">
+                <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl rounded-[2rem] shadow-2xl border border-slate-200/50 dark:border-white/5 p-8 transition-colors duration-300">
                     <div className="max-w-3xl mx-auto">
                         <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2 mb-6">
                             <Shield className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
@@ -135,7 +135,7 @@ function Settings() {
                 </div>
 
                 {/* Danger Zone */}
-                <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-lg border border-red-200 dark:border-red-900/30 p-8 transition-colors duration-300">
+                <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl rounded-[2rem] shadow-2xl border border-red-200/50 dark:border-red-900/30 p-8 transition-colors duration-300">
                     <div className="max-w-3xl mx-auto">
                         <h2 className="text-xl font-bold text-red-600 dark:text-red-400 flex items-center gap-2 mb-6">
                             <Trash2 className="w-5 h-5" />

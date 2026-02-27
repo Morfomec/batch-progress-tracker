@@ -47,7 +47,7 @@ function ProfileSetup() {
             <div className="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] bg-indigo-500/10 rounded-full blur-[100px] animate-float pointer-events-none" />
             <div className="absolute bottom-[-10%] right-[-10%] w-[40vw] h-[40vw] bg-purple-500/10 rounded-full blur-[120px] animate-float pointer-events-none" style={{ animationDelay: '2s' }} />
 
-            <div className="w-full max-w-lg bg-white dark:bg-slate-800 rounded-3xl shadow-xl border border-slate-100 dark:border-slate-700 p-8 relative z-10 transition-colors duration-300">
+            <div className="w-full max-w-lg bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl rounded-[2rem] shadow-2xl border border-slate-200/50 dark:border-white/5 p-8 relative z-10 transition-colors duration-300">
                 <div className="w-16 h-16 bg-indigo-50 dark:bg-indigo-900/40 rounded-2xl flex items-center justify-center mb-6 shadow-sm border border-indigo-100 dark:border-indigo-800">
                     <User className="h-8 w-8 text-indigo-600 dark:text-indigo-400" />
                 </div>

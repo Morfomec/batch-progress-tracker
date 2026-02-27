@@ -95,7 +95,7 @@ function MyProgress() {
 
     return (
         <div className="min-h-screen bg-transparent p-4 sm:p-6 lg:p-8 transition-colors duration-300">
-            <div className="max-w-7xl mx-auto space-y-8">
+            <div className="max-w-[1600px] w-full mx-auto space-y-8">
 
                 {/* Header Action */}
                 <div className="mb-6">
@@ -105,7 +105,7 @@ function MyProgress() {
                     </Link>
                 </div>
 
-                <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-xl shadow-slate-200/50 dark:shadow-none border border-slate-100 dark:border-slate-800 overflow-hidden transition-colors duration-300">
+                <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl rounded-[2rem] shadow-2xl border border-slate-200/50 dark:border-white/5 overflow-hidden transition-colors duration-300">
 
                     {/* Header Details */}
                     <div className="bg-gradient-to-r from-slate-900 to-indigo-900 dark:from-slate-800 dark:to-indigo-950 px-8 py-10 text-white relative overflow-hidden">

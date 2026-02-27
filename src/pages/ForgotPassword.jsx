@@ -35,7 +35,7 @@ function ForgotPassword() {
 
     return (
         <div className="flex min-h-screen bg-slate-50 dark:bg-slate-900 items-center justify-center p-4 transition-colors duration-300">
-            <div className="w-full max-w-md bg-white dark:bg-slate-800 rounded-3xl shadow-xl shadow-slate-200/50 dark:shadow-none border border-slate-100 dark:border-slate-700 p-8 relative z-10 animate-fadeIn">
+            <div className="w-full max-w-md bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl rounded-[2rem] shadow-2xl border border-slate-200/50 dark:border-white/5 p-8 relative z-10 animate-fadeIn transition-colors duration-300">
                 <Link to="/" className="inline-flex items-center gap-2 text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors mb-8">
                     <ArrowLeft className="w-4 h-4" />
                     Back to Login

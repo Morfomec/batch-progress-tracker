@@ -61,27 +61,29 @@ function AdminDashboard() {
     }
 
     return (
-        <div className="min-h-screen p-4 sm:p-6 lg:p-8">
-            <div className="max-w-7xl mx-auto space-y-8">
+        <div className="min-h-screen p-4 sm:p-6 lg:p-8 transition-colors duration-300">
+            <div className="max-w-[1600px] w-full mx-auto space-y-8">
 
                 {/* Header */}
-                <div className="bg-gradient-to-r from-rose-600 to-orange-600 rounded-3xl p-8 text-white shadow-xl relative overflow-hidden">
-                    <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3" />
+                {/* Header */}
+                <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl rounded-[2rem] p-8 shadow-2xl border border-slate-200/50 dark:border-white/5 relative overflow-hidden transition-colors duration-300">
+                    <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-rose-500/10 dark:bg-rose-500/20 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/3 pointer-events-none" />
+                    <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-orange-500/10 dark:bg-orange-500/20 rounded-full blur-[60px] translate-y-1/3 -translate-x-1/3 pointer-events-none" />
                     <div className="relative z-10 flex items-center gap-4">
-                        <div className="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-md">
-                            <ShieldCheck className="w-8 h-8 text-white" />
+                        <div className="w-14 h-14 bg-rose-50 dark:bg-rose-900/30 rounded-2xl flex items-center justify-center backdrop-blur-md shadow-sm border border-rose-100 dark:border-rose-800">
+                            <ShieldCheck className="w-8 h-8 text-rose-600 dark:text-rose-400" />
                         </div>
                         <div>
-                            <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">Admin Dashboard</h1>
-                            <p className="text-rose-100 font-medium mt-1">Platform Overview & Management</p>
+                            <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight bg-gradient-to-br from-slate-900 to-slate-600 dark:from-white dark:to-slate-400 bg-clip-text text-transparent">Admin Dashboard</h1>
+                            <p className="text-slate-500 dark:text-slate-400 font-medium mt-1">Platform Overview & Management</p>
                         </div>
                     </div>
                 </div>
 
                 {/* Stats row */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm flex items-center gap-6 group hover:shadow-md transition-shadow">
-                        <div className="w-16 h-16 rounded-2xl bg-indigo-50 dark:bg-indigo-900/30 flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl rounded-[2rem] p-6 border border-slate-200/50 dark:border-white/5 shadow-xl flex items-center gap-6 group hover:-translate-y-1 transition-all duration-300">
+                        <div className="w-16 h-16 rounded-2xl bg-indigo-50 dark:bg-indigo-900/30 flex items-center justify-center shadow-sm border border-indigo-100 dark:border-indigo-800 group-hover:scale-110 transition-transform">
                             <Users className="w-8 h-8 text-indigo-600 dark:text-indigo-400" />
                         </div>
                         <div>
@@ -90,8 +92,8 @@ function AdminDashboard() {
                         </div>
                     </div>
 
-                    <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm flex items-center gap-6 group hover:shadow-md transition-shadow">
-                        <div className="w-16 h-16 rounded-2xl bg-emerald-50 dark:bg-emerald-900/30 flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl rounded-[2rem] p-6 border border-slate-200/50 dark:border-white/5 shadow-xl flex items-center gap-6 group hover:-translate-y-1 transition-all duration-300">
+                        <div className="w-16 h-16 rounded-2xl bg-emerald-50 dark:bg-emerald-900/30 flex items-center justify-center shadow-sm border border-emerald-100 dark:border-emerald-800 group-hover:scale-110 transition-transform">
                             <BookOpen className="w-8 h-8 text-emerald-600 dark:text-emerald-400" />
                         </div>
                         <div>
@@ -102,10 +104,10 @@ function AdminDashboard() {
                 </div>
 
                 {/* Groups List */}
-                <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden">
-                    <div className="px-6 py-5 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/50 flex items-center justify-between">
+                <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl rounded-[2rem] shadow-2xl border border-slate-200/50 dark:border-white/5 overflow-hidden transition-colors duration-300">
+                    <div className="px-6 py-5 border-b border-slate-100/50 dark:border-slate-800/50 bg-slate-50/50 dark:bg-slate-800/30 flex items-center justify-between">
                         <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
-                            <Activity className="w-5 h-5 text-indigo-500" />
+                            <Activity className="w-5 h-5 text-rose-500 dark:text-rose-400" />
                             Manage Batches
                         </h2>
                     </div>
