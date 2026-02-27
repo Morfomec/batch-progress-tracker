@@ -363,16 +363,30 @@ function Dashboard() {
 
             const timelineArray = Object.values(allTimelinesMap).map(stats => {
                 const remainingModules = Math.max(0, 52 - stats.highestModule);
-                const baseDays = remainingModules * 8;
-                const totalDays = baseDays + (stats.delays * 8);
 
                 let expectedDate = stats.latestDate ? new Date(stats.latestDate) : new Date();
-                expectedDate.setDate(expectedDate.getDate() + totalDays);
+
+                if (remainingModules > 0) {
+                    const fullCycles = Math.floor(remainingModules / 6);
+                    const singleModules = remainingModules % 6;
+
+                    // Step 3: Add cycle days (49 days for 6 modules)
+                    expectedDate.setDate(expectedDate.getDate() + (fullCycles * 49));
+
+                    // Step 4: Handle remainder modules individually
+                    for (let i = 0; i < singleModules + stats.delays; i++) {
+                        expectedDate.setDate(expectedDate.getDate() + 8);
+                        // Shift if landing on Sunday (0)
+                        if (expectedDate.getDay() === 0) {
+                            expectedDate.setDate(expectedDate.getDate() + 1);
+                        }
+                    }
+                }
 
                 return {
                     ...stats,
                     expectedEndDate: expectedDate,
-                    remainingDays: totalDays
+                    remainingDays: "Calculated" // Simplified since days vary based on Sundays
                 };
             });
 
@@ -491,16 +505,30 @@ function Dashboard() {
 
             const timelineArray = Object.values(allTimelinesMap).map(stats => {
                 const remainingModules = Math.max(0, 52 - stats.highestModule);
-                const baseDays = remainingModules * 8;
-                const totalDays = baseDays + (stats.delays * 8);
 
                 let expectedDate = stats.latestDate ? new Date(stats.latestDate) : new Date();
-                expectedDate.setDate(expectedDate.getDate() + totalDays);
+
+                if (remainingModules > 0) {
+                    const fullCycles = Math.floor(remainingModules / 6);
+                    const singleModules = remainingModules % 6;
+
+                    // Step 3: Add cycle days (49 days for 6 modules)
+                    expectedDate.setDate(expectedDate.getDate() + (fullCycles * 49));
+
+                    // Step 4: Handle remainder individually + delays
+                    for (let i = 0; i < singleModules + stats.delays; i++) {
+                        expectedDate.setDate(expectedDate.getDate() + 8);
+                        // Shift if landing on Sunday (0)
+                        if (expectedDate.getDay() === 0) {
+                            expectedDate.setDate(expectedDate.getDate() + 1);
+                        }
+                    }
+                }
 
                 return {
                     ...stats,
                     expectedEndDate: expectedDate,
-                    remainingDays: totalDays
+                    remainingDays: "Calculated"
                 };
             });
 
