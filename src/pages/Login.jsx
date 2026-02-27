@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { auth, db } from "../firebase/firebaseConfig";
-import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, setPersistence, browserLocalPersistence, browserSessionPersistence } from "firebase/auth";
+import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, setPersistence, browserLocalPersistence, browserSessionPersistence } from "firebase/auth";
 import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
 import { useNavigate, Link, Navigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
@@ -20,6 +20,41 @@ function Login() {
   const navigate = useNavigate();
   const { isDarkMode, toggleTheme } = useTheme();
   const { user } = useAuth(); // to check if already logged in
+
+  // Handle Redirect Result for Mobile
+  useEffect(() => {
+    const handleRedirectResult = async () => {
+      try {
+        const result = await getRedirectResult(auth);
+        if (result && result.user) {
+          const user = result.user;
+          const userDocRef = doc(db, "users", user.uid);
+          const userDocSnap = await getDoc(userDocRef);
+
+          if (!userDocSnap.exists()) {
+            await setDoc(userDocRef, {
+              fullName: user.displayName || "Google User",
+              nickName: user.displayName ? user.displayName.split(" ")[0] : "User",
+              email: user.email,
+              createdAt: serverTimestamp(),
+              themePreference: "system",
+              privacyMode: false,
+            });
+          }
+          toast.success("Welcome back!");
+          navigate("/dashboard");
+        }
+      } catch (err) {
+        console.error("Redirect login error:", err);
+        // Sometimes the error is just that there is no redirect result, which is fine to ignore if not explicitly logging in
+        if (err.code !== 'auth/no-redirect-result') {
+          toast.error("Failed to sign in with Google: " + err.message);
+        }
+      }
+    };
+
+    handleRedirectResult();
+  }, [navigate]);
 
   useEffect(() => {
     const savedEmail = localStorage.getItem("rememberedEmail");
@@ -72,30 +107,39 @@ function Login() {
       await setPersistence(auth, persistenceType);
 
       const provider = new GoogleAuthProvider();
-      const result = await signInWithPopup(auth, provider);
-      const user = result.user;
 
-      // Check if user document exists in Firestore
-      const userDocRef = doc(db, "users", user.uid);
-      const userDocSnap = await getDoc(userDocRef);
+      // Check if mobile device
+      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
-      // If it's a new Google user, automatically create a default profile so they aren't stuck on profile setup
-      if (!userDocSnap.exists()) {
-        await setDoc(userDocRef, {
-          fullName: user.displayName || "Google User",
-          nickName: user.displayName ? user.displayName.split(" ")[0] : "User",
-          email: user.email,
-          createdAt: serverTimestamp(),
-          themePreference: "system",
-          privacyMode: false,
-        });
+      if (isMobile) {
+        // Use redirect for mobile to avoid popup blockers and "firebase: error" 
+        await signInWithRedirect(auth, provider);
+        // The rest is handled in the useEffect for getRedirectResult
+      } else {
+        // Use popup for desktop
+        const result = await signInWithPopup(auth, provider);
+        const user = result.user;
+
+        const userDocRef = doc(db, "users", user.uid);
+        const userDocSnap = await getDoc(userDocRef);
+
+        if (!userDocSnap.exists()) {
+          await setDoc(userDocRef, {
+            fullName: user.displayName || "Google User",
+            nickName: user.displayName ? user.displayName.split(" ")[0] : "User",
+            email: user.email,
+            createdAt: serverTimestamp(),
+            themePreference: "system",
+            privacyMode: false,
+          });
+        }
+
+        toast.success("Welcome back!");
+        navigate("/dashboard");
       }
-
-      toast.success("Welcome back!");
-      navigate("/dashboard");
     } catch (err) {
+      console.error(err);
       toast.error(err.message || "Failed to sign in with Google");
-    } finally {
       setLoading(false);
     }
   };
