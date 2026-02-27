@@ -1,4 +1,5 @@
 import { Routes, Route } from "react-router-dom";
+import ErrorBoundary from "./components/ErrorBoundary";
 
 import Login from "./pages/Login";
 import Register from "./pages/Register";
@@ -38,65 +39,67 @@ function App() {
           },
         }}
       />
-      <Routes>
+      <ErrorBoundary>
+        <Routes>
 
 
-        <Route path="/" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/forgot-password" element={<ForgotPassword />} />
-        <Route path="/auth/action" element={<AuthAction />} />
+          <Route path="/" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/auth/action" element={<AuthAction />} />
 
-        <Route
-          path="/profile-setup"
-          element={
-            <ProtectedRoute>
-              <ProfileSetup />
-            </ProtectedRoute>
-          }
-        />
+          <Route
+            path="/profile-setup"
+            element={
+              <ProtectedRoute>
+                <ProfileSetup />
+              </ProtectedRoute>
+            }
+          />
 
-        <Route element={<ProtectedRoute><GroupLayout /></ProtectedRoute>}>
-          <Route element={<AppLayout />}>
+          <Route element={<ProtectedRoute><GroupLayout /></ProtectedRoute>}>
+            <Route element={<AppLayout />}>
 
-            <Route path="/dashboard">
-              <Route index element={<Dashboard />} />
-              <Route path="group-info" element={<GroupInfo />} />
-              <Route path="my-progress" element={<MyProgress />} />
-              <Route path="peers" element={<Peers />} />
-              {/* SETTINGS (Non-group specific) */}
-              <Route path="settings" element={<Settings />} />
-              <Route path="my-profile" element={<MyProfile />} />
-              {/* Peer Profile */}
-              <Route path="profile/:userId" element={<PeerProfile />} />
+              <Route path="/dashboard">
+                <Route index element={<Dashboard />} />
+                <Route path="group-info" element={<GroupInfo />} />
+                <Route path="my-progress" element={<MyProgress />} />
+                <Route path="peers" element={<Peers />} />
+                {/* SETTINGS (Non-group specific) */}
+                <Route path="settings" element={<Settings />} />
+                <Route path="my-profile" element={<MyProfile />} />
+                {/* Peer Profile */}
+                <Route path="profile/:userId" element={<PeerProfile />} />
+              </Route>
+
+              {/* STANDALONE PROTECTED PAGES */}
+              <Route
+                path="/create-group"
+                element={<CreateGroup />}
+              />
+              <Route
+                path="/join-group"
+                element={<JoinGroup />}
+              />
+
             </Route>
-
-            {/* STANDALONE PROTECTED PAGES */}
-            <Route
-              path="/create-group"
-              element={<CreateGroup />}
-            />
-            <Route
-              path="/join-group"
-              element={<JoinGroup />}
-            />
-
           </Route>
-        </Route>
 
-        {/* ADMIN ROUTES */}
-        <Route
-          path="/admin"
-          element={
-            <AdminRoute>
-              <AdminLayout />
-            </AdminRoute>
-          }
-        >
-          <Route index element={<AdminDashboard />} />
-          <Route path="groups/:groupId" element={<AdminGroupDetails />} />
-        </Route>
+          {/* ADMIN ROUTES */}
+          <Route
+            path="/admin"
+            element={
+              <AdminRoute>
+                <AdminLayout />
+              </AdminRoute>
+            }
+          >
+            <Route index element={<AdminDashboard />} />
+            <Route path="groups/:groupId" element={<AdminGroupDetails />} />
+          </Route>
 
-      </Routes>
+        </Routes>
+      </ErrorBoundary>
     </>
   );
 }
