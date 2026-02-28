@@ -179,7 +179,7 @@ function MyProfile() {
             <div className="max-w-[1600px] w-full mx-auto space-y-8">
 
                 {/* Glassmorphic Banner Header */}
-                <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl rounded-3xl p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.4)] border border-slate-200/50 dark:border-white/5 relative transition-all duration-300">
+                <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl rounded-3xl p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.4)] border border-slate-200/50 dark:border-white/5 relative z-50 transition-all duration-300">
                     {/* Background glows matching dashboard style */}
                     <div className="absolute inset-0 overflow-hidden rounded-3xl pointer-events-none z-0">
                         <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-indigo-500/10 dark:bg-indigo-500/20 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/3 pointer-events-none" />
@@ -234,7 +234,7 @@ function MyProfile() {
                                         <button
                                             type="button"
                                             onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-                                            className="group flex flex-row items-center gap-2 px-4 py-2 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 border border-indigo-100 dark:border-indigo-500/20 transition-all duration-300"
+                                            className="group flex flex-row items-center gap-2 px-4 py-2 rounded-xl bg-indigo-50/80 dark:bg-indigo-500/10 backdrop-blur-md text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 border border-indigo-200/50 dark:border-indigo-500/20 shadow-sm transition-all duration-300"
                                             title="Choose your emoji"
                                         >
                                             <span className="text-lg leading-none">{emoji || "😀"}</span>
@@ -264,7 +264,7 @@ function MyProfile() {
                                             type="button"
                                             onClick={handleRemoveImage}
                                             disabled={uploadingImage}
-                                            className="group flex flex-row items-center gap-2 px-4 py-2 rounded-xl bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-500/20 border border-red-100 dark:border-red-500/20 transition-all duration-300"
+                                            className="group flex flex-row items-center gap-2 px-4 py-2 rounded-xl bg-red-50/80 dark:bg-red-500/10 backdrop-blur-md text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-500/20 border border-red-200/50 dark:border-red-500/20 shadow-sm transition-all duration-300"
                                         >
                                             <Trash2 className="w-4 h-4 group-hover:scale-110 transition-transform" />
                                             <span className="text-sm font-bold tracking-wide">Remove Photo</span>
@@ -274,37 +274,39 @@ function MyProfile() {
                             </div>
                         </div>
                     </div>
-                </div>{/* Profile Form */}
-                <div className="bg-slate-900/50 backdrop-blur-2xl rounded-3xl border border-slate-700/50 shadow-2xl p-6 sm:p-8 transition-colors duration-300">
-                    <h2 className="text-xl font-bold text-white flex items-center gap-2 mb-6">
-                        <User className="w-5 h-5 text-indigo-400" />
+                </div>
+
+                {/* Profile Form */}
+                <div className="bg-white/60 dark:bg-slate-900/50 backdrop-blur-2xl rounded-3xl border border-slate-200/60 dark:border-slate-700/50 shadow-xl dark:shadow-2xl p-6 sm:p-8 transition-colors duration-300">
+                    <h2 className="text-xl font-bold text-slate-800 dark:text-white flex items-center gap-2 mb-6">
+                        <User className="w-5 h-5 text-indigo-500 dark:text-indigo-400" />
                         Personal Information
                     </h2>
 
                     <form onSubmit={handleSave} className="space-y-8">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
-                                <label className="block text-sm font-semibold text-slate-300 mb-2">Full Name</label>
+                                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Full Name</label>
                                 <input
                                     type="text"
                                     value={fullName}
                                     onChange={(e) => setFullName(e.target.value)}
-                                    className="w-full px-4 py-3 bg-slate-800/80 border border-slate-700/50 text-white rounded-xl focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500/50 outline-none transition-all placeholder-slate-500/80"
+                                    className="w-full px-4 py-3 bg-white/50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/50 text-slate-900 dark:text-white rounded-xl focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500/50 outline-none transition-all placeholder-slate-400 dark:placeholder-slate-500/80 backdrop-blur-sm"
                                     required
                                     placeholder="Jane Doe"
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-semibold text-slate-300 mb-2">Nick Name</label>
+                                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Nick Name</label>
                                 <input
                                     type="text"
                                     value={nickName}
                                     onChange={(e) => setNickName(e.target.value)}
-                                    className="w-full px-4 py-3 bg-slate-800/80 border border-slate-700/50 text-white rounded-xl focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500/50 outline-none transition-all placeholder-slate-500/80"
+                                    className="w-full px-4 py-3 bg-white/50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/50 text-slate-900 dark:text-white rounded-xl focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500/50 outline-none transition-all placeholder-slate-400 dark:placeholder-slate-500/80 backdrop-blur-sm"
                                     required
                                     placeholder="Jane"
                                 />
-                                <p className="mt-2 text-xs text-slate-400">Used on leaderboards and recent activity.</p>
+                                <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">Used on leaderboards and recent activity.</p>
                             </div>
                         </div>
 
@@ -312,12 +314,12 @@ function MyProfile() {
                             <button
                                 type="submit"
                                 disabled={loading}
-                                className="w-full sm:w-auto px-8 py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl shadow-lg shadow-indigo-200 dark:shadow-none transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-70"
+                                className="w-full sm:w-auto px-8 py-3.5 bg-indigo-500/80 hover:bg-indigo-600/80 dark:bg-indigo-600/80 dark:hover:bg-indigo-700/80 backdrop-blur-md border border-white/20 dark:border-white/10 text-white font-semibold rounded-xl shadow-lg shadow-indigo-200 dark:shadow-none transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-70"
                             >
                                 <Save className="w-5 h-5" />
                                 {loading ? "Saving..." : "Save Profile"}
                             </button>
-                            {successMsg && <span className="text-emerald-600 dark:text-emerald-400 font-semibold text-sm animate-fadeIn bg-emerald-50 dark:bg-emerald-500/10 px-4 py-2 rounded-lg">{successMsg}</span>}
+                            {successMsg && <span className="text-emerald-700 dark:text-emerald-400 font-semibold text-sm animate-fadeIn bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 px-4 py-2 rounded-lg backdrop-blur-sm">{successMsg}</span>}
                         </div>
                     </form>
                 </div>
