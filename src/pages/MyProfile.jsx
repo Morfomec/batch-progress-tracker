@@ -301,74 +301,6 @@ function MyProfile() {
                             </div>
                         </div>
 
-                </div>
-
-                <div className="pt-4 flex flex-col sm:flex-row items-center gap-4">
-                    <button
-                        type="submit"
-                        disabled={loading}
-                        className="w-full sm:w-auto px-8 py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl shadow-lg shadow-indigo-200 dark:shadow-none transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-70"
-                    >
-                        <Save className="w-5 h-5" />
-                        {loading ? "Saving..." : "Save Profile"}
-                    </button>
-                    {successMsg && <span className="text-emerald-600 dark:text-emerald-400 font-semibold text-sm animate-fadeIn bg-emerald-50 dark:bg-emerald-500/10 px-4 py-2 rounded-lg">{successMsg}</span>}
-                </div>
-            </form>
-        </div>
-                </div >
-
-        {/* Cropper Modal */ }
-    {
-        isCropping && (
-            <div className="fixed inset-0 z-[200] flex items-center justify-center bg-slate-900/90 backdrop-blur-sm p-4">
-                <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl p-6 w-full max-w-lg flex flex-col overflow-hidden animate-fadeIn">
-                    <div className="flex justify-between items-center mb-4">
-                        <h3 className="text-lg font-bold text-slate-800 dark:text-white">Crop Profile Photo</h3>
-                        <button onClick={handleCancelCrop} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
-                            <X className="w-6 h-6" />
-                        </button>
-                    </div>
-
-                    <div className="relative w-full h-80 sm:h-96 rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-900">
-                        <Cropper
-                            image={imageSrc}
-                            crop={crop}
-                            zoom={zoom}
-                            aspect={1} // Square avatar
-                            cropShape="round" // Show circular crop guide
-                            showGrid={false}
-                            onCropChange={setCrop}
-                            onCropComplete={onCropComplete}
-                            onZoomChange={setZoom}
-                        />
-                    </div>
-
-                    {/* Zoom Slider */}
-                    <div className="mt-6 flex items-center gap-4">
-                        <span className="text-sm text-slate-500 dark:text-slate-400 min-w-12">Zoom</span>
-                        <input
-                            type="range"
-                            value={zoom}
-                            min={1}
-                            max={3}
-                            step={0.1}
-                            aria-label="Zoom"
-                            onChange={(e) => setZoom(Number(e.target.value))}
-                            className="w-full h-2 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-indigo-600"
-                        />
-                    </div>
-
-                    <div className="mt-6 flex justify-end gap-3">
-                        <button
-                            onClick={handleCancelCrop}
-                            className="px-5 py-2.5 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition"
-                        >
-                            Cancel
-                        </button>
-                        <button
-                            onClick={handleCropUpload}
-                            disabled={uploadingImage}
                         <div className="pt-4 flex flex-col sm:flex-row items-center gap-4">
                             <button
                                 type="submit"
@@ -384,9 +316,8 @@ function MyProfile() {
                 </div>
             </div>
 
-            {/* Cropper Modal */ }
-        {
-            isCropping && (
+            {/* Cropper Modal */}
+            {isCropping && (
                 <div className="fixed inset-0 z-[200] flex items-center justify-center bg-slate-900/90 backdrop-blur-sm p-4">
                     <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl p-6 w-full max-w-lg flex flex-col overflow-hidden animate-fadeIn">
                         <div className="flex justify-between items-center mb-4">
@@ -442,13 +373,9 @@ function MyProfile() {
                         </div>
                     </div>
                 </div>
-                        </div >
-                    </div >
-                </div >
-            )
-        }
-        </div >
+            )}
+        </div>
     );
-    }
+}
 
-    export default MyProfile;
+export default MyProfile;
