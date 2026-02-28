@@ -91,20 +91,24 @@ function Peers() {
             <div className="max-w-[1600px] w-full mx-auto space-y-8 animate-fadeIn">
 
                 {/* Header */}
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl rounded-[2rem] p-8 shadow-2xl border border-slate-200/50 dark:border-white/5 transition-colors duration-300">
-                    <div className="flex items-center gap-4">
-                        <div className="w-14 h-14 bg-indigo-50 dark:bg-indigo-900/30 rounded-2xl flex items-center justify-center shadow-sm">
-                            <UsersIcon className="w-7 h-7 text-indigo-600 dark:text-indigo-400" />
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl rounded-3xl p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.4)] border border-slate-200/50 dark:border-white/5 transition-colors duration-300 relative overflow-hidden sm:h-36">
+                    {/* Background glows */}
+                    <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-indigo-500/10 dark:bg-indigo-500/20 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/3 pointer-events-none" />
+                    <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-purple-500/10 dark:bg-purple-500/20 rounded-full blur-[60px] translate-y-1/3 -translate-x-1/3 pointer-events-none" />
+
+                    <div className="flex items-center gap-6 relative z-10">
+                        <div className="w-16 h-16 bg-white/50 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl flex items-center justify-center shadow-lg border border-white/50 dark:border-slate-700/50 shrink-0">
+                            <UsersIcon className="w-8 h-8 text-indigo-600 dark:text-indigo-400" />
                         </div>
                         <div>
-                            <h1 className="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">Batch Mates</h1>
-                            <p className="text-slate-500 dark:text-slate-400 mt-1 font-medium">
+                            <h1 className="text-3xl font-extrabold tracking-tight bg-gradient-to-br from-slate-900 to-slate-600 dark:from-white dark:to-slate-400 bg-clip-text text-transparent">Batch Mates</h1>
+                            <p className="text-slate-500 dark:text-slate-400 mt-1 font-medium text-sm">
                                 {peers.length} members in {group.groupName}
                             </p>
                         </div>
                     </div>
 
-                    <div className="w-full sm:w-auto">
+                    <div className="w-full sm:w-auto relative z-10">
                         <div className="relative">
                             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                 <Search className="h-5 w-5 text-slate-400 dark:text-slate-500" />
@@ -114,7 +118,7 @@ function Peers() {
                                 placeholder="Search peers..."
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                className="w-full sm:w-64 pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all duration-200"
+                                className="w-full sm:w-64 pl-10 pr-4 py-3 bg-white/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50 rounded-xl text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500/80 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 backdrop-blur-sm transition-all duration-200"
                             />
                         </div>
                     </div>

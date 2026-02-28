@@ -105,27 +105,29 @@ function MyProgress() {
                     </Link>
                 </div>
 
-                <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl rounded-[2rem] shadow-2xl border border-slate-200/50 dark:border-white/5 overflow-hidden transition-colors duration-300">
+                {/* Glassmorphic Header */}
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl rounded-3xl p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.4)] border border-slate-200/50 dark:border-white/5 transition-colors duration-300 relative overflow-hidden sm:h-36">
+                    {/* Background glows */}
+                    <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-indigo-500/10 dark:bg-indigo-500/20 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/3 pointer-events-none" />
+                    <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-purple-500/10 dark:bg-purple-500/20 rounded-full blur-[60px] translate-y-1/3 -translate-x-1/3 pointer-events-none" />
 
-                    {/* Header Details */}
-                    <div className="bg-gradient-to-r from-slate-900 to-indigo-900 dark:from-slate-800 dark:to-indigo-950 px-8 py-10 text-white relative overflow-hidden">
-                        <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/20 rounded-full blur-3xl" />
-                        <div className="relative z-10 flex items-center justify-between">
-                            <div>
-                                <h1 className="text-3xl font-bold flex items-center gap-3">
-                                    <History className="w-8 h-8 text-indigo-400 font-bold" />
-                                    My Progress History
-                                </h1>
-                                <p className="text-indigo-200 mt-2 text-lg">
-                                    Review and edit your past weekly submissions.
-                                </p>
-                            </div>
+                    <div className="flex items-center gap-6 relative z-10 w-full">
+                        <div className="w-16 h-16 bg-white/50 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl flex items-center justify-center shadow-lg border border-white/50 dark:border-slate-700/50 shrink-0">
+                            <History className="w-8 h-8 text-indigo-600 dark:text-indigo-400" />
+                        </div>
+                        <div>
+                            <h1 className="text-3xl font-extrabold tracking-tight bg-gradient-to-br from-slate-900 to-slate-600 dark:from-white dark:to-slate-400 bg-clip-text text-transparent">My Progress History</h1>
+                            <p className="text-slate-500 dark:text-slate-400 mt-1 font-medium text-sm">
+                                Review and edit your past weekly submissions.
+                            </p>
                         </div>
                     </div>
+                </div>
 
-                    <div className="p-8">
+                <div className="bg-white/60 dark:bg-slate-900/50 backdrop-blur-2xl rounded-[2rem] shadow-xl dark:shadow-2xl border border-slate-200/60 dark:border-slate-700/50 overflow-hidden transition-colors duration-300 p-8">
+                    <div className="">
                         {!group ? (
-                            <div className="text-center py-16 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-dashed border-slate-200 dark:border-slate-700">
+                            <div className="text-center py-16 bg-white/50 dark:bg-slate-800/50 rounded-2xl border border-dashed border-slate-200 dark:border-slate-700">
                                 <div className="w-16 h-16 bg-white dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm">
                                     <History className="w-8 h-8 text-slate-400 dark:text-slate-500" />
                                 </div>
