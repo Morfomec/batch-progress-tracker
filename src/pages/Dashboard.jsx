@@ -245,7 +245,7 @@ import { LogOut } from "lucide-react";
 import { Link, useOutletContext } from "react-router-dom";
 import { db } from "../firebase/firebaseConfig";
 import { useAuth } from "../context/AuthContext";
-import { collection, getDocs, orderBy, query, addDoc, serverTimestamp } from "firebase/firestore";
+import { collection, getDocs, orderBy, query, addDoc, serverTimestamp, where } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import { calculateScore } from "../utils/calculateScore";
 import Leaderboard from "../components/Leaderboard";
@@ -421,6 +421,19 @@ function Dashboard() {
         }
 
         try {
+            // First check if a submission for this module already exists for the user
+            const existingDocQuery = query(
+                collection(db, "groups", group.id, "progress"),
+                where("userId", "==", user.uid),
+                where("moduleNo", "==", Number(formData.moduleNo))
+            );
+
+            const existingDocs = await getDocs(existingDocQuery);
+            if (!existingDocs.empty) {
+                toast.error(`You have already submitted progress for Module ${formData.moduleNo}. Please edit it in 'My Progress History' instead.`);
+                return;
+            }
+
             const score = calculateScore(
                 formData.examStatus,
                 formData.linkedinActivity,

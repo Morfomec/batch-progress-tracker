@@ -24,8 +24,8 @@ function MyProgress() {
         try {
             const q = query(
                 collection(db, "groups", group.id, "progress"),
-                where("userId", "==", user.uid),
-                orderBy("createdAt", "desc")
+                where("userId", "==", user.uid)
+                // We'll sort it client-side to ensure moduleNo acts numerically
             );
 
             const snapshot = await getDocs(q);
@@ -34,6 +34,9 @@ function MyProgress() {
                 id: doc.id,
                 ...doc.data()
             }));
+
+            // Sort by moduleNo descending
+            data.sort((a, b) => b.moduleNo - a.moduleNo);
 
             setProgressList(data);
         } catch (error) {
