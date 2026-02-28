@@ -179,10 +179,12 @@ function MyProfile() {
             <div className="max-w-[1600px] w-full mx-auto space-y-8">
 
                 {/* Glassmorphic Banner Header */}
-                <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl rounded-3xl p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.4)] border border-slate-200/50 dark:border-white/5 relative overflow-hidden transition-all duration-300">
+                <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl rounded-3xl p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.4)] border border-slate-200/50 dark:border-white/5 relative transition-all duration-300">
                     {/* Background glows matching dashboard style */}
-                    <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-indigo-500/10 dark:bg-indigo-500/20 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/3 pointer-events-none" />
-                    <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-purple-500/10 dark:bg-purple-500/20 rounded-full blur-[60px] translate-y-1/3 -translate-x-1/3 pointer-events-none" />
+                    <div className="absolute inset-0 overflow-hidden rounded-3xl pointer-events-none z-0">
+                        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-indigo-500/10 dark:bg-indigo-500/20 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/3 pointer-events-none" />
+                        <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-purple-500/10 dark:bg-purple-500/20 rounded-full blur-[60px] translate-y-1/3 -translate-x-1/3 pointer-events-none" />
+                    </div>
 
                     <div className="relative z-10 flex flex-col sm:flex-row items-center sm:items-end gap-6 justify-between">
                         <div className="flex flex-col sm:flex-row items-center sm:items-end gap-6">
@@ -199,31 +201,6 @@ function MyProfile() {
                                         </span>
                                     )}
                                 </div>
-
-                                {/* Emoji Overlay Button */}
-                                <button
-                                    onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-                                    className="absolute top-1 right-1 z-20 w-10 h-10 bg-white dark:bg-slate-800 border-2 border-slate-100 dark:border-slate-700 rounded-full shadow-lg flex items-center justify-center text-2xl hover:scale-110 transition-transform cursor-pointer"
-                                    title="Choose your emoji"
-                                >
-                                    {emoji || <Smile className="w-5 h-5 text-slate-400" />}
-                                </button>
-
-                                {/* Emoji Picker Popover */}
-                                {showEmojiPicker && (
-                                    <div className="absolute top-12 left-full ml-4 z-[100] animate-fadeIn">
-                                        <div className="fixed inset-0" onClick={() => setShowEmojiPicker(false)}></div>
-                                        <div className="relative shadow-2xl rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-700">
-                                            <EmojiPicker
-                                                onEmojiClick={(emojiData) => {
-                                                    setEmoji(emojiData.emoji);
-                                                    setShowEmojiPicker(false);
-                                                }}
-                                                theme="auto"
-                                            />
-                                        </div>
-                                    </div>
-                                )}
 
                                 {/* Photo Upload Area */}
                                 <input
@@ -249,23 +226,53 @@ function MyProfile() {
                                 <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight bg-gradient-to-br from-slate-900 to-slate-600 dark:from-white dark:to-slate-400 bg-clip-text text-transparent">
                                     {userProfile?.fullName || user?.displayName || "My Profile"}
                                 </h1>
-                                <p className="text-slate-500 dark:text-slate-400 text-sm font-medium mt-1">Manage your public persona</p>
+                                <p className="text-slate-500 dark:text-slate-400 text-sm font-medium mt-1 mb-4">Manage your public persona</p>
+
+                                <div className="flex flex-wrap items-center justify-center sm:justify-start gap-3">
+                                    {/* Set Emoji Button */}
+                                    <div className="relative">
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                                            className="group flex flex-row items-center gap-2 px-4 py-2 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 border border-indigo-100 dark:border-indigo-500/20 transition-all duration-300"
+                                            title="Choose your emoji"
+                                        >
+                                            <span className="text-lg leading-none">{emoji || "😀"}</span>
+                                            <span className="text-sm font-bold tracking-wide">Set Emoji</span>
+                                        </button>
+
+                                        {/* Emoji Picker Popover */}
+                                        {showEmojiPicker && (
+                                            <div className="absolute top-full mt-2 left-0 sm:left-0 z-[100] animate-fadeIn">
+                                                <div className="fixed inset-0" onClick={() => setShowEmojiPicker(false)}></div>
+                                                <div className="relative shadow-2xl rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-700">
+                                                    <EmojiPicker
+                                                        onEmojiClick={(emojiData) => {
+                                                            setEmoji(emojiData.emoji);
+                                                            setShowEmojiPicker(false);
+                                                        }}
+                                                        theme="auto"
+                                                    />
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* Redesigned Delete Photo Button */}
+                                    {userProfile?.photoURL && (
+                                        <button
+                                            type="button"
+                                            onClick={handleRemoveImage}
+                                            disabled={uploadingImage}
+                                            className="group flex flex-row items-center gap-2 px-4 py-2 rounded-xl bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-500/20 border border-red-100 dark:border-red-500/20 transition-all duration-300"
+                                        >
+                                            <Trash2 className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                                            <span className="text-sm font-bold tracking-wide">Remove Photo</span>
+                                        </button>
+                                    )}
+                                </div>
                             </div>
                         </div>
-
-                        {/* Redesigned Delete Photo Button */}
-                        {userProfile?.photoURL && (
-                            <div className="mb-2 sm:self-center">
-                                <button
-                                    onClick={handleRemoveImage}
-                                    disabled={uploadingImage}
-                                    className="group flex flex-row items-center gap-2 px-4 py-2 rounded-xl bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-500/20 border border-red-100 dark:border-red-500/20 transition-all duration-300"
-                                >
-                                    <Trash2 className="w-4 h-4 group-hover:scale-110 transition-transform" />
-                                    <span className="text-sm font-bold tracking-wide">Remove Photo</span>
-                                </button>
-                            </div>
-                        )}
                     </div>
                 </div>{/* Profile Form */}
                 <div className="bg-slate-900/50 backdrop-blur-2xl rounded-3xl border border-slate-700/50 shadow-2xl p-6 sm:p-8 transition-colors duration-300">
