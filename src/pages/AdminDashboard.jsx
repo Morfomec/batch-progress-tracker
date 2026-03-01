@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { db } from "../firebase/firebaseConfig";
 import { collection, getDocs, query, orderBy } from "firebase/firestore";
-import { ShieldCheck, Users, BookOpen, ChevronRight, Activity } from "lucide-react";
+import { ShieldCheck, Users, BookOpen, ChevronRight, Activity, X, ChevronLeft } from "lucide-react";
 import { Link } from "react-router-dom";
 
 function AdminDashboard() {
@@ -9,6 +9,10 @@ function AdminDashboard() {
     const [groups, setGroups] = useState([]);
     const [usersList, setUsersList] = useState([]);
     const [loading, setLoading] = useState(true);
+
+    const [showUsersModal, setShowUsersModal] = useState(false);
+    const [currentPage, setCurrentPage] = useState(1);
+    const usersPerPage = 10;
 
     useEffect(() => {
         const fetchAdminData = async () => {
@@ -66,6 +70,19 @@ function AdminDashboard() {
         );
     }
 
+    const indexOfLastUser = currentPage * usersPerPage;
+    const indexOfFirstUser = indexOfLastUser - usersPerPage;
+    const currentUsers = usersList.slice(indexOfFirstUser, indexOfLastUser);
+    const totalPages = Math.ceil(usersList.length / usersPerPage);
+
+    const handleNextPage = () => {
+        if (currentPage < totalPages) setCurrentPage(currentPage + 1);
+    };
+
+    const handlePrevPage = () => {
+        if (currentPage > 1) setCurrentPage(currentPage - 1);
+    };
+
     return (
         <div className="min-h-screen p-4 sm:p-6 lg:p-8 transition-colors duration-300">
             <div className="max-w-[1600px] w-full mx-auto space-y-8">
@@ -88,7 +105,10 @@ function AdminDashboard() {
 
                 {/* Stats row */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl rounded-[2rem] p-6 border border-slate-200/50 dark:border-white/5 shadow-xl flex items-center gap-6 group hover:-translate-y-1 transition-all duration-300">
+                    <div
+                        onClick={() => setShowUsersModal(true)}
+                        className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl rounded-[2rem] p-6 border border-slate-200/50 dark:border-white/5 shadow-xl flex items-center gap-6 group hover:-translate-y-1 transition-all duration-300 cursor-pointer"
+                    >
                         <div className="w-16 h-16 rounded-2xl bg-indigo-50 dark:bg-indigo-900/30 flex items-center justify-center shadow-sm border border-indigo-100 dark:border-indigo-800 group-hover:scale-110 transition-transform">
                             <Users className="w-8 h-8 text-indigo-600 dark:text-indigo-400" />
                         </div>
@@ -145,77 +165,114 @@ function AdminDashboard() {
                             </Link>
                         ))}
 
-                        {groups.length === 0 && (
-                            <div className="p-8 text-center text-slate-500 dark:text-slate-400">
-                                No groups created yet.
+                    </div>
+                    {groups.length === 0 && (
+                        <div className="p-8 text-center text-slate-500 dark:text-slate-400">
+                            No groups created yet.
+                        </div>
+                    )}
+                </div>
+            </div>
+
+            {/* Users List Modal */}
+            {showUsersModal && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
+                    <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" onClick={() => setShowUsersModal(false)}></div>
+                    <div className="relative w-full max-w-5xl bg-white dark:bg-slate-900 rounded-[2rem] shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden flex flex-col max-h-[90vh]">
+                        <div className="px-6 py-5 border-b border-slate-100/50 dark:border-slate-800/50 bg-slate-50/50 dark:bg-slate-800/30 flex items-center justify-between shrink-0">
+                            <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100 flex items-center gap-3">
+                                <div className="p-2 bg-indigo-50 dark:bg-indigo-500/10 rounded-xl text-indigo-600 dark:text-indigo-400">
+                                    <Users className="w-6 h-6" />
+                                </div>
+                                Registered Users
+                                <span className="text-sm font-semibold bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300 px-3 py-1 rounded-full">{usersList.length} Total</span>
+                            </h2>
+                            <button onClick={() => setShowUsersModal(false)} className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 bg-slate-50 dark:bg-slate-800 rounded-full transition-colors">
+                                <X className="w-5 h-5" />
+                            </button>
+                        </div>
+
+                        <div className="overflow-y-auto flex-1 p-0">
+                            <div className="overflow-x-auto min-h-[400px]">
+                                <table className="w-full text-left border-collapse min-w-[800px]">
+                                    <thead>
+                                        <tr className="border-b-2 border-slate-100 dark:border-slate-800 bg-slate-50/20 dark:bg-slate-800/10 sticky top-0 z-10">
+                                            <th className="pb-4 pt-4 px-6 font-semibold text-slate-500 dark:text-slate-400 uppercase text-xs tracking-wider">User</th>
+                                            <th className="pb-4 pt-4 px-6 font-semibold text-slate-500 dark:text-slate-400 uppercase text-xs tracking-wider">Email</th>
+                                            <th className="pb-4 pt-4 px-6 font-semibold text-slate-500 dark:text-slate-400 uppercase text-xs tracking-wider">Nickname</th>
+                                            <th className="pb-4 pt-4 px-6 font-semibold text-slate-500 dark:text-slate-400 uppercase text-xs tracking-wider">Privacy Mode</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-slate-50 dark:divide-slate-800/50">
+                                        {currentUsers.map((user) => (
+                                            <tr key={user.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/50 transition-colors group">
+                                                <td className="py-4 px-6">
+                                                    <div className="flex items-center gap-4">
+                                                        <div className="w-10 h-10 rounded-full flex items-center justify-center bg-gradient-to-br from-indigo-400 to-purple-500 dark:from-indigo-600 dark:to-purple-700 text-white font-bold shadow-sm shrink-0">
+                                                            {(user.fullName || user.displayName || user.email || "U").charAt(0).toUpperCase()}
+                                                        </div>
+                                                        <div>
+                                                            <p className="font-bold text-slate-800 dark:text-slate-200 flex items-center gap-2">
+                                                                {user.fullName || user.displayName || user.email || "Unknown User"}
+                                                                {user.emoji && <span className="text-lg leading-none">{user.emoji}</span>}
+                                                            </p>
+                                                            <p className="text-xs text-slate-400 font-medium font-mono">ID: {user.id}</p>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td className="py-4 px-6 text-slate-600 dark:text-slate-400 text-sm font-medium">
+                                                    {user.email || "—"}
+                                                </td>
+                                                <td className="py-4 px-6 text-slate-600 dark:text-slate-400 text-sm font-medium">
+                                                    {user.nickName || "—"}
+                                                </td>
+                                                <td className="py-4 px-6">
+                                                    <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${user.privacyMode ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400' : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'}`}>
+                                                        {user.privacyMode ? "Private" : "Public"}
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                                {usersList.length === 0 && (
+                                    <div className="p-16 text-center text-slate-500 dark:text-slate-400">
+                                        No users registered yet.
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Pagination Footer */}
+                        {totalPages > 1 && (
+                            <div className="px-6 py-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 flex items-center justify-between shrink-0">
+                                <span className="text-sm text-slate-500 dark:text-slate-400">
+                                    Showing <span className="font-semibold text-slate-700 dark:text-slate-300">{indexOfFirstUser + 1}</span> to <span className="font-semibold text-slate-700 dark:text-slate-300">{Math.min(indexOfLastUser, usersList.length)}</span> of <span className="font-semibold text-slate-700 dark:text-slate-300">{usersList.length}</span> Users
+                                </span>
+                                <div className="flex items-center gap-2">
+                                    <button
+                                        onClick={handlePrevPage}
+                                        disabled={currentPage === 1}
+                                        className="p-2 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                    >
+                                        <ChevronLeft className="w-5 h-5" />
+                                    </button>
+                                    <span className="text-sm font-medium text-slate-700 dark:text-slate-300 px-2">
+                                        Page {currentPage} of {totalPages}
+                                    </span>
+                                    <button
+                                        onClick={handleNextPage}
+                                        disabled={currentPage === totalPages}
+                                        className="p-2 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                    >
+                                        <ChevronRight className="w-5 h-5" />
+                                    </button>
+                                </div>
                             </div>
                         )}
                     </div>
                 </div>
-
-            </div>
-
-            {/* Users List */}
-            <div className="max-w-[1600px] w-full mx-auto mt-8">
-                <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl rounded-[2rem] shadow-2xl border border-slate-200/50 dark:border-white/5 overflow-hidden transition-colors duration-300">
-                    <div className="px-6 py-5 border-b border-slate-100/50 dark:border-slate-800/50 bg-slate-50/50 dark:bg-slate-800/30 flex items-center justify-between">
-                        <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
-                            <Users className="w-5 h-5 text-indigo-500 dark:text-indigo-400" />
-                            Registered Users
-                        </h2>
-                        <span className="text-sm font-semibold bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300 px-3 py-1 rounded-full">{usersList.length} Total</span>
-                    </div>
-
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-left border-collapse min-w-[800px]">
-                            <thead>
-                                <tr className="border-b-2 border-slate-100 dark:border-slate-800 bg-slate-50/20 dark:bg-slate-800/10">
-                                    <th className="pb-4 pt-4 px-6 font-semibold text-slate-500 dark:text-slate-400 uppercase text-xs tracking-wider">User</th>
-                                    <th className="pb-4 pt-4 px-6 font-semibold text-slate-500 dark:text-slate-400 uppercase text-xs tracking-wider">Email</th>
-                                    <th className="pb-4 pt-4 px-6 font-semibold text-slate-500 dark:text-slate-400 uppercase text-xs tracking-wider">Nickname</th>
-                                    <th className="pb-4 pt-4 px-6 font-semibold text-slate-500 dark:text-slate-400 uppercase text-xs tracking-wider">Privacy Mode</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-slate-50 dark:divide-slate-800/50">
-                                {usersList.map((user) => (
-                                    <tr key={user.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/50 transition-colors group">
-                                        <td className="py-4 px-6">
-                                            <div className="flex items-center gap-4">
-                                                <div className="w-10 h-10 rounded-full flex items-center justify-center bg-gradient-to-br from-indigo-400 to-purple-500 dark:from-indigo-600 dark:to-purple-700 text-white font-bold shadow-sm shrink-0">
-                                                    {(user.fullName || user.displayName || user.email || "U").charAt(0).toUpperCase()}
-                                                </div>
-                                                <div>
-                                                    <p className="font-bold text-slate-800 dark:text-slate-200 flex items-center gap-2">
-                                                        {user.fullName || user.displayName || user.email || "Unknown User"}
-                                                        {user.emoji && <span className="text-lg leading-none">{user.emoji}</span>}
-                                                    </p>
-                                                    <p className="text-xs text-slate-400 font-medium font-mono">ID: {user.id}</p>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td className="py-4 px-6 text-slate-600 dark:text-slate-400 text-sm font-medium">
-                                            {user.email || "—"}
-                                        </td>
-                                        <td className="py-4 px-6 text-slate-600 dark:text-slate-400 text-sm font-medium">
-                                            {user.nickName || "—"}
-                                        </td>
-                                        <td className="py-4 px-6">
-                                            <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${user.privacyMode ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400' : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'}`}>
-                                                {user.privacyMode ? "Private" : "Public"}
-                                            </span>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                        {usersList.length === 0 && (
-                            <div className="p-8 text-center text-slate-500 dark:text-slate-400">
-                                No users registered yet.
-                            </div>
-                        )}
-                    </div>
-                </div>
-            </div>
+            )}
         </div>
     );
 }
