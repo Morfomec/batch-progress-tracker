@@ -155,7 +155,7 @@ function EnglishKick() {
     };
 
     // Calculate Most Kicks
-    const maxPoints = membersData.length > 0 ? membersData[0].points : 0;
+    const maxPoints = membersData.length > 0 ? Math.max(...membersData.map(m => m.points)) : 0;
     const topKickers = maxPoints > 0 ? membersData.filter(m => m.points === maxPoints) : [];
 
     if (!group) {
