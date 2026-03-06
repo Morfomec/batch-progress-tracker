@@ -1,4 +1,4 @@
-import { Users, UserCircle, Settings, LogOut, ChevronLeft, LayoutDashboard, CheckCircle2, ChevronDown, User as UserIcon, PlusCircle, UserPlus, BookOpen, ShieldAlert, Activity, X } from "lucide-react";
+import { Users, UserCircle, Settings, LogOut, ChevronLeft, LayoutDashboard, CheckCircle2, ChevronDown, User as UserIcon, PlusCircle, UserPlus, BookOpen, ShieldAlert, Activity, X, Zap } from "lucide-react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { signOut } from "firebase/auth";
 import { auth } from "../firebase/firebaseConfig";
@@ -22,6 +22,7 @@ function Sidebar({ groupContext = {}, onClose }) {
     { name: 'Dashboard', icon: LayoutDashboard, path: '/dashboard', end: true },
     { name: 'Batch Mates', icon: Users, path: '/dashboard/peers' },
     { name: 'My Progress', icon: UserCircle, path: '/dashboard/my-progress' },
+    { name: 'English Kicks', icon: Zap, path: '/dashboard/english-kick' },
     { name: 'My Profile', icon: UserIcon, path: '/dashboard/my-profile' },
   ];
 

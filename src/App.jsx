@@ -15,6 +15,7 @@ import AuthAction from "./pages/AuthAction";
 import PeerProfile from "./pages/PeerProfile";
 import MyProfile from "./pages/MyProfile";
 import Peers from "./pages/Peers";
+import EnglishKick from "./pages/EnglishKick";
 
 import ProtectedRoute from "./components/ProtectedRoute";
 import AdminRoute from "./components/AdminRoute";
@@ -65,6 +66,7 @@ function App() {
                 <Route path="group-info" element={<GroupInfo />} />
                 <Route path="my-progress" element={<MyProgress />} />
                 <Route path="peers" element={<Peers />} />
+                <Route path="english-kick" element={<EnglishKick />} />
                 {/* SETTINGS (Non-group specific) */}
                 <Route path="settings" element={<Settings />} />
                 <Route path="my-profile" element={<MyProfile />} />

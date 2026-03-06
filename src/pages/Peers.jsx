@@ -43,6 +43,7 @@ function Peers() {
                     return {
                         id: memberId,
                         displayName,
+                        emoji: user.emoji || "",
                         photoURL: user.photoURL || null,
                         score: scoresMap[memberId] || 0
                     };
@@ -152,8 +153,8 @@ function Peers() {
                                         )}
                                     </div>
                                     <div className="flex flex-col">
-                                        <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
-                                            {peer.displayName}
+                                        <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors flex items-center gap-2">
+                                            {peer.displayName} {peer.emoji && <span className="text-xl leading-none">{peer.emoji}</span>}
                                         </h3>
                                         <p className="text-sm text-slate-500 dark:text-slate-400 flex flex-col sm:flex-row sm:items-center sm:gap-4 mt-0.5">
                                             <span className="flex items-center gap-1.5 font-medium">

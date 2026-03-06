@@ -28,7 +28,7 @@ function Topbar({ onMenuClick }) {
   }, []);
 
   return (
-    <header className="h-[90px] bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b-2 border-slate-200 dark:border-slate-800 flex items-center justify-between px-4 sm:px-8 shadow-sm transition-colors duration-300 sticky top-0 z-50">
+    <header className="h-[90px] bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b-2 border-slate-200 dark:border-slate-800 flex items-center justify-between px-4 sm:px-8 shadow-sm transition-colors duration-300 sticky top-0 z-[100]">
 
       {/* Hamburger Menu (Mobile Only) */}
       <div className="flex items-center lg:hidden">

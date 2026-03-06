@@ -248,8 +248,9 @@ import { useAuth } from "../context/AuthContext";
 import { collection, getDocs, orderBy, query, addDoc, serverTimestamp, where } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import { calculateScore } from "../utils/calculateScore";
+import { Activity, Target, LayoutDashboard, CheckCircle2, Medal, Clock, TrendingUp, Users, FileText, BarChart, ExternalLink, ChevronRight, Award, Trophy, Play, Calendar, Zap, AlertCircle, X, Check, UsersIcon, ShieldAlert, Sparkles, Target as TargetIcon, Copy, PlusCircle } from "lucide-react";
 import Leaderboard from "../components/Leaderboard";
-import { PlusCircle, Target, Users as UsersIcon, Activity, ChevronRight, BarChart, Copy, CheckCircle2, ChevronDown, Calendar, Clock, AlertTriangle, ExternalLink } from "lucide-react";
+import KicksBoard from "../components/KicksBoard";
 import toast from "react-hot-toast";
 
 function Dashboard() {
@@ -729,21 +730,21 @@ function Dashboard() {
                             </div>
                         )}
 
-                        {/* 3. Bottom Row: Leaderboard (Left) & Timeline (Right) */}
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+                        {/* 3. Bottom Row: Leaderboard, Timeline, Kicks */}
+                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
 
                             <Leaderboard groupId={group.id} />
 
                             {/* Timeline Card */}
                             <div className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl rounded-[2rem] shadow-xl border border-slate-200/50 dark:border-white/5 overflow-hidden relative h-full flex flex-col transition-colors duration-300">
-                                <div className="px-6 py-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between shrink-0">
+                                <div className="px-4 py-4 border-b border-slate-100/50 dark:border-slate-800/50 flex items-center justify-between shrink-0">
                                     <h2 className="text-xl font-bold bg-gradient-to-r from-slate-800 to-indigo-900 dark:from-slate-100 dark:to-indigo-300 bg-clip-text text-transparent flex items-center gap-2">
                                         <Calendar className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
                                         Timeline
                                     </h2>
                                 </div>
 
-                                <div className="p-4 sm:p-6 flex-1 overflow-y-auto custom-scrollbar">
+                                <div className="p-2 sm:p-3 flex-1 overflow-y-auto custom-scrollbar">
                                     {timelineData.length === 0 ? (
                                         <div className="text-center py-12">
                                             <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-50 dark:bg-slate-800 mb-4">
@@ -754,9 +755,9 @@ function Dashboard() {
                                     ) : (
                                         <div className="space-y-3">
                                             {timelineData.map(userStats => (
-                                                <div key={userStats.userId} className="flex items-center justify-between p-4 rounded-xl border border-transparent bg-slate-50/50 dark:bg-slate-900/30 transition-all duration-300 hover:shadow-md hover:scale-[1.01] hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                                                <div key={userStats.userId} className="flex items-center justify-between px-4 py-3 rounded-xl border border-transparent bg-slate-50/50 dark:bg-slate-900/30 transition-all duration-300 hover:shadow-md hover:scale-[1.01] hover:bg-slate-50 dark:hover:bg-slate-800/50">
                                                     <div className="flex items-center gap-3">
-                                                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 dark:from-indigo-600 dark:to-purple-700 flex items-center justify-center text-white font-bold shadow-sm">
+                                                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 dark:from-indigo-600 dark:to-purple-700 flex items-center justify-center text-white font-bold text-sm shadow-sm">
                                                             {(userStats.userName || "U").charAt(0).toUpperCase()}
                                                         </div>
                                                         <div>
@@ -764,8 +765,10 @@ function Dashboard() {
                                                                 {userStats.userName}
                                                                 {userStats.emoji && <span className="text-lg">{userStats.emoji}</span>}
                                                             </span>
-                                                            <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mt-0.5">
-                                                                {Math.max(0, 52 - userStats.highestModule)} Modules Left
+                                                            <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mt-0.5 flex items-center gap-1.5">
+                                                                <span className="text-indigo-600 dark:text-indigo-400 font-extrabold">Current: {userStats.highestModule}</span>
+                                                                <span className="w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-700"></span>
+                                                                <span>Remaining: {Math.max(0, 52 - userStats.highestModule)}</span>
                                                             </p>
                                                         </div>
                                                     </div>
@@ -784,15 +787,17 @@ function Dashboard() {
                                 </div>
                             </div>
 
+                            <KicksBoard groupId={group.id} />
+
                         </div>
                     </div>
                 )}
 
                 {/* 4. Batch Progress History */}
                 <div className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl rounded-[2rem] shadow-xl border border-slate-200/50 dark:border-white/5 overflow-hidden transition-colors duration-300">
-                    <div className="px-8 py-6 border-b border-slate-100/50 dark:border-slate-800/50 bg-slate-50/50 dark:bg-slate-800/30 flex items-center justify-between">
+                    <div className="px-6 py-4 border-b border-slate-100/50 dark:border-slate-800/50 bg-slate-50/50 dark:bg-slate-800/30 flex items-center justify-between">
                         <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100 flex items-center gap-3">
-                            <BarChart className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
+                            <Activity className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
                             Recent Batch Activity
                         </h2>
                         <Link to="/dashboard/my-progress" className="text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 flex items-center gap-1 transition-colors">
@@ -800,7 +805,7 @@ function Dashboard() {
                         </Link>
                     </div>
 
-                    <div className="p-0 sm:p-4">
+                    <div className="p-0 sm:p-2">
                         {latestUpdates.length === 0 ? (
                             <div className="text-center py-16">
                                 <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-50 dark:bg-slate-800 mb-4">
@@ -814,6 +819,7 @@ function Dashboard() {
                                 <table className="w-full text-left border-collapse">
                                     <thead>
                                         <tr className="border-b-2 border-slate-100 dark:border-slate-800">
+                                            <th className="px-6 py-4 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest w-12 text-center">#</th>
                                             <th className="px-6 py-4 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">Student</th>
                                             <th className="px-6 py-4 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">Module</th>
                                             <th className="px-6 py-4 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">Status</th>
@@ -822,27 +828,30 @@ function Dashboard() {
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-slate-50 dark:divide-slate-800/50">
-                                        {latestUpdates.map((item) => (
+                                        {latestUpdates.map((item, index) => (
                                             <tr key={item.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/80 transition-colors group">
-                                                <td className="px-6 py-5">
-                                                    <Link to={`/dashboard/profile/${item.userId}`} className="flex items-center gap-4 group-hover:opacity-90 transition-opacity">
-                                                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 dark:from-indigo-600 dark:to-purple-700 flex items-center justify-center text-white font-bold shadow-sm">
+                                                <td className="px-6 py-3 text-center text-sm font-bold text-slate-400 dark:text-slate-500">
+                                                    {index + 1}
+                                                </td>
+                                                <td className="px-6 py-3">
+                                                    <Link to={`/dashboard/profile/${item.userId}`} className="flex items-center gap-3 group-hover:opacity-90 transition-opacity">
+                                                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 dark:from-indigo-600 dark:to-purple-700 flex items-center justify-center text-white font-bold text-sm shadow-sm">
                                                             {(item.userName || "U").charAt(0).toUpperCase()}
                                                         </div>
                                                         <div>
-                                                            <span className="font-semibold text-slate-900 dark:text-slate-100 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">{item.userName}</span>
-                                                            <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">
+                                                            <span className="font-semibold text-slate-900 dark:text-slate-100 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors flex items-center gap-1.5">{item.userName} {item.emoji && <span className="text-lg leading-none">{item.emoji}</span>}</span>
+                                                            <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">
                                                                 {item.createdAt?.toDate ? item.createdAt.toDate().toLocaleDateString() : "Just now"}
                                                             </p>
                                                         </div>
                                                     </Link>
                                                 </td>
-                                                <td className="px-6 py-5">
+                                                <td className="px-6 py-3">
                                                     <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
                                                         Module {item.moduleNo}
                                                     </span>
                                                 </td>
-                                                <td className="px-6 py-5">
+                                                <td className="px-6 py-3">
                                                     <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold ${item.examStatus === 'Passed' ? 'bg-emerald-100/80 dark:bg-emerald-500/20 text-emerald-800 dark:text-emerald-400' :
                                                         item.examStatus === 'Repeat' ? 'bg-amber-100/80 dark:bg-amber-500/20 text-amber-800 dark:text-amber-400' :
                                                             'bg-sky-100/80 dark:bg-sky-500/20 text-sky-800 dark:text-sky-400'
@@ -850,7 +859,7 @@ function Dashboard() {
                                                         {item.examStatus}
                                                     </span>
                                                 </td>
-                                                <td className="px-6 py-5 text-sm font-medium text-slate-600 dark:text-slate-400">
+                                                <td className="px-6 py-3 text-sm font-medium text-slate-600 dark:text-slate-400">
                                                     <div className="flex items-center gap-2">
                                                         <span>{item.linkedinActivity}</span>
                                                         {item.postLink && (
@@ -865,7 +874,7 @@ function Dashboard() {
                                                             </a>
                                                         )}
                                                     </div>
-                                                </td>                                                <td className="px-6 py-5 text-right">
+                                                </td>                                                <td className="px-6 py-3 text-right">
                                                     <span className="font-bold text-xl text-indigo-600 dark:text-indigo-400">{item.score || 0}</span>
                                                 </td>
                                             </tr>
