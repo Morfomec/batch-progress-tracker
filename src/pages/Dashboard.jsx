@@ -821,7 +821,7 @@ function Dashboard() {
                                                                 {userStats.emoji && <span className="text-lg">{userStats.emoji}</span>}
                                                             </span>
                                                             <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mt-0.5 flex items-center gap-1.5">
-                                                                <span className="text-indigo-600 dark:text-indigo-400 font-extrabold">Current: {userStats.highestModule}</span>
+                                                                <span className="text-indigo-600 dark:text-indigo-400 font-extrabold">Current: {userStats.highestModule + 1}</span>
                                                                 <span className="w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-700"></span>
                                                                 <span>Remaining: {Math.max(0, 52 - userStats.highestModule)}</span>
                                                             </p>
