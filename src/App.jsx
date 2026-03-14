@@ -26,7 +26,6 @@ import AdminDashboard from "./pages/AdminDashboard";
 import AdminGroupDetails from "./pages/AdminGroupDetails";
 import { Toaster } from "react-hot-toast";
 
-
 function App() {
 
   return (
