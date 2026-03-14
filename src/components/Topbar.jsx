@@ -5,6 +5,7 @@ import { useTheme } from "../context/ThemeContext";
 import { Moon, Sun, User as UserIcon, Settings, LogOut, Menu } from "lucide-react";
 import { auth } from "../firebase/firebaseConfig";
 import NotificationDropdown from "./NotificationDropdown";
+import WordOfTheDay from "./WordOfTheDay";
 
 function Topbar({ onMenuClick }) {
   const { user, userProfile } = useAuth();
@@ -41,10 +42,10 @@ function Topbar({ onMenuClick }) {
         </button>
       </div>
 
-      {/* LOGO (Mobile Only, optional space filler) */}
-      <h1 className="lg:hidden text-lg sm:text-xl font-bold text-slate-900 dark:text-white truncate px-2">
-        BatchTracker
-      </h1>
+      {/* Word Of The Day Section */}
+      <div className="flex-1 min-w-0 pr-4">
+        <WordOfTheDay compact={true} />
+      </div>
 
       {/* RIGHT USER */}
       <div className="flex items-center gap-4 sm:gap-6 ml-auto">

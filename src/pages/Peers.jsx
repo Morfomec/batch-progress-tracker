@@ -69,7 +69,7 @@ function Peers() {
 
     if (loading) {
         return (
-            <div className="min-h-screen p-8 flex items-center justify-center">
+            <div className="min-h-screen p-4 flex items-center justify-center">
                 <div className="w-10 h-10 border-4 border-indigo-200 border-t-indigo-600 dark:border-indigo-900 dark:border-t-indigo-400 rounded-full animate-spin"></div>
             </div>
         );
@@ -77,7 +77,7 @@ function Peers() {
 
     if (!group) {
         return (
-            <div className="min-h-screen bg-transparent p-4 sm:p-6 lg:p-8 flex items-center justify-center transition-colors duration-300">
+            <div className="min-h-screen bg-transparent p-3 sm:p-4 lg:p-6 flex items-center justify-center transition-colors duration-300">
                 <div className="flex flex-col items-center justify-center p-12 text-slate-500 dark:text-slate-400 bg-white dark:bg-slate-900 rounded-3xl shadow-xl border border-slate-100 dark:border-slate-800 w-full max-w-2xl">
                     <UsersIcon className="w-16 h-16 mb-6 text-slate-300 dark:text-slate-600" />
                     <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100 mb-2">No Batch Mates Yet</h2>
@@ -88,11 +88,11 @@ function Peers() {
     }
 
     return (
-        <div className="min-h-screen bg-transparent p-4 sm:p-6 lg:p-8 transition-colors duration-300">
+        <div className="min-h-screen bg-transparent p-3 sm:p-4 lg:p-6 transition-colors duration-300">
             <div className="max-w-[1600px] w-full mx-auto space-y-8 animate-fadeIn">
 
                 {/* Header */}
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl rounded-3xl p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.4)] border border-slate-200/50 dark:border-white/5 transition-colors duration-300 relative overflow-hidden sm:h-36">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl rounded-3xl p-5 sm:p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.4)] border border-slate-200/50 dark:border-white/5 transition-colors duration-300 relative overflow-hidden">
                     {/* Background glows */}
                     <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-indigo-500/10 dark:bg-indigo-500/20 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/3 pointer-events-none" />
                     <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-purple-500/10 dark:bg-purple-500/20 rounded-full blur-[60px] translate-y-1/3 -translate-x-1/3 pointer-events-none" />
@@ -137,7 +137,7 @@ function Peers() {
                             <Link
                                 key={peer.id}
                                 to={`/dashboard/profile/${peer.id}`}
-                                className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl rounded-[2rem] p-4 sm:p-6 border border-slate-200/50 dark:border-white/5 shadow-xl hover:-translate-y-1 transition-all duration-300 group flex items-center justify-between gap-4"
+                                className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl rounded-2xl sm:rounded-[2rem] p-3 sm:p-4 border border-slate-200/50 dark:border-white/5 shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group flex items-center justify-between gap-3"
                             >
                                 <div className="flex items-center gap-5">
                                     <div className="w-8 flex justify-center text-lg font-bold text-slate-400 dark:text-slate-500">

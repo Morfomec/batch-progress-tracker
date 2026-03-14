@@ -223,7 +223,7 @@ function MyProgress() {
     };
 
     return (
-        <div className="min-h-screen bg-transparent p-4 sm:p-6 lg:p-8 transition-colors duration-300">
+        <div className="min-h-screen bg-transparent p-3 sm:p-4 lg:p-6 transition-colors duration-300">
             <div className="max-w-[1600px] w-full mx-auto space-y-8">
 
                 {/* Header Action */}
@@ -235,7 +235,7 @@ function MyProgress() {
                 </div>
 
                 {/* Glassmorphic Header */}
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl rounded-3xl p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.4)] border border-slate-200/50 dark:border-white/5 transition-colors duration-300 relative overflow-hidden sm:h-36">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl rounded-3xl p-5 sm:p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.4)] border border-slate-200/50 dark:border-white/5 transition-colors duration-300 relative overflow-hidden">
                     {/* Background glows */}
                     <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-indigo-500/10 dark:bg-indigo-500/20 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/3 pointer-events-none" />
                     <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-purple-500/10 dark:bg-purple-500/20 rounded-full blur-[60px] translate-y-1/3 -translate-x-1/3 pointer-events-none" />
@@ -264,7 +264,7 @@ function MyProgress() {
                     </div>
                 </div>
 
-                <div className="bg-white/60 dark:bg-slate-900/50 backdrop-blur-2xl rounded-[2rem] shadow-xl dark:shadow-2xl border border-slate-200/60 dark:border-slate-700/50 overflow-hidden transition-colors duration-300 p-8">
+                <div className="bg-white/60 dark:bg-slate-900/50 backdrop-blur-2xl rounded-[2rem] shadow-xl dark:shadow-2xl border border-slate-200/60 dark:border-slate-700/50 overflow-hidden transition-colors duration-300 p-5 sm:p-6">
                     <div className="">
                         {!group ? (
                             <div className="text-center py-16 bg-white/50 dark:bg-slate-800/50 rounded-2xl border border-dashed border-slate-200 dark:border-slate-700">

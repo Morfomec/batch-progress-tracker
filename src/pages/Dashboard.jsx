@@ -379,6 +379,7 @@ function Dashboard() {
                     userName: userInfo.name || "Unknown Student",
                     emoji: userInfo.emoji || "",
                     highestModule: 0,
+                    highestPassedModule: 0,
                     delays: 0,
                     latestDate: null
                 };
@@ -392,6 +393,7 @@ function Dashboard() {
                         userName: userInfo.name || entry.userName || "Unknown",
                         emoji: userInfo.emoji || "",
                         highestModule: 0,
+                        highestPassedModule: 0,
                         delays: 0,
                         latestDate: null
                     };
@@ -399,6 +401,9 @@ function Dashboard() {
                 const stats = allTimelinesMap[entry.userId];
                 if (entry.moduleNo > stats.highestModule) {
                     stats.highestModule = entry.moduleNo;
+                }
+                if (entry.examStatus === "Passed" && entry.moduleNo > stats.highestPassedModule) {
+                    stats.highestPassedModule = entry.moduleNo;
                 }
                 if (entry.createdAt) {
                     const entryDate = entry.createdAt.toDate();
@@ -412,7 +417,7 @@ function Dashboard() {
             });
 
             const timelineArray = Object.values(allTimelinesMap).map(stats => {
-                const remainingModules = Math.max(0, 52 - stats.highestModule);
+                const remainingModules = Math.max(0, 52 - stats.highestPassedModule);
 
                 let expectedDate = stats.latestDate ? new Date(stats.latestDate) : new Date();
 
@@ -539,6 +544,7 @@ function Dashboard() {
                     userName: userInfo.name || "Unknown Student",
                     emoji: userInfo.emoji || "",
                     highestModule: 0,
+                    highestPassedModule: 0,
                     delays: 0,
                     latestDate: null
                 };
@@ -560,6 +566,7 @@ function Dashboard() {
                         userName: userInfo.name || entry.userName || "Unknown",
                         emoji: userInfo.emoji || "",
                         highestModule: 0,
+                        highestPassedModule: 0,
                         delays: 0,
                         latestDate: null
                     };
@@ -567,6 +574,9 @@ function Dashboard() {
                 const stats = allTimelinesMap[entry.userId];
                 if (entry.moduleNo > stats.highestModule) {
                     stats.highestModule = entry.moduleNo;
+                }
+                if (entry.examStatus === "Passed" && entry.moduleNo > stats.highestPassedModule) {
+                    stats.highestPassedModule = entry.moduleNo;
                 }
                 if (entry.createdAt) {
                     const entryDate = entry.createdAt.toDate();
@@ -584,7 +594,7 @@ function Dashboard() {
             setLatestUpdates(finalUpdatesAfterSubmit);
 
             const timelineArray = Object.values(allTimelinesMap).map(stats => {
-                const remainingModules = Math.max(0, 52 - stats.highestModule);
+                const remainingModules = Math.max(0, 52 - stats.highestPassedModule);
 
                 let expectedDate = stats.latestDate ? new Date(stats.latestDate) : new Date();
 
@@ -628,11 +638,11 @@ function Dashboard() {
     };
 
     return (
-        <div className="min-h-screen bg-transparent p-4 sm:p-6 lg:p-8 transition-colors duration-300">
+        <div className="min-h-screen bg-transparent p-3 sm:p-4 lg:p-6 transition-colors duration-300">
             <div className="max-w-[1600px] w-full mx-auto space-y-8">
 
                 {/* 1. Sleek Group Info Header Card */}
-                <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl rounded-2xl md:rounded-[2rem] p-5 sm:p-8 text-slate-800 dark:text-white border border-slate-200/50 dark:border-white/5 shadow-2xl relative overflow-hidden">
+                <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl rounded-2xl md:rounded-[2rem] p-4 sm:p-6 text-slate-800 dark:text-white border border-slate-200/50 dark:border-white/5 shadow-2xl relative overflow-hidden">
                     <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-indigo-500/10 dark:bg-indigo-500/20 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/3 pointer-events-none" />
                     <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-purple-500/10 dark:bg-purple-500/20 rounded-full blur-[60px] translate-y-1/3 -translate-x-1/3 pointer-events-none" />
                     <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
@@ -799,7 +809,7 @@ function Dashboard() {
                                     </h2>
                                 </div>
 
-                                <div className="p-2 sm:p-3 flex-1 overflow-y-auto custom-scrollbar">
+                                <div className="p-2 sm:p-3 flex-1 overflow-y-auto custom-scrollbar max-h-[500px]">
                                     {timelineData.length === 0 ? (
                                         <div className="text-center py-12">
                                             <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-50 dark:bg-slate-800 mb-4">
@@ -821,9 +831,9 @@ function Dashboard() {
                                                                 {userStats.emoji && <span className="text-lg">{userStats.emoji}</span>}
                                                             </span>
                                                             <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mt-0.5 flex items-center gap-1.5">
-                                                                <span className="text-indigo-600 dark:text-indigo-400 font-extrabold">Current: {userStats.highestModule + 1}</span>
+                                                                <span className="text-indigo-600 dark:text-indigo-400 font-extrabold">Current: {Math.max(userStats.highestModule, userStats.highestPassedModule + 1)}</span>
                                                                 <span className="w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-700"></span>
-                                                                <span>Remaining: {Math.max(0, 52 - userStats.highestModule)}</span>
+                                                                <span>Remaining: {Math.max(0, 52 - userStats.highestPassedModule)}</span>
                                                             </p>
                                                         </div>
                                                     </div>
@@ -870,10 +880,10 @@ function Dashboard() {
                                 <p className="text-sm text-slate-400 mt-1">Be the first to log progress in this batch!</p>
                             </div>
                         ) : (
-                            <div className="overflow-x-auto">
-                                <table className="w-full text-left border-collapse">
-                                    <thead>
-                                        <tr className="border-b-2 border-slate-100 dark:border-slate-800">
+                            <div className="overflow-x-auto overflow-y-auto max-h-[500px] custom-scrollbar rounded-xl">
+                                <table className="w-full text-left border-collapse relative">
+                                    <thead className="sticky top-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl z-10 shadow-sm border-b-2 border-slate-100 dark:border-slate-800">
+                                        <tr>
                                             <th className="px-6 py-4 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest w-12 text-center">#</th>
                                             <th className="px-6 py-4 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">Student</th>
                                             <th className="px-6 py-4 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">Module</th>

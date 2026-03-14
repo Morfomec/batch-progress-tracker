@@ -102,7 +102,7 @@ function KicksBoard({ groupId }) {
                 </div>
             </div>
 
-            <div className="p-2 sm:p-3 flex-1 overflow-y-auto custom-scrollbar">
+            <div className="p-2 sm:p-3 flex-1 overflow-y-auto custom-scrollbar max-h-[500px]">
                 {kicks.length === 0 ? (
                     <div className="flex flex-col items-center justify-center h-full text-center py-8">
                         <div className="relative mb-6 group">

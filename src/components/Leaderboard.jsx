@@ -109,7 +109,7 @@ function Leaderboard({ groupId }) {
                 </div>
             </div>
 
-            <div className="p-2 sm:p-3 flex-1 overflow-y-auto">
+            <div className="p-2 sm:p-3 flex-1 overflow-y-auto max-h-[500px] custom-scrollbar">
                 {leaders.length === 0 ? (
                     <div className="text-center py-12">
                         <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-50 dark:bg-slate-800 mb-4">
