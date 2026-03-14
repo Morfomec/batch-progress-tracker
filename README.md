@@ -174,5 +174,3 @@ Thanks to everyone who has contributed to this project!
 This project is licensed under the [MIT License](LICENSE).
 
 ---
-
-<p align="center">Made with ❤️ by <a href="https://github.com/YOUR_USERNAME">YOUR_USERNAME</a></p>
