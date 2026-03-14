@@ -20,10 +20,27 @@ export default function WordOfTheDay({ compact = false }) {
                     return;
                 }
 
-                // 1. Fetch random word
-                // We fetch multiple to increase chance of finding one in dictionary API
-                const randomWordRes = await fetch("https://random-word-api.herokuapp.com/word?number=5");
-                const randomWords = await randomWordRes.json();
+                // 1. Fetch random word from curated easy-to-medium list
+                const vocabList = [
+                    "abundant", "accurate", "adapt", "ambition", "analyze", "authentic", "benevolent", "bold",
+                    "brave", "brilliant", "calm", "capable", "catalyst", "clarity", "compassion", "courage",
+                    "create", "curious", "dedication", "deliberate", "diligent", "discover", "diverse", "dynamic",
+                    "eager", "efficient", "eloquent", "empathy", "empower", "endurance", "energy", "enhance",
+                    "enthusiasm", "evolve", "excellent", "explore", "focus", "forgive", "frequent", "genuine",
+                    "gratitude", "growth", "harmony", "heal", "honest", "hope", "humble", "ignite", "imagine",
+                    "impact", "improve", "innovate", "inspire", "integrity", "journey", "joy", "keen", "kind",
+                    "knowledge", "lead", "legacy", "listen", "lucid", "luminous", "mindful", "momentum", "motivate",
+                    "navigate", "noble", "notice", "nurture", "observe", "open", "opportunity", "optimistic",
+                    "overcome", "passion", "patience", "peace", "persist", "pioneer", "positive", "profound",
+                    "purpose", "quality", "radiant", "reflect", "resilient", "resolve", "respect", "serene",
+                    "share", "strength", "synergy", "teach", "tenacious", "thrive", "transform", "trust",
+                    "understand", "unity", "uplift", "value", "versatile", "vibrant", "vision", "wisdom",
+                    "wonder", "yield", "zeal", "zenith"
+                ];
+
+                // Shuffle array and pick 5 to try in the dictionary
+                const shuffled = [...vocabList].sort(() => 0.5 - Math.random());
+                const randomWords = shuffled.slice(0, 5);
 
                 let foundValidWord = false;
 
