@@ -23,7 +23,8 @@ function Leaderboard({ groupId }) {
                     privacyMap[d.id] = data?.privacyMode || false;
                     userDocsMap[d.id] = {
                         name: data?.nickName || data?.fullName || data?.displayName || data?.email || "Unknown",
-                        emoji: data?.emoji || ""
+                        emoji: data?.emoji || "",
+                        photoURL: data?.photoURL || null
                     };
                 });
 
@@ -39,6 +40,7 @@ function Leaderboard({ groupId }) {
                             userId: entry.userId,
                             userName: userInfo.name || entry.userName || "Unknown",
                             emoji: userInfo.emoji || "",
+                            photoURL: userInfo.photoURL || null,
                             totalScore: 0
                         };
                     }

@@ -26,7 +26,8 @@ function KicksBoard({ groupId }) {
                 const data = d.data();
                 userDocsMap[d.id] = {
                     name: data?.nickName || data?.fullName || data?.displayName || data?.email || "Unknown",
-                    emoji: data?.emoji || ""
+                    emoji: data?.emoji || "",
+                    photoURL: data?.photoURL || null
                 };
             });
 
@@ -46,6 +47,7 @@ function KicksBoard({ groupId }) {
                                 userId: memberId,
                                 userName: userInfo.name || "Unknown",
                                 emoji: userInfo.emoji || "",
+                                photoURL: userInfo.photoURL || null,
                                 points: pointsMap[memberId] || 0
                             };
                         });
