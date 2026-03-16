@@ -38,15 +38,17 @@ function KicksBoard({ groupId }) {
                         pointsMap[d.id] = d.data().points || 0;
                     });
 
-                    let kicksArray = groupMembers.map(memberId => {
-                        const userInfo = userDocsMap[memberId] || {};
-                        return {
-                            userId: memberId,
-                            userName: userInfo.name || "Unknown",
-                            emoji: userInfo.emoji || "",
-                            points: pointsMap[memberId] || 0
-                        };
-                    });
+                    let kicksArray = groupMembers
+                        .filter(memberId => userDocsMap[memberId])
+                        .map(memberId => {
+                            const userInfo = userDocsMap[memberId] || {};
+                            return {
+                                userId: memberId,
+                                userName: userInfo.name || "Unknown",
+                                emoji: userInfo.emoji || "",
+                                points: pointsMap[memberId] || 0
+                            };
+                        });
 
                     kicksArray.sort((a, b) => (a.userName || "").localeCompare(b.userName || ""));
 

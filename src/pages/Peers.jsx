@@ -37,17 +37,19 @@ function Peers() {
 
                 // Filter members and map their details
                 const groupMembers = group.members || [];
-                const mappedPeers = groupMembers.map(memberId => {
-                    const user = usersMap[memberId] || {};
-                    const displayName = user.nickName || user.fullName || user.displayName || user.email || "Unknown Student";
-                    return {
-                        id: memberId,
-                        displayName,
-                        emoji: user.emoji || "",
-                        photoURL: user.photoURL || null,
-                        score: scoresMap[memberId] || 0
-                    };
-                });
+                const mappedPeers = groupMembers
+                    .filter(memberId => usersMap[memberId])
+                    .map(memberId => {
+                        const user = usersMap[memberId] || {};
+                        const displayName = user.nickName || user.fullName || user.displayName || user.email || "Unknown";
+                        return {
+                            id: memberId,
+                            displayName,
+                            emoji: user.emoji || "",
+                            photoURL: user.photoURL || null,
+                            score: scoresMap[memberId] || 0
+                        };
+                    });
 
                 // Sort alphabetically by displayName
                 mappedPeers.sort((a, b) => a.displayName.localeCompare(b.displayName));

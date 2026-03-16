@@ -357,12 +357,10 @@ function Dashboard() {
 
             const map = {};
             all.forEach(entry => {
+                if (!userDocsMap[entry.userId]) return;
                 if (!map[entry.userId]) {
-                    // Override the static name and add emoji if available
-                    if (userDocsMap[entry.userId]) {
-                        entry.userName = userDocsMap[entry.userId].name;
-                        entry.emoji = userDocsMap[entry.userId].emoji;
-                    }
+                    entry.userName = userDocsMap[entry.userId].name;
+                    entry.emoji = userDocsMap[entry.userId].emoji;
                     map[entry.userId] = entry;
                 }
             });
@@ -372,25 +370,28 @@ function Dashboard() {
 
             // Timeline Calculation for all group members
             const allTimelinesMap = {};
-            (group.members || []).forEach(memberId => {
-                const userInfo = userDocsMap[memberId] || {};
-                allTimelinesMap[memberId] = {
-                    userId: memberId,
-                    userName: userInfo.name || "Unknown Student",
-                    emoji: userInfo.emoji || "",
-                    highestModule: 0,
-                    highestPassedModule: 0,
-                    delays: 0,
-                    latestDate: null
-                };
-            });
+            (group.members || [])
+                .filter(memberId => userDocsMap[memberId])
+                .forEach(memberId => {
+                    const userInfo = userDocsMap[memberId];
+                    allTimelinesMap[memberId] = {
+                        userId: memberId,
+                        userName: userInfo.name,
+                        emoji: userInfo.emoji || "",
+                        highestModule: 0,
+                        highestPassedModule: 0,
+                        delays: 0,
+                        latestDate: null
+                    };
+                });
 
             all.forEach(entry => {
+                if (!userDocsMap[entry.userId]) return;
                 if (!allTimelinesMap[entry.userId]) {
-                    const userInfo = userDocsMap[entry.userId] || {};
+                    const userInfo = userDocsMap[entry.userId];
                     allTimelinesMap[entry.userId] = {
                         userId: entry.userId,
-                        userName: userInfo.name || entry.userName || "Unknown",
+                        userName: userInfo.name,
                         emoji: userInfo.emoji || "",
                         highestModule: 0,
                         highestPassedModule: 0,
@@ -537,33 +538,34 @@ function Dashboard() {
             const map = {};
             const allTimelinesMap = {};
 
-            (group.members || []).forEach(memberId => {
-                const userInfo = userDocsMap[memberId] || {};
-                allTimelinesMap[memberId] = {
-                    userId: memberId,
-                    userName: userInfo.name || "Unknown Student",
-                    emoji: userInfo.emoji || "",
-                    highestModule: 0,
-                    highestPassedModule: 0,
-                    delays: 0,
-                    latestDate: null
-                };
-            });
+            (group.members || [])
+                .filter(memberId => userDocsMap[memberId])
+                .forEach(memberId => {
+                    const userInfo = userDocsMap[memberId];
+                    allTimelinesMap[memberId] = {
+                        userId: memberId,
+                        userName: userInfo.name,
+                        emoji: userInfo.emoji || "",
+                        highestModule: 0,
+                        highestPassedModule: 0,
+                        delays: 0,
+                        latestDate: null
+                    };
+                });
 
             all.forEach(entry => {
+                if (!userDocsMap[entry.userId]) return;
                 if (!map[entry.userId]) {
-                    if (userDocsMap[entry.userId]) {
-                        entry.userName = userDocsMap[entry.userId].name;
-                        entry.emoji = userDocsMap[entry.userId].emoji;
-                    }
+                    entry.userName = userDocsMap[entry.userId].name;
+                    entry.emoji = userDocsMap[entry.userId].emoji;
                     map[entry.userId] = entry;
                 }
 
                 if (!allTimelinesMap[entry.userId]) {
-                    const userInfo = userDocsMap[entry.userId] || {};
+                    const userInfo = userDocsMap[entry.userId];
                     allTimelinesMap[entry.userId] = {
                         userId: entry.userId,
-                        userName: userInfo.name || entry.userName || "Unknown",
+                        userName: userInfo.name,
                         emoji: userInfo.emoji || "",
                         highestModule: 0,
                         highestPassedModule: 0,

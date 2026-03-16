@@ -75,7 +75,7 @@ function PeerProfile() {
         );
     }
 
-    const displayName = peerProfile.nickName || peerProfile.fullName || peerProfile.displayName || "Unknown Student";
+    const displayName = peerProfile.nickName || peerProfile.fullName || peerProfile.displayName || "Unknown";
 
     return (
         <div className="min-h-screen bg-transparent p-4 sm:p-6 lg:p-8 transition-colors duration-300">

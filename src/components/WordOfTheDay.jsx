@@ -38,9 +38,18 @@ export default function WordOfTheDay({ compact = false }) {
                     "wonder", "yield", "zeal", "zenith"
                 ];
 
-                // Shuffle array and pick 5 to try in the dictionary
-                const shuffled = [...vocabList].sort(() => 0.5 - Math.random());
-                const randomWords = shuffled.slice(0, 5);
+                // Use the date to pick a deterministic index so all users see the same word
+                const todayStr = new Date().toISOString().split("T")[0];
+                let hash = 0;
+                for (let i = 0; i < todayStr.length; i++) {
+                    hash = todayStr.charCodeAt(i) + ((hash << 5) - hash);
+                }
+                const startIndex = Math.abs(hash) % vocabList.length;
+
+                const randomWords = [];
+                for (let i = 0; i < 5; i++) {
+                    randomWords.push(vocabList[(startIndex + i) % vocabList.length]);
+                }
 
                 let foundValidWord = false;
 

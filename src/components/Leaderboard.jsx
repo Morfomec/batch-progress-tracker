@@ -31,6 +31,7 @@ function Leaderboard({ groupId }) {
 
                 allProgress.forEach(entry => {
                     if (privacyMap[entry.userId]) return;
+                    if (!userDocsMap[entry.userId]) return; // Skip deleted users
 
                     if (!totalsMap[entry.userId]) {
                         const userInfo = userDocsMap[entry.userId] || {};
