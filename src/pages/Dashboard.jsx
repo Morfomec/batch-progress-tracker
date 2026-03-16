@@ -351,7 +351,8 @@ function Dashboard() {
                 const data = d.data();
                 userDocsMap[d.id] = {
                     name: data?.nickName || data?.fullName || data?.displayName || data?.email || "Unknown",
-                    emoji: data?.emoji || ""
+                    emoji: data?.emoji || "",
+                    photoURL: data?.photoURL || null
                 };
             });
 
@@ -361,6 +362,7 @@ function Dashboard() {
                 if (!map[entry.userId]) {
                     entry.userName = userDocsMap[entry.userId].name;
                     entry.emoji = userDocsMap[entry.userId].emoji;
+                    entry.photoURL = userDocsMap[entry.userId].photoURL;
                     map[entry.userId] = entry;
                 }
             });
@@ -378,6 +380,7 @@ function Dashboard() {
                         userId: memberId,
                         userName: userInfo.name,
                         emoji: userInfo.emoji || "",
+                        photoURL: userInfo.photoURL || null,
                         highestModule: 0,
                         highestPassedModule: 0,
                         delays: 0,
@@ -393,6 +396,7 @@ function Dashboard() {
                         userId: entry.userId,
                         userName: userInfo.name,
                         emoji: userInfo.emoji || "",
+                        photoURL: userInfo.photoURL || null,
                         highestModule: 0,
                         highestPassedModule: 0,
                         delays: 0,
@@ -531,7 +535,8 @@ function Dashboard() {
                 const data = d.data();
                 userDocsMap[d.id] = {
                     name: data?.nickName || data?.fullName || data?.displayName || data?.email || "Unknown",
-                    emoji: data?.emoji || ""
+                    emoji: data?.emoji || "",
+                    photoURL: data?.photoURL || null
                 };
             });
 
@@ -546,6 +551,7 @@ function Dashboard() {
                         userId: memberId,
                         userName: userInfo.name,
                         emoji: userInfo.emoji || "",
+                        photoURL: userInfo.photoURL || null,
                         highestModule: 0,
                         highestPassedModule: 0,
                         delays: 0,
@@ -558,6 +564,7 @@ function Dashboard() {
                 if (!map[entry.userId]) {
                     entry.userName = userDocsMap[entry.userId].name;
                     entry.emoji = userDocsMap[entry.userId].emoji;
+                    entry.photoURL = userDocsMap[entry.userId].photoURL;
                     map[entry.userId] = entry;
                 }
 
@@ -567,6 +574,7 @@ function Dashboard() {
                         userId: entry.userId,
                         userName: userInfo.name,
                         emoji: userInfo.emoji || "",
+                        photoURL: userInfo.photoURL || null,
                         highestModule: 0,
                         highestPassedModule: 0,
                         delays: 0,
@@ -824,8 +832,12 @@ function Dashboard() {
                                             {timelineData.map(userStats => (
                                                 <div key={userStats.userId} className="flex items-center justify-between px-4 py-3 rounded-xl border border-transparent bg-slate-50/50 dark:bg-slate-900/30 transition-all duration-300 hover:shadow-md hover:scale-[1.01] hover:bg-slate-50 dark:hover:bg-slate-800/50">
                                                     <div className="flex items-center gap-3">
-                                                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 dark:from-indigo-600 dark:to-purple-700 flex items-center justify-center text-white font-bold text-sm shadow-sm">
-                                                            {(userStats.userName || "U").charAt(0).toUpperCase()}
+                                                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 dark:from-indigo-600 dark:to-purple-700 flex items-center justify-center text-white font-bold text-sm shadow-sm overflow-hidden">
+                                                            {userStats.photoURL ? (
+                                                                <img src={userStats.photoURL} alt={userStats.userName} className="w-full h-full object-cover" />
+                                                            ) : (
+                                                                (userStats.userName || "U").charAt(0).toUpperCase()
+                                                            )}
                                                         </div>
                                                         <div>
                                                             <span className="font-bold text-slate-700 dark:text-slate-300 flex items-center gap-2">
@@ -902,8 +914,12 @@ function Dashboard() {
                                                 </td>
                                                 <td className="px-4 sm:px-6 py-3 whitespace-nowrap min-w-[150px]">
                                                     <Link to={`/dashboard/profile/${item.userId}`} className="flex items-center gap-3 group-hover:opacity-90 transition-opacity">
-                                                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 dark:from-indigo-600 dark:to-purple-700 flex items-center justify-center text-white font-bold text-sm shadow-sm">
-                                                            {(item.userName || "U").charAt(0).toUpperCase()}
+                                                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 dark:from-indigo-600 dark:to-purple-700 flex items-center justify-center text-white font-bold text-sm shadow-sm overflow-hidden">
+                                                            {item.photoURL ? (
+                                                                <img src={item.photoURL} alt={item.userName} className="w-full h-full object-cover" />
+                                                            ) : (
+                                                                (item.userName || "U").charAt(0).toUpperCase()
+                                                            )}
                                                         </div>
                                                         <div>
                                                             <span className="font-semibold text-slate-900 dark:text-slate-100 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors flex items-center gap-1.5">{item.userName} {item.emoji && <span className="text-lg leading-none">{item.emoji}</span>}</span>

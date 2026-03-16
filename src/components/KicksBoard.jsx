@@ -128,8 +128,12 @@ function KicksBoard({ groupId }) {
                                 >
                                     <div className="flex items-center gap-2 sm:gap-4">
                                         <Link to={`/dashboard/profile/${userData.userId}`} className="flex items-center gap-2 sm:gap-3 hover:opacity-80 transition-opacity min-w-0">
-                                            <div className="w-8 h-8 shrink-0 rounded-full flex items-center justify-center text-white font-bold text-sm shadow-sm bg-gradient-to-br from-indigo-400 to-purple-500 dark:from-indigo-600 dark:to-purple-700">
-                                                {(userData.userName || "U").charAt(0).toUpperCase()}
+                                            <div className="w-8 h-8 shrink-0 rounded-full flex items-center justify-center text-white font-bold text-sm shadow-sm bg-gradient-to-br from-indigo-400 to-purple-500 dark:from-indigo-600 dark:to-purple-700 overflow-hidden">
+                                                {userData.photoURL ? (
+                                                    <img src={userData.photoURL} alt={userData.userName} className="w-full h-full object-cover" />
+                                                ) : (
+                                                    (userData.userName || "U").charAt(0).toUpperCase()
+                                                )}
                                             </div>
                                             <div className="min-w-0">
                                                 <p className="font-bold flex items-center gap-1 sm:gap-1.5 hover:text-amber-600 dark:hover:text-amber-400 transition-colors text-slate-700 dark:text-slate-300 truncate">

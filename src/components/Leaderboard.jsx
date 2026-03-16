@@ -134,12 +134,16 @@ function Leaderboard({ groupId }) {
                                         {getRankIcon(user.rank)}
                                     </div>
                                     <Link to={`/dashboard/profile/${user.userId}`} className="flex items-center gap-2 sm:gap-3 hover:opacity-80 transition-opacity">
-                                        <div className={`w-8 h-8 shrink-0 rounded-full flex items-center justify-center text-white font-bold text-sm shadow-sm ${user.rank === 1 ? 'bg-gradient-to-br from-amber-400 to-amber-600' :
+                                        <div className={`w-8 h-8 shrink-0 rounded-full flex items-center justify-center text-white font-bold text-sm shadow-sm overflow-hidden ${user.rank === 1 ? 'bg-gradient-to-br from-amber-400 to-amber-600' :
                                             user.rank === 2 ? 'bg-gradient-to-br from-slate-400 to-slate-500' :
                                                 user.rank === 3 ? 'bg-gradient-to-br from-amber-700 to-amber-800' :
                                                     'bg-gradient-to-br from-indigo-400 to-purple-500 dark:from-indigo-600 dark:to-purple-700'
                                             }`}>
-                                            {(user.userName || "U").charAt(0).toUpperCase()}
+                                            {user.photoURL ? (
+                                                <img src={user.photoURL} alt={user.userName} className="w-full h-full object-cover" />
+                                            ) : (
+                                                (user.userName || "U").charAt(0).toUpperCase()
+                                            )}
                                         </div>
                                         <div>
                                             <p className={`font-bold flex items-center gap-1.5 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors ${user.rank <= 3 ? 'text-slate-800 dark:text-slate-100' : 'text-slate-700 dark:text-slate-300'}`}>
