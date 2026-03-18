@@ -1,96 +1,19 @@
-import { useEffect, useState } from "react";
-import { collection, onSnapshot, getDocs, doc, getDoc, setDoc } from "firebase/firestore";
-import { db } from "../firebase/firebaseConfig";
 import { Zap, Plus } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import toast from "react-hot-toast";
+import { useEnglishKicks } from "../hooks/useEnglishKicks";
 
 function KicksBoard({ groupId }) {
     const { user, isAdmin } = useAuth();
-    const [kicks, setKicks] = useState([]);
-    const [coordinator, setCoordinator] = useState(null);
 
-    useEffect(() => {
-        if (!groupId) return;
-
-        const fetchKicks = async () => {
-            const groupSnap = await getDoc(doc(db, "groups", groupId));
-            const groupData = groupSnap.data();
-            const groupMembers = groupData?.members || [];
-            setCoordinator(groupData?.englishKickCoordinator || null);
-
-            const usersSnap = await getDocs(collection(db, "users"));
-            const userDocsMap = {};
-            usersSnap.docs.forEach(d => {
-                const data = d.data();
-                userDocsMap[d.id] = {
-                    name: data?.nickName || data?.fullName || data?.displayName || data?.email || "Unknown",
-                    emoji: data?.emoji || "",
-                    photoURL: data?.photoURL || null
-                };
-            });
-
-            const unsubscribe = onSnapshot(
-                collection(db, "groups", groupId, "englishKick"),
-                (snapshot) => {
-                    const pointsMap = {};
-                    snapshot.docs.forEach(d => {
-                        pointsMap[d.id] = d.data().points || 0;
-                    });
-
-                    let kicksArray = groupMembers
-                        .filter(memberId => userDocsMap[memberId] && userDocsMap[memberId].name !== "Unknown")
-                        .map(memberId => {
-                            const userInfo = userDocsMap[memberId] || {};
-                            return {
-                                userId: memberId,
-                                userName: userInfo.name || "Unknown",
-                                emoji: userInfo.emoji || "",
-                                photoURL: userInfo.photoURL || null,
-                                points: pointsMap[memberId] || 0
-                            };
-                        });
-
-                    kicksArray.sort((a, b) => (a.userName || "").localeCompare(b.userName || ""));
-
-                    setKicks(kicksArray);
-                }
-            );
-
-            return () => unsubscribe();
-        };
-
-        let unsub = () => { };
-        fetchKicks().then(cleanup => {
-            if (cleanup) unsub = cleanup;
-        });
-
-        return () => unsub();
-    }, [groupId]);
+    const {
+        kicks,
+        coordinator,
+        handleAddPoint,
+        handleMinusPoint
+    } = useEnglishKicks(groupId);
 
     const isAuthorized = isAdmin || (coordinator && user?.uid === coordinator);
-
-    const handleAddPoint = async (userId, currentPoints) => {
-        try {
-            const newPoints = currentPoints + 1;
-            await setDoc(doc(db, "groups", groupId, "englishKick", userId), { points: newPoints }, { merge: true });
-            toast.success("+1 Point Added!");
-        } catch (error) {
-            toast.error("Failed to add point.");
-        }
-    };
-
-    const handleMinusPoint = async (userId, currentPoints) => {
-        try {
-            const newPoints = Math.max(0, currentPoints - 1);
-            if (currentPoints === 0) return;
-            await setDoc(doc(db, "groups", groupId, "englishKick", userId), { points: newPoints }, { merge: true });
-            toast.success("-1 Point Deducted!");
-        } catch (error) {
-            toast.error("Failed to deduct point.");
-        }
-    };
 
     return (
         <div className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl rounded-2xl md:rounded-[2rem] shadow-xl border border-slate-200/50 dark:border-white/5 overflow-hidden relative h-full flex flex-col transition-colors duration-300">

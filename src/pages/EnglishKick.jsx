@@ -1,20 +1,27 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useOutletContext } from "react-router-dom";
-import { db } from "../firebase/firebaseConfig";
-import { doc, getDoc, updateDoc, collection, getDocs, setDoc } from "firebase/firestore";
 import { Zap, Shield, Trophy, RefreshCcw, Info, Edit3, Plus, Search, CheckCircle2, X, Flame } from "lucide-react";
-import toast from "react-hot-toast";
 import WordOfTheDay from "../components/WordOfTheDay";
+import { useEnglishKicks } from "../hooks/useEnglishKicks";
 
 function EnglishKick() {
     const { user, isAdmin } = useAuth();
     const { group } = useOutletContext();
+    const groupId = group?.id;
 
-    const [coordinator, setCoordinator] = useState(null);
-    const [rules, setRules] = useState("");
-    const [membersData, setMembersData] = useState([]);
-    const [allUsers, setAllUsers] = useState({});
+    const {
+        kicks: membersData,
+        allUsers,
+        coordinator,
+        rules,
+        loading,
+        handleAddPoint,
+        handleMinusPoint,
+        handleAssignCoordinator,
+        handleSaveRules,
+        handleResetAllPoints
+    } = useEnglishKicks(groupId);
 
     const [isEditingRules, setIsEditingRules] = useState(false);
     const [tempRules, setTempRules] = useState("");
@@ -22,144 +29,33 @@ function EnglishKick() {
     const [showCoordinatorModal, setShowCoordinatorModal] = useState(false);
     const [showResetModal, setShowResetModal] = useState(false);
 
-    // Fetch initial data
+    // Sync local temp rules when rules fetch
     useEffect(() => {
-        if (!group?.id) return;
-        fetchData();
-    }, [group?.id]);
-
-    const fetchData = async () => {
-        try {
-            // 1. Fetch group document for coordinator, rules, description
-            const groupRef = doc(db, "groups", group.id);
-            const groupSnap = await getDoc(groupRef);
-
-            if (groupSnap.exists()) {
-                const data = groupSnap.data();
-                setCoordinator(data.englishKickCoordinator || null);
-                setRules(data.englishKickRules || "No rules defined yet.");
-                setTempRules(data.englishKickRules || "No rules defined yet.");
-            }
-
-            // 2. Fetch all users to map IDs to names/emojis
-            const usersSnap = await getDocs(collection(db, "users"));
-            const usersMap = {};
-            usersSnap.docs.forEach(d => {
-                const uData = d.data();
-                usersMap[d.id] = {
-                    name: uData.nickName || uData.fullName || uData.displayName || uData.email || "Unknown",
-                    emoji: uData.emoji || "",
-                    email: uData.email
-                };
-            });
-            setAllUsers(usersMap);
-
-            // 3. Fetch English Kick points from subcollection
-            const pointsRef = collection(db, "groups", group.id, "englishKick");
-            const pointsSnap = await getDocs(pointsRef);
-            const pointsMap = {};
-            pointsSnap.docs.forEach(d => {
-                pointsMap[d.id] = d.data().points || 0;
-            });
-
-            // 4. Combine members with their points
-            const mergedMembers = (groupSnap.data()?.members || []).map(memberId => {
-                return {
-                    id: memberId,
-                    ...usersMap[memberId],
-                    points: pointsMap[memberId] || 0
-                };
-            });
-
-            // Sort alphabetically instead of by points
-            mergedMembers.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
-            setMembersData(mergedMembers);
-
-        } catch (error) {
-            console.error("Error fetching English Kick data:", error);
-            toast.error("Failed to load data.");
-        }
-    };
+        setTempRules(rules || "No rules defined yet.");
+    }, [rules]);
 
     const isAuthorized = isAdmin || (coordinator && user.uid === coordinator);
 
-    const handleAssignCoordinator = async (userId) => {
-        try {
-            await updateDoc(doc(db, "groups", group.id), {
-                englishKickCoordinator: userId
-            });
-            setCoordinator(userId);
-            setShowCoordinatorModal(false);
-            toast.success("Coordinator assigned successfully.");
-        } catch (error) {
-            toast.error("Failed to assign coordinator.");
-        }
+    const onSaveRules = () => {
+        handleSaveRules(tempRules);
+        setIsEditingRules(false);
     };
 
-    const handleSaveRules = async () => {
-        try {
-            await updateDoc(doc(db, "groups", group.id), {
-                englishKickRules: tempRules
-            });
-            setRules(tempRules);
-            setIsEditingRules(false);
-            toast.success("Rules updated.");
-        } catch (error) {
-            toast.error("Failed to update rules.");
-        }
+    const confirmAssignCoordinator = (userId) => {
+        handleAssignCoordinator(userId);
+        setShowCoordinatorModal(false);
     };
 
-    const handleAddPoint = async (userId, currentPoints) => {
-        try {
-            const newPoints = currentPoints + 1;
-            await setDoc(doc(db, "groups", group.id, "englishKick", userId), { points: newPoints }, { merge: true });
-
-            setMembersData(prev => {
-                const updated = prev.map(m => m.id === userId ? { ...m, points: newPoints } : m);
-                return updated.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
-            });
-            toast.success("+1 Point Added!");
-        } catch (error) {
-            toast.error("Failed to add point.");
-        }
-    };
-
-    const handleMinusPoint = async (userId, currentPoints) => {
-        try {
-            const newPoints = Math.max(0, currentPoints - 1);
-            if (currentPoints === 0) return; // Prevent unnecessary DB write
-            await setDoc(doc(db, "groups", group.id, "englishKick", userId), { points: newPoints }, { merge: true });
-
-            setMembersData(prev => {
-                const updated = prev.map(m => m.id === userId ? { ...m, points: newPoints } : m);
-                return updated.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
-            });
-            toast.success("-1 Point Deducted!");
-        } catch (error) {
-            toast.error("Failed to deduct point.");
-        }
-    };
-
-    const handleResetAllPoints = async () => {
-        try {
-            const updates = membersData.map(m =>
-                setDoc(doc(db, "groups", group.id, "englishKick", m.id), { points: 0 }, { merge: true })
-            );
-            await Promise.all(updates);
-
-            setMembersData(prev => prev.map(m => ({ ...m, points: 0 })));
-            setShowResetModal(false);
-            toast.success("All points have been reset to zero.");
-        } catch (error) {
-            toast.error("Failed to reset points.");
-        }
+    const confirmResetPoints = () => {
+        handleResetAllPoints();
+        setShowResetModal(false);
     };
 
     // Calculate Most Kicks
     const maxPoints = membersData.length > 0 ? Math.max(...membersData.map(m => m.points)) : 0;
     const topKickers = maxPoints > 0 ? membersData.filter(m => m.points === maxPoints) : [];
 
-    if (!group) {
+    if (!groupId) {
         return <div className="p-8 text-center text-slate-500">Please select a batch first.</div>;
     }
 
@@ -354,7 +250,7 @@ function EnglishKick() {
                                 />
                                 <div className="flex justify-end gap-3">
                                     <button onClick={() => setIsEditingRules(false)} className="px-4 py-2 font-semibold text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg">Cancel</button>
-                                    <button onClick={handleSaveRules} className="px-4 py-2 font-bold bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg">Save Rules</button>
+                                    <button onClick={onSaveRules} className="px-4 py-2 font-bold bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg">Save Rules</button>
                                 </div>
                             </div>
                         ) : (
@@ -394,7 +290,7 @@ function EnglishKick() {
                             {membersData.map(m => (
                                 <button
                                     key={m.id}
-                                    onClick={() => handleAssignCoordinator(m.id)}
+                                    onClick={() => confirmAssignCoordinator(m.id)}
                                     className={`w-full flex items-center gap-3 p-3 rounded-xl transition-colors border ${coordinator === m.id ? 'bg-indigo-50 border-indigo-200 dark:bg-indigo-900/30 dark:border-indigo-800' : 'bg-transparent border-transparent hover:bg-slate-50 dark:hover:bg-slate-800'}`}
                                 >
                                     <div className="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-slate-600 dark:text-slate-300 font-bold text-sm">
@@ -422,7 +318,7 @@ function EnglishKick() {
 
                         <div className="flex gap-3">
                             <button onClick={() => setShowResetModal(false)} className="flex-1 py-3 font-bold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl transition-colors">Cancel</button>
-                            <button onClick={handleResetAllPoints} className="flex-1 py-3 font-bold bg-rose-600 hover:bg-rose-700 text-white rounded-xl shadow-lg shadow-rose-600/20 transition-all hover:scale-[1.02]">Confirm Reset</button>
+                            <button onClick={confirmResetPoints} className="flex-1 py-3 font-bold bg-rose-600 hover:bg-rose-700 text-white rounded-xl shadow-lg shadow-rose-600/20 transition-all hover:scale-[1.02]">Confirm Reset</button>
                         </div>
                     </div>
                 </div>
