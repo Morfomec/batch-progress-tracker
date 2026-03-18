@@ -81,15 +81,39 @@ function MyProgress() {
         }
 
         try {
-            const existingDocQuery = query(
-                collection(db, "groups", group.id, "progress"),
-                where("userId", "==", user.uid),
-                where("moduleNo", "==", Number(formData.moduleNo))
-            );
+            // Check connection count and module rules
+            const currentLinkedinCount = Number(formData.linkedinCount || 0);
+            if (currentLinkedinCount < 0) {
+                toast.error("Connection count cannot be negative.");
+                return;
+            }
 
-            const existingDocs = await getDocs(existingDocQuery);
-            if (!existingDocs.empty) {
-                toast.error(`You have already submitted progress for Module ${formData.moduleNo}. Please edit it in 'My Progress History' instead.`);
+            const allUserProgressQuery = query(
+                collection(db, "groups", group.id, "progress"),
+                where("userId", "==", user.uid)
+            );
+            const allUserProgressDocs = await getDocs(allUserProgressQuery);
+
+            let maxConnectionCount = 0;
+            let hasPassedThisModule = false;
+
+            allUserProgressDocs.forEach(doc => {
+                const data = doc.data();
+                if (data.linkedinCount > maxConnectionCount) {
+                    maxConnectionCount = data.linkedinCount;
+                }
+                if (data.moduleNo === Number(formData.moduleNo)) {
+                    if (data.examStatus === "Passed") hasPassedThisModule = true;
+                }
+            });
+
+            if (formData.linkedinCount !== "" && currentLinkedinCount < maxConnectionCount) {
+                toast.error(`Connection count cannot be less than your previous count (${maxConnectionCount}).`);
+                return;
+            }
+
+            if (hasPassedThisModule && formData.examStatus === "Passed") {
+                toast.error(`You have already passed Module ${formData.moduleNo}.`);
                 return;
             }
 
@@ -157,18 +181,41 @@ function MyProgress() {
         }
 
         try {
-            // Check for duplicate module entry
-            const existingDocQuery = query(
+            // Check connection count and module rules
+            const currentLinkedinCount = Number(editData.linkedinCount || 0);
+            if (currentLinkedinCount < 0) {
+                toast.error("Connection count cannot be negative.");
+                return;
+            }
+
+            const allUserProgressQuery = query(
                 collection(db, "groups", group.id, "progress"),
-                where("userId", "==", user.uid),
-                where("moduleNo", "==", Number(editData.moduleNo))
+                where("userId", "==", user.uid)
             );
+            const existingDocs = await getDocs(allUserProgressQuery);
 
-            const existingDocs = await getDocs(existingDocQuery);
-            const isDuplicate = existingDocs.docs.some(doc => doc.id !== editingItem);
+            let maxConnectionCountOther = 0;
+            let hasPassedThisModuleOther = false;
 
-            if (isDuplicate) {
-                toast.error(`You have already submitted progress for Module ${editData.moduleNo}.`);
+            existingDocs.docs.forEach(doc => {
+                if (doc.id === editingItem) return;
+
+                const data = doc.data();
+                if (data.linkedinCount > maxConnectionCountOther) {
+                    maxConnectionCountOther = data.linkedinCount;
+                }
+                if (data.moduleNo === Number(editData.moduleNo)) {
+                    if (data.examStatus === "Passed") hasPassedThisModuleOther = true;
+                }
+            });
+
+            if (editData.linkedinCount !== "" && currentLinkedinCount < maxConnectionCountOther) {
+                toast.error(`Connection count cannot be less than your previous count (${maxConnectionCountOther}).`);
+                return;
+            }
+
+            if (hasPassedThisModuleOther && editData.examStatus === "Passed") {
+                toast.error(`You have already submitted a Passed status for Module ${editData.moduleNo}.`);
                 return;
             }
 

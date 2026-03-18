@@ -482,16 +482,40 @@ function Dashboard() {
         }
 
         try {
-            // First check if a submission for this module already exists for the user
-            const existingDocQuery = query(
-                collection(db, "groups", group.id, "progress"),
-                where("userId", "==", user.uid),
-                where("moduleNo", "==", Number(formData.moduleNo))
-            );
+            // Check connection count and module rules
+            const currentLinkedinCount = Number(formData.linkedinCount || 0);
+            if (currentLinkedinCount < 0) {
+                toast.error("Connection count cannot be negative.");
+                return;
+            }
 
-            const existingDocs = await getDocs(existingDocQuery);
-            if (!existingDocs.empty) {
-                toast.error(`You have already submitted progress for Module ${formData.moduleNo}. Please edit it in 'My Progress History' instead.`);
+            const allUserProgressQuery = query(
+                collection(db, "groups", group.id, "progress"),
+                where("userId", "==", user.uid)
+            );
+            const allUserProgressDocs = await getDocs(allUserProgressQuery);
+
+            let maxConnectionCount = 0;
+            let hasPassedThisModule = false;
+
+            allUserProgressDocs.forEach(doc => {
+                const data = doc.data();
+                if (data.linkedinCount > maxConnectionCount) {
+                    maxConnectionCount = data.linkedinCount;
+                }
+                if (data.moduleNo === Number(formData.moduleNo)) {
+                    if (data.examStatus === "Passed") hasPassedThisModule = true;
+                }
+            });
+
+            // If user provided a connection count, check if it's not less than max previous
+            if (formData.linkedinCount !== "" && currentLinkedinCount < maxConnectionCount) {
+                toast.error(`Connection count cannot be less than your previous count (${maxConnectionCount}).`);
+                return;
+            }
+
+            if (hasPassedThisModule && formData.examStatus === "Passed") {
+                toast.error(`You have already passed Module ${formData.moduleNo}.`);
                 return;
             }
 
