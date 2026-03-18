@@ -40,7 +40,7 @@ function KicksBoard({ groupId }) {
                     });
 
                     let kicksArray = groupMembers
-                        .filter(memberId => userDocsMap[memberId])
+                        .filter(memberId => userDocsMap[memberId] && userDocsMap[memberId].name !== "Unknown")
                         .map(memberId => {
                             const userInfo = userDocsMap[memberId] || {};
                             return {
