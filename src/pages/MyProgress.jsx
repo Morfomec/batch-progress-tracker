@@ -49,8 +49,15 @@ function MyProgress() {
                 ...doc.data()
             }));
 
-            // Sort by moduleNo descending
-            data.sort((a, b) => b.moduleNo - a.moduleNo);
+            // Sort by moduleNo descending, then by date descending
+            data.sort((a, b) => {
+                if (b.moduleNo !== a.moduleNo) {
+                    return b.moduleNo - a.moduleNo;
+                }
+                const dateA = a.createdAt?.toMillis ? a.createdAt.toMillis() : 0;
+                const dateB = b.createdAt?.toMillis ? b.createdAt.toMillis() : 0;
+                return dateB - dateA;
+            });
 
             setProgressList(data);
         } catch (error) {
