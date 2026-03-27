@@ -7,6 +7,7 @@ export const useEnglishKicks = (groupId) => {
     const [kicks, setKicks] = useState([]);
     const [allUsers, setAllUsers] = useState({});
     const [coordinator, setCoordinator] = useState(null);
+    const [ownerId, setOwnerId] = useState(null);
     const [rules, setRules] = useState("");
     const [loading, setLoading] = useState(true);
 
@@ -24,6 +25,7 @@ export const useEnglishKicks = (groupId) => {
                 const groupData = groupSnap.data() || {};
 
                 setCoordinator(groupData.englishKickCoordinator || null);
+                setOwnerId(groupData.ownerId || null);
                 setRules(groupData.englishKickRules || "No rules defined yet.");
 
                 const groupMembers = groupData.members || [];
@@ -146,6 +148,7 @@ export const useEnglishKicks = (groupId) => {
         kicks,
         allUsers,
         coordinator,
+        ownerId,
         rules,
         loading,
         handleAddPoint,

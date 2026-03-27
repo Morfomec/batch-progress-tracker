@@ -160,9 +160,16 @@ function GroupInfo() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-semibold text-slate-800 dark:text-slate-200 truncate" title={member}>
-                    {member}
-                  </p>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">Member</p>
+                  {member}
+                  {member === group.ownerId && (
+                    <span className="ml-2 px-1.5 py-0.5 bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 text-[10px] font-bold rounded uppercase tracking-wider">
+                      Batch Admin
+                    </span>
+                  )}
+                </p>
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  {member === group.ownerId ? "Owner" : "Member"}
+                </p>
                 </div>
               </div>
             ))

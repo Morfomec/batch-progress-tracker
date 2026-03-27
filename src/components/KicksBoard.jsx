@@ -9,11 +9,13 @@ function KicksBoard({ groupId }) {
     const {
         kicks,
         coordinator,
+        ownerId,
         handleAddPoint,
         handleMinusPoint
     } = useEnglishKicks(groupId);
 
-    const isAuthorized = isAdmin || (coordinator && user?.uid === coordinator);
+    const isBatchAdmin = ownerId === user?.uid;
+    const isAuthorized = isAdmin || isBatchAdmin || (coordinator && user?.uid === coordinator);
 
     return (
         <div className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl rounded-2xl md:rounded-[2rem] shadow-xl border border-slate-200/50 dark:border-white/5 overflow-hidden relative h-full flex flex-col transition-colors duration-300">

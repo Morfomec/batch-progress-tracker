@@ -14,6 +14,7 @@ function EnglishKick() {
         kicks: membersData,
         allUsers,
         coordinator,
+        ownerId,
         rules,
         loading,
         handleAddPoint,
@@ -34,7 +35,8 @@ function EnglishKick() {
         setTempRules(rules || "No rules defined yet.");
     }, [rules]);
 
-    const isAuthorized = isAdmin || (coordinator && user.uid === coordinator);
+    const isBatchAdmin = ownerId === user?.uid;
+    const isAuthorized = isAdmin || isBatchAdmin || (coordinator && user.uid === coordinator);
 
     const onSaveRules = () => {
         handleSaveRules(tempRules);
@@ -93,7 +95,7 @@ function EnglishKick() {
                                 <span>Rules</span>
                             </button>
 
-                            {isAdmin && (
+                            {(isAdmin || isBatchAdmin) && (
                                 <button
                                     onClick={() => setShowCoordinatorModal(true)}
                                     className="px-4 py-2 lg:px-5 lg:py-2.5 bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-900/30 dark:hover:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 font-bold rounded-xl transition-colors flex items-center justify-center gap-2 border border-indigo-200 dark:border-indigo-800 whitespace-nowrap"
