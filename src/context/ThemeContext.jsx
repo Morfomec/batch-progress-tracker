@@ -9,17 +9,18 @@ export function useTheme() {
 
 export function ThemeProvider({ children }) {
     const [isDarkMode, setIsDarkMode] = useState(() => {
-        const savedTheme = localStorage.getItem("theme");
-        return savedTheme === "dark"; // Default to light mode; only use dark if explicitly saved
+        const savedTheme = localStorage.getItem("app_theme");
+        // Default to false (light mode). This also resets current users since we changed the key.
+        return savedTheme === "dark"; 
     });
 
     useEffect(() => {
         if (isDarkMode) {
             document.documentElement.classList.add("dark");
-            localStorage.setItem("theme", "dark");
+            localStorage.setItem("app_theme", "dark");
         } else {
             document.documentElement.classList.remove("dark");
-            localStorage.setItem("theme", "light");
+            localStorage.setItem("app_theme", "light");
         }
     }, [isDarkMode]);
 
