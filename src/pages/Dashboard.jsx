@@ -426,6 +426,8 @@ function Dashboard() {
                 const remainingModules = Math.max(0, 52 - (currentModule - 1));
 
                 let expectedDate = stats.latestDate ? new Date(stats.latestDate) : new Date();
+                const now = new Date();
+                const weeksSinceLastLog = stats.latestDate ? Math.floor((now - stats.latestDate) / (1000 * 60 * 60 * 24 * 7)) : 0;
 
                 if (remainingModules > 0) {
                     const fullCycles = Math.floor(remainingModules / 6);
@@ -434,8 +436,8 @@ function Dashboard() {
                     // Step 3: Add cycle days (49 days for 6 modules)
                     expectedDate.setDate(expectedDate.getDate() + (fullCycles * 49));
 
-                    // Step 4: Handle remainder modules individually
-                    for (let i = 0; i < singleModules + stats.delays; i++) {
+                    // Step 4: Handle remainder modules individually + delays + unlogged weeks
+                    for (let i = 0; i < singleModules + stats.delays + weeksSinceLastLog; i++) {
                         expectedDate.setDate(expectedDate.getDate() + 8);
                         // Shift if landing on Sunday (0)
                         if (expectedDate.getDay() === 0) {
@@ -447,7 +449,8 @@ function Dashboard() {
                 return {
                     ...stats,
                     expectedEndDate: expectedDate,
-                    remainingDays: "Calculated" // Simplified since days vary based on Sundays
+                    remainingDays: "Calculated",
+                    weeksSinceLastLog
                 };
             });
 
@@ -633,6 +636,8 @@ function Dashboard() {
                 const remainingModules = Math.max(0, 52 - (currentModule - 1));
 
                 let expectedDate = stats.latestDate ? new Date(stats.latestDate) : new Date();
+                const now = new Date();
+                const weeksSinceLastLog = stats.latestDate ? Math.floor((now - stats.latestDate) / (1000 * 60 * 60 * 24 * 7)) : 0;
 
                 if (remainingModules > 0) {
                     const fullCycles = Math.floor(remainingModules / 6);
@@ -641,8 +646,8 @@ function Dashboard() {
                     // Step 3: Add cycle days (49 days for 6 modules)
                     expectedDate.setDate(expectedDate.getDate() + (fullCycles * 49));
 
-                    // Step 4: Handle remainder individually + delays
-                    for (let i = 0; i < singleModules + stats.delays; i++) {
+                    // Step 4: Handle remainder individually + delays + unlogged weeks
+                    for (let i = 0; i < singleModules + stats.delays + weeksSinceLastLog; i++) {
                         expectedDate.setDate(expectedDate.getDate() + 8);
                         // Shift if landing on Sunday (0)
                         if (expectedDate.getDay() === 0) {
@@ -654,7 +659,8 @@ function Dashboard() {
                 return {
                     ...stats,
                     expectedEndDate: expectedDate,
-                    remainingDays: "Calculated"
+                    remainingDays: "Calculated",
+                    weeksSinceLastLog
                 };
             });
 
