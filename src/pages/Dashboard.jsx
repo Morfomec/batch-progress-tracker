@@ -422,7 +422,8 @@ function Dashboard() {
             });
 
             const timelineArray = Object.values(allTimelinesMap).map(stats => {
-                const remainingModules = Math.max(0, 52 - stats.highestPassedModule);
+                const currentModule = Math.max(stats.highestModule, stats.highestPassedModule + 1);
+                const remainingModules = Math.max(0, 52 - (currentModule - 1));
 
                 let expectedDate = stats.latestDate ? new Date(stats.latestDate) : new Date();
 
@@ -628,7 +629,8 @@ function Dashboard() {
             setLatestUpdates(finalUpdatesAfterSubmit);
 
             const timelineArray = Object.values(allTimelinesMap).map(stats => {
-                const remainingModules = Math.max(0, 52 - stats.highestPassedModule);
+                const currentModule = Math.max(stats.highestModule, stats.highestPassedModule + 1);
+                const remainingModules = Math.max(0, 52 - (currentModule - 1));
 
                 let expectedDate = stats.latestDate ? new Date(stats.latestDate) : new Date();
 
@@ -871,7 +873,7 @@ function Dashboard() {
                                                             <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mt-0.5 flex items-center gap-1.5">
                                                                 <span className="text-indigo-600 dark:text-indigo-400 font-extrabold">Current: {Math.max(userStats.highestModule, userStats.highestPassedModule + 1)}</span>
                                                                 <span className="w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-700"></span>
-                                                                <span>Remaining: {Math.max(0, 52 - userStats.highestPassedModule)}</span>
+                                                                <span>Remaining: {Math.max(0, 52 - (Math.max(userStats.highestModule, userStats.highestPassedModule + 1) - 1))}</span>
                                                             </p>
                                                         </div>
                                                     </div>
