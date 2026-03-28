@@ -100,24 +100,52 @@ export const subscribeToChatRooms = (userId, callback) => {
   
   const chatRoomsRef = collection(db, "chatRooms");
   
-  // Query for rooms that are:
-  // 1. Global (everyone sees)
-  // 2. Group (everyone sees for discovery)
-  // 3. Private AND the user is a member
-  const q = query(
+  // Query 1: Global and Group rooms (Discovery)
+  const qPublic = query(
     chatRoomsRef, 
-    or(
-      where("type", "==", "global"),
-      where("type", "==", "group"),
-      where("members", "array-contains", userId)
-    ),
+    where("type", "in", ["global", "group"]),
     orderBy("createdAt", "asc")
   );
-  
-  return onSnapshot(q, (snapshot) => {
-    const rooms = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    callback(rooms);
-  });
+
+  // Query 2: Private rooms where USER is a member
+  const qPrivate = query(
+    chatRoomsRef,
+    where("type", "==", "private"),
+    where("members", "array-contains", userId),
+    orderBy("createdAt", "asc")
+  );
+
+  let publicRooms = [];
+  let privateRooms = [];
+
+  const updateAll = () => {
+    // Merge lists
+    const all = [...publicRooms, ...privateRooms];
+    // Deduplicate by ID
+    const unique = Array.from(new Map(all.map(r => [r.id, r])).values());
+    // Sort by createdAt (JS sort since we merged)
+    unique.sort((a, b) => {
+        const timeA = a.createdAt?.toMillis?.() || 0;
+        const timeB = b.createdAt?.toMillis?.() || 0;
+        return timeA - timeB;
+    });
+    callback(unique);
+  };
+
+  const unsub1 = onSnapshot(qPublic, (snap) => {
+    publicRooms = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    updateAll();
+  }, (err) => console.error("Error in public rooms sub:", err));
+
+  const unsub2 = onSnapshot(qPrivate, (snap) => {
+    privateRooms = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    updateAll();
+  }, (err) => console.error("Error in private rooms sub:", err));
+
+  return () => {
+    unsub1();
+    unsub2();
+  };
 };
 
 // -------------------------------------------------------------

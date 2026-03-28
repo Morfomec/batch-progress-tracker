@@ -25,7 +25,7 @@ function PeerProfile() {
 
     useEffect(() => {
         const fetchPeerData = async () => {
-            if (!userId || !group) return;
+            if (!userId) return;
 
             try {
                 // 1. Fetch User Profile
@@ -38,29 +38,31 @@ function PeerProfile() {
                     console.warn("Peer profile not found.");
                 }
 
-                // 2. Fetch User Progress
-                const q = query(
-                    collection(db, "groups", group.id, "progress"),
-                    where("userId", "==", userId),
-                    orderBy("createdAt", "desc")
-                );
-
-                const progressSnap = await getDocs(q);
-                const progressData = progressSnap.docs.map(doc => ({
-                    id: doc.id,
-                    ...doc.data()
-                }));
-
-                setPeerProgress(progressData);
-                const score = progressData.reduce((acc, curr) => acc + (curr.score || 0), 0);
-                setTotalScore(score);
-
-                // 3. Fetch Poke Status
+                // 2. Fetch Poke Status (Independent of group)
                 if (user.uid !== userId) {
                    const pStatus = await getPokeStatus(user.uid, userId);
                    setPokeData(pStatus);
                 } else {
                    setPokeData({ status: 'self' });
+                }
+
+                // 3. Fetch User Progress (Only if group exists)
+                if (group) {
+                    const q = query(
+                        collection(db, "groups", group.id, "progress"),
+                        where("userId", "==", userId),
+                        orderBy("createdAt", "desc")
+                    );
+
+                    const progressSnap = await getDocs(q);
+                    const progressData = progressSnap.docs.map(doc => ({
+                        id: doc.id,
+                        ...doc.data()
+                    }));
+
+                    setPeerProgress(progressData);
+                    const score = progressData.reduce((acc, curr) => acc + (curr.score || 0), 0);
+                    setTotalScore(score);
                 }
 
             } catch (error) {
