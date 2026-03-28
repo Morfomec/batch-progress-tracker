@@ -63,8 +63,7 @@ Click any notification to jump directly to the related content. Chat message not
 | **Member** | Standard access |
 
 ---
-
-*Have questions? Use the **Connect with Admin** button below!*`;
+*Have questions? Use the **Connect with me** button below!*`;
 
 export default function HelpPage() {
   const { user, userProfile, isAdmin } = useAuth();
@@ -165,14 +164,17 @@ export default function HelpPage() {
       if (line.startsWith("### ")) return <h3 key={i} className="text-lg font-bold text-indigo-600 dark:text-indigo-400 mt-6 mb-2">{line.slice(4)}</h3>;
       if (line.startsWith("---")) return <hr key={i} className="my-4 border-slate-200 dark:border-slate-700" />;
       if (line.startsWith("| ")) {
-        // Table row
-        const cells = line.split("|").filter(c => c.trim() && !c.match(/^[-\s]+$/));
+        // Table row - Skip the separator line |---|---|
+        if (line.includes("---")) return null;
+        
+        const cells = line.split("|").filter(c => c.trim());
         if (cells.length === 0) return null;
-        const isHeader = line.includes("---") || i === 0 || (i > 0 && text.split("\n")[i-1]?.startsWith("| **"));
+        
+        const isHeader = i === 0 || (i > 0 && text.split("\n")[i-2]?.startsWith("### "));
         return (
-          <div key={i} className={`flex gap-4 px-4 py-2 rounded-lg text-sm ${i % 2 === 0 ? 'bg-slate-50 dark:bg-slate-800/50' : ''}`}>
+          <div key={i} className={`flex gap-4 px-4 py-2.5 rounded-xl text-sm mb-1 ${isHeader ? 'bg-indigo-50 dark:bg-indigo-900/40 font-bold border border-indigo-100/50 dark:border-indigo-800/30' : 'bg-slate-50 dark:bg-slate-800/50'}`}>
             {cells.map((cell, j) => (
-              <span key={j} className={`flex-1 ${j === 0 ? 'font-semibold text-slate-800 dark:text-slate-200' : 'text-slate-600 dark:text-slate-400'}`}>
+              <span key={j} className={`flex-1 ${j === 0 && !isHeader ? 'font-bold text-slate-800 dark:text-slate-200' : 'text-slate-600 dark:text-slate-400'}`}>
                 {cell.trim().replace(/\*\*/g, "")}
               </span>
             ))}
