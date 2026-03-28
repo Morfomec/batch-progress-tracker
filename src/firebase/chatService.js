@@ -83,6 +83,38 @@ export const joinGroupChat = async (roomId, userId) => {
 };
 
 /**
+ * Creates a new Private Chat directly between two users, or returns existing one.
+ */
+export const createOrGetPrivateChat = async (userId1, userId2) => {
+  const chatRoomsRef = collection(db, "chatRooms");
+
+  // Check if a private chat already exists between these two users
+  const q = query(
+    chatRoomsRef,
+    where("type", "==", "private"),
+    where("members", "array-contains", userId1)
+  );
+
+  const snap = await getDocs(q);
+  const existing = snap.docs.find(doc => doc.data().members?.includes(userId2));
+
+  if (existing) {
+    return existing.id; // Return existing chat room ID
+  }
+
+  // Create a new private chat
+  const newChat = await addDoc(chatRoomsRef, {
+    name: "Private Chat",
+    type: "private",
+    members: [userId1, userId2],
+    adminId: "system",
+    createdAt: serverTimestamp(),
+  });
+
+  return newChat.id;
+};
+
+/**
  * Leaves a Group Chat
  */
 export const leaveGroupChat = async (roomId, userId) => {
@@ -103,16 +135,14 @@ export const subscribeToChatRooms = (userId, callback) => {
   // Query 1: Global and Group rooms (Discovery)
   const qPublic = query(
     chatRoomsRef, 
-    where("type", "in", ["global", "group"]),
-    orderBy("createdAt", "asc")
+    where("type", "in", ["global", "group"])
   );
 
   // Query 2: Private rooms where USER is a member
   const qPrivate = query(
     chatRoomsRef,
     where("type", "==", "private"),
-    where("members", "array-contains", userId),
-    orderBy("createdAt", "asc")
+    where("members", "array-contains", userId)
   );
 
   let publicRooms = [];

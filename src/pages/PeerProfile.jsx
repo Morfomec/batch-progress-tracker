@@ -5,6 +5,7 @@ import { db } from "../firebase/firebaseConfig";
 import { ArrowLeft, User as UserIcon, MapPin, Linkedin, Calendar, Target, Award, Activity, MessageCircle, Hand, Clock } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { getPokeStatus, sendPoke, acceptPoke } from "../firebase/pokeService";
+import { createOrGetPrivateChat } from "../firebase/chatService";
 import toast from "react-hot-toast";
 
 function PeerProfile() {
@@ -17,6 +18,7 @@ function PeerProfile() {
     const [peerProgress, setPeerProgress] = useState([]);
     const [totalScore, setTotalScore] = useState(0);
     const [loading, setLoading] = useState(true);
+    const [startingChat, setStartingChat] = useState(false);
     const [pokeData, setPokeData] = useState({ status: 'loading' });
     const [cooldownRemaining, setCooldownRemaining] = useState(0);
 
@@ -110,6 +112,20 @@ function PeerProfile() {
 
     const displayName = peerProfile.nickName || peerProfile.fullName || peerProfile.displayName || "Unknown";
 
+    const handleStartChat = async () => {
+        if (startingChat) return;
+        setStartingChat(true);
+        try {
+            await createOrGetPrivateChat(user.uid, userId);
+            navigate("/dashboard/chat");
+        } catch (error) {
+            console.error("Error starting chat:", error);
+            toast.error("Could not open chat.");
+        } finally {
+            setStartingChat(false);
+        }
+    };
+
     const handlePokeAction = async () => {
         const canPoke = pokeData.status === 'none' || (pokeData.status === 'sent' && cooldownRemaining === 0);
         
@@ -123,12 +139,13 @@ function PeerProfile() {
             
             toast.success(isRePoke ? `You poked ${displayName} again!` : `You poked ${displayName}!`);
         } else if (pokeData.status === 'received') {
-            const chatId = await acceptPoke(pokeData.pokeId, user.uid, userId, userProfile?.fullName || "User", displayName);
-            setPokeData({ status: 'accepted', chatId });
-            toast.success("Poke accepted! Private chat created.");
-            navigate("/dashboard/chat");
+            await sendPoke(user.uid, userId, userProfile?.nickName || userProfile?.fullName || user?.displayName);
+            const pStatus = await getPokeStatus(user.uid, userId);
+            setPokeData(pStatus);
+            toast.success(`You poked ${displayName} back! 👋`);
         } else if (pokeData.status === 'accepted') {
-            navigate("/dashboard/chat");
+            // Do nothing - poke is just for fun now
+            toast(`You and ${displayName} have poked each other! 🎉`);
         }
     };
 
@@ -186,6 +203,12 @@ function PeerProfile() {
                                         </span>
                                     )}
                                 </h1>
+                                {peerProfile.status && (
+                                    <p className="text-sm font-medium text-indigo-600 dark:text-indigo-400 mt-0.5 flex items-center gap-1.5">
+                                        <span className="text-base">💬</span>
+                                        {peerProfile.status}
+                                    </p>
+                                )}
                                 <div className="flex flex-wrap items-center gap-4 text-sm font-medium text-slate-500 dark:text-slate-400 mt-2">
                                     {peerProfile.location && (
                                         <div className="flex items-center gap-1.5">
@@ -203,6 +226,17 @@ function PeerProfile() {
                             </div>
 
                             <div className="flex flex-col sm:flex-row items-center gap-4">
+                                {/* Direct Chat Button */}
+                                {pokeData.status !== 'self' && (
+                                    <button
+                                        onClick={handleStartChat}
+                                        disabled={startingChat}
+                                        className="flex items-center gap-2 px-6 py-3 rounded-2xl border font-bold shadow-sm transition-all bg-emerald-500 hover:bg-emerald-600 text-white border-transparent"
+                                    >
+                                        <MessageCircle className="w-5 h-5" />
+                                        {startingChat ? "Opening..." : "Chat"}
+                                    </button>
+                                )}
                                 {pokeData.status !== 'self' && pokeData.status !== 'loading' && (
                                     <button
                                         onClick={handlePokeAction}
@@ -222,8 +256,8 @@ function PeerProfile() {
                                         {pokeData.status === 'none' ? <><Hand className="w-5 h-5" /> Poke {displayName}</> :
                                          isPokeInCooldown ? <><Clock className="w-5 h-5" /> Cooldown: {formatRemainingTime(cooldownRemaining)}</> :
                                          pokeData.status === 'sent' ? <><Hand className="w-5 h-5" /> Poke Again</> :
-                                         pokeData.status === 'received' ? <><Hand className="w-5 h-5" /> Poke Back (Chat)</> :
-                                         <><MessageCircle className="w-5 h-5" /> Open Chat</>}
+                                         pokeData.status === 'received' ? <><Hand className="w-5 h-5" /> Poke Back 👋</> :
+                                         <><Hand className="w-5 h-5" /> Poked! 🎉</>}
                                     </button>
                                 )}
 

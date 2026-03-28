@@ -19,6 +19,7 @@ import Peers from "./pages/Peers";
 import EnglishKick from "./pages/EnglishKick";
 import Chat from "./pages/Chat";
 import ChatSettings from "./pages/ChatSettings";
+import HelpPage from "./pages/HelpPage";
 
 import ProtectedRoute from "./components/ProtectedRoute";
 import AdminRoute from "./components/AdminRoute";
@@ -78,6 +79,8 @@ function App() {
                 <Route path="my-profile" element={<MyProfile />} />
                 {/* Peer Profile */}
                 <Route path="profile/:userId" element={<PeerProfile />} />
+                {/* Help Page */}
+                <Route path="help" element={<HelpPage />} />
               </Route>
 
               {/* STANDALONE PROTECTED PAGES */}

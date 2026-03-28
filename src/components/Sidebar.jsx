@@ -1,4 +1,4 @@
-import { Users, UserCircle, Settings, LogOut, ChevronLeft, LayoutDashboard, CheckCircle2, ChevronDown, User as UserIcon, PlusCircle, UserPlus, BookOpen, ShieldAlert, Activity, X, Zap, MessageSquare } from "lucide-react";
+import { Users, UserCircle, Settings, LogOut, ChevronLeft, LayoutDashboard, CheckCircle2, ChevronDown, User as UserIcon, PlusCircle, UserPlus, BookOpen, ShieldAlert, Activity, X, Zap, MessageSquare, HelpCircle } from "lucide-react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { signOut } from "firebase/auth";
 import { auth } from "../firebase/firebaseConfig";
@@ -163,6 +163,22 @@ function Sidebar({ groupContext = {}, onClose }) {
           </nav>
         </div>
 
+      </div>
+
+      {/* HELP FOOTER */}
+      <div className="px-4 pb-6 border-t border-slate-100 dark:border-slate-800 pt-4">
+        <Link
+          to="/dashboard/help"
+          onClick={() => onClose && onClose()}
+          className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
+            location.pathname === '/dashboard/help'
+              ? 'bg-indigo-50 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300'
+              : 'text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-900 hover:text-slate-900 dark:hover:text-slate-200'
+          }`}
+        >
+          <HelpCircle className={`w-5 h-5 ${location.pathname === '/dashboard/help' ? 'text-indigo-500' : 'text-slate-400 dark:text-slate-500'}`} />
+          How it Works
+        </Link>
       </div>
 
     </aside>

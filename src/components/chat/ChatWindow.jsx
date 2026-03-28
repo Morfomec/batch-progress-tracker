@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Send, LogOut, AlignLeft, Smile, PlusCircle, Settings, Hash, User, MessageSquare } from "lucide-react";
+import { Send, LogOut, AlignLeft, Smile, PlusCircle, Settings, Hash, User, MessageSquare, UserPlus } from "lucide-react";
 import { subscribeToMessages, sendMessage } from "../../firebase/chatService";
 import EmojiPicker from 'emoji-picker-react';
 import { useNavigate } from "react-router-dom";
@@ -59,6 +59,12 @@ export default function ChatWindow({ activeRoom, userId, userName, userPhoto, pe
 
   const isGlobal = activeRoom.type === 'global';
   const isPrivate = activeRoom.type === 'private';
+  const isGroup = activeRoom.type === 'group';
+
+  // Pending requests badge: only show to current members of the group
+  const pendingCount = (isGroup && activeRoom.members?.includes(userId))
+    ? (activeRoom.pendingRequests?.length || 0)
+    : 0;
   
   // Resolve Peer Profile for Header
   let displayRoomName = activeRoom.name || "Chat Room";
@@ -113,13 +119,28 @@ export default function ChatWindow({ activeRoom, userId, userName, userPhoto, pe
           </div>
         </div>
         
-        <button
-          onClick={handleOpenSettingsPage}
-          className="p-2 text-slate-500 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-slate-800/50 rounded-full transition-colors outline-none shrink-0"
-          title="Chat Settings"
-        >
-          <Settings className="w-5 h-5" />
-        </button>
+        <div className="flex items-center gap-1">
+          {/* Pending Requests Bell — only visible to group members */}
+          {pendingCount > 0 && (
+            <button
+              onClick={handleOpenSettingsPage}
+              className="relative p-2 text-amber-500 hover:text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-900/20 rounded-full transition-colors outline-none shrink-0"
+              title={`${pendingCount} pending join ${pendingCount === 1 ? 'request' : 'requests'}`}
+            >
+              <UserPlus className="w-5 h-5" />
+              <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-red-500 text-white text-[9px] font-black rounded-full flex items-center justify-center leading-none">
+                {pendingCount > 9 ? '9+' : pendingCount}
+              </span>
+            </button>
+          )}
+          <button
+            onClick={handleOpenSettingsPage}
+            className="p-2 text-slate-500 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-slate-800/50 rounded-full transition-colors outline-none shrink-0"
+            title="Chat Settings"
+          >
+            <Settings className="w-5 h-5" />
+          </button>
+        </div>
       </div>
 
       {/* Messages Area */}

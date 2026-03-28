@@ -2,10 +2,12 @@ import { useState, useEffect, useRef } from "react";
 import { collection, query, orderBy, onSnapshot, doc, updateDoc, writeBatch } from "firebase/firestore";
 import { db } from "../firebase/firebaseConfig";
 import { useAuth } from "../context/AuthContext";
-import { Bell, Check, Trash2, X } from "lucide-react";
+import { Bell, Check, Trash2, X, MessageSquare } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 function NotificationDropdown() {
     const { user } = useAuth();
+    const navigate = useNavigate();
     const [notifications, setNotifications] = useState([]);
     const [isOpen, setIsOpen] = useState(false);
     const dropdownRef = useRef(null);
@@ -59,6 +61,19 @@ function NotificationDropdown() {
             await updateDoc(docRef, { unread: false });
         } catch (error) {
             console.error("Error marking notification as read:", error);
+        }
+    };
+
+    const handleNotificationClick = async (notification) => {
+        // Mark as read
+        if (notification.unread) await markAsRead(notification.id);
+        setIsOpen(false);
+
+        // Navigate to the relevant page
+        if (notification.roomId) {
+            navigate(`/dashboard/chat?room=${notification.roomId}`);
+        } else if (notification.link) {
+            navigate(notification.link);
         }
     };
 
@@ -151,13 +166,17 @@ function NotificationDropdown() {
                                     <div
                                         key={notification.id}
                                         className={`px-5 py-4 transition-colors cursor-pointer group relative hover:bg-slate-50 dark:hover:bg-slate-800/80 ${notification.unread ? 'bg-indigo-50/50 dark:bg-indigo-500/5' : 'bg-white dark:bg-slate-900'}`}
-                                        onClick={() => notification.unread && markAsRead(notification.id)}
+                                        onClick={() => handleNotificationClick(notification)}
                                     >
                                         <div className="flex gap-4">
                                             <div className="mt-1 shrink-0">
                                                 {notification.type === 'success' ? (
                                                     <div className={`w-8 h-8 rounded-full flex items-center justify-center ${notification.unread ? 'bg-emerald-500 text-white shadow-emerald-500/20' : 'bg-emerald-100 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400'} shadow-sm`}>
                                                         <Check className="w-4 h-4" />
+                                                    </div>
+                                                ) : notification.type === 'chat' ? (
+                                                    <div className={`w-8 h-8 rounded-full flex items-center justify-center ${notification.unread ? 'bg-blue-500 text-white shadow-blue-500/20' : 'bg-blue-100 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400'} shadow-sm`}>
+                                                        <MessageSquare className="w-4 h-4" />
                                                     </div>
                                                 ) : (
                                                     <div className={`w-8 h-8 rounded-full flex items-center justify-center ${notification.unread ? 'bg-indigo-500 text-white shadow-indigo-500/20' : 'bg-indigo-100 text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-400'} shadow-sm`}>

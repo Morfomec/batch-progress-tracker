@@ -56,6 +56,17 @@ export default function Chat() {
     return () => unsubscribe();
   }, [activeRoomId]);
 
+  // Auto-select room from URL query param (e.g. from notification click)
+  useEffect(() => {
+    if (rooms.length === 0) return;
+    const params = new URLSearchParams(location.search);
+    const roomParam = params.get("room");
+    if (roomParam) {
+      const found = rooms.find(r => r.id === roomParam);
+      if (found) setActiveRoomId(roomParam);
+    }
+  }, [rooms, location.search]);
+
   // Fetch Profiles for ALL relevant users (Peers in private chats + members of active room)
   useEffect(() => {
     const fetchRelevantProfiles = async () => {

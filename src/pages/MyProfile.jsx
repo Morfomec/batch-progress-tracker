@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useAuth } from "../context/AuthContext";
 import { db } from "../firebase/firebaseConfig";
 import { doc, updateDoc } from "firebase/firestore";
-import { User, Save, Camera, Loader2, Trash2, Smile, X } from "lucide-react";
+import { User, Save, Camera, Loader2, Trash2, Smile, X, MessageSquare } from "lucide-react";
 import Cropper from "react-easy-crop";
 import EmojiPicker from "emoji-picker-react";
 import getCroppedImg from "../utils/cropImage";
@@ -14,7 +14,17 @@ function MyProfile() {
     const [fullName, setFullName] = useState("");
     const [nickName, setNickName] = useState("");
     const [emoji, setEmoji] = useState("");
+    const [status, setStatus] = useState("");
     const [loading, setLoading] = useState(false);
+
+    const STATUS_PRESETS = [
+        "☕ Up for a tea or coffee",
+        "📚 Deep in study mode",
+        "🚀 Building something cool",
+        "🎯 On a learning streak",
+        "😴 Taking a break",
+        "👋 Open to connect",
+    ];
     const [uploadingImage, setUploadingImage] = useState(false);
     const [successMsg, setSuccessMsg] = useState("");
 
@@ -33,6 +43,7 @@ function MyProfile() {
             setFullName(userProfile.fullName || "");
             setNickName(userProfile.nickName || "");
             setEmoji(userProfile.emoji || "");
+            setStatus(userProfile.status || "");
         }
     }, [userProfile]);
 
@@ -47,6 +58,7 @@ function MyProfile() {
                 fullName,
                 nickName,
                 emoji,
+                status: status.trim(),
             });
 
             setSuccessMsg("Profile updated successfully!");
@@ -308,6 +320,53 @@ function MyProfile() {
                                 />
                                 <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">Used on leaderboards and recent activity.</p>
                             </div>
+                        </div>
+
+                        {/* Status Section */}
+                        <div>
+                            <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3 flex items-center gap-2">
+                                <MessageSquare className="w-4 h-4 text-indigo-500" />
+                                Status
+                                <span className="text-xs font-normal text-slate-400">(visible to others)</span>
+                            </label>
+                            {/* Preset chips */}
+                            <div className="flex flex-wrap gap-2 mb-3">
+                                {STATUS_PRESETS.map((preset) => (
+                                    <button
+                                        key={preset}
+                                        type="button"
+                                        onClick={() => setStatus(status === preset ? "" : preset)}
+                                        className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-all ${
+                                            status === preset
+                                                ? "bg-indigo-600 text-white border-indigo-600 shadow-md"
+                                                : "bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-indigo-400 hover:text-indigo-600 dark:hover:text-indigo-400"
+                                        }`}
+                                    >
+                                        {preset}
+                                    </button>
+                                ))}
+                            </div>
+                            {/* Custom status input */}
+                            <div className="relative">
+                                <input
+                                    type="text"
+                                    value={status}
+                                    onChange={(e) => setStatus(e.target.value)}
+                                    maxLength={80}
+                                    placeholder="Or write your own status..."
+                                    className="w-full px-4 py-3 pr-10 bg-white/50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/50 text-slate-900 dark:text-white rounded-xl focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500/50 outline-none transition-all placeholder-slate-400 dark:placeholder-slate-500/80 backdrop-blur-sm"
+                                />
+                                {status && (
+                                    <button
+                                        type="button"
+                                        onClick={() => setStatus("")}
+                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                                    >
+                                        <X className="w-4 h-4" />
+                                    </button>
+                                )}
+                            </div>
+                            <p className="mt-1 text-xs text-slate-400 text-right">{status.length}/80</p>
                         </div>
 
                         <div className="pt-4 flex flex-col sm:flex-row items-center gap-4">
