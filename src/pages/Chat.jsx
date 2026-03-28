@@ -5,7 +5,8 @@ import {
   joinGroupChat, 
   leaveGroupChat, 
   createGroupChat,
-  initializeGlobalChat
+  initializeGlobalChat,
+  requestJoinGroupChat
 } from "../firebase/chatService";
 import { collection, query, where, getDocs, documentId } from "firebase/firestore";
 import { db } from "../firebase/firebaseConfig";
@@ -95,13 +96,22 @@ export default function Chat() {
     fetchRelevantProfiles();
   }, [rooms, user?.uid, activeRoomId, peerProfiles]);
 
-  const handleJoinRoom = async (roomId) => {
+  const handleJoinRoom = async (roomId, isRequest = false) => {
     try {
-      await joinGroupChat(roomId, user.uid);
-      setActiveRoomId(roomId);
-      toast.success("Joined group chat!");
+      if (isRequest) {
+        await requestJoinGroupChat(roomId, user.uid, {
+            name: userProfile?.fullName || userProfile?.nickName || user?.displayName || "User",
+            photo: userProfile?.photoURL || user?.photoURL || null
+        });
+        toast.success("Join request sent!");
+      } else {
+        await joinGroupChat(roomId, user.uid);
+        setActiveRoomId(roomId);
+        toast.success("Joined group chat!");
+      }
     } catch (error) {
-      toast.error("Failed to join group.");
+      console.error("Join error:", error);
+      toast.error(isRequest ? "Failed to send request." : "Failed to join group.");
     }
   };
 

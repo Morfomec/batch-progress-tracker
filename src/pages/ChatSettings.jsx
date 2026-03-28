@@ -5,8 +5,8 @@ import { db } from "../firebase/firebaseConfig";
 import { ArrowLeft, LogOut, Trash2, Camera, Check, Settings, User, Search, Bell, BellOff, Loader2, Hash, X, ExternalLink, Edit2, ShieldAlert } from "lucide-react";
 import toast from "react-hot-toast";
 import { useAuth } from "../context/AuthContext";
-import { updateGroupName, deleteGroupChat, updateGroupIcon, kickUserFromRoom, banUserFromRoom } from "../firebase/chatService";
-import { UserMinus, ShieldX } from "lucide-react";
+import { updateGroupName, deleteGroupChat, updateGroupIcon, kickUserFromRoom, banUserFromRoom, approveJoinRequest, rejectJoinRequest } from "../firebase/chatService";
+import { UserMinus, ShieldX, UserPlus, UserCheck, UserX } from "lucide-react";
 
 export default function ChatSettings() {
   const { roomId: roomIdParam } = useParams();
@@ -16,6 +16,7 @@ export default function ChatSettings() {
   const [room, setRoom] = useState(null);
   const [loading, setLoading] = useState(true);
   const [peerProfile, setPeerProfile] = useState(null);
+  const [totalUsersCount, setTotalUsersCount] = useState(0);
   
   // Custom Modals State
   const [showMembersModal, setShowMembersModal] = useState(false);
@@ -43,18 +44,23 @@ export default function ChatSettings() {
       try {
         const docRef = doc(db, "chatRooms", roomIdParam);
         const docSnap = await getDoc(docRef);
-          if (docSnap.exists()) {
-            const data = { id: docSnap.id, ...docSnap.data() };
-            
-            // Privacy Check: If private chat, user MUST be a member
-            if (data.type === 'private' && !data.members?.includes(user?.uid)) {
-                toast.error("You don't have permission to view this chat's settings.");
-                navigate("/dashboard/chat");
-                return;
-            }
+        if (docSnap.exists()) {
+          const data = { id: docSnap.id, ...docSnap.data() };
+          
+          // Privacy Check: If private chat, user MUST be a member
+          if (data.type === 'private' && !data.members?.includes(user?.uid)) {
+              toast.error("You don't have permission to view this chat's settings.");
+              navigate("/dashboard/chat");
+              return;
+          }
 
-            setRoom(data);
-            setEditNameValue(data.name || "");
+          setRoom(data);
+          setEditNameValue(data.name || "");
+
+          if (data.type === 'global') {
+            const usersSnap = await getDocs(collection(db, "users"));
+            setTotalUsersCount(usersSnap.size);
+          }
 
           if (data.type === 'private') {
             const peerId = data.members?.find(id => id !== user.uid);
@@ -144,6 +150,33 @@ export default function ChatSettings() {
         toast.success("User BANNED from room.");
     } catch (e) {
         toast.error("Failed to ban user.");
+    }
+  };
+
+  const handleApproveRequest = async (request) => {
+    try {
+        await approveJoinRequest(room.id, request.uid, request);
+        setRoom(prev => ({
+            ...prev,
+            members: [...(prev.members || []), request.uid],
+            pendingRequests: (prev.pendingRequests || []).filter(r => r.uid !== request.uid)
+        }));
+        toast.success("Request approved!");
+    } catch (e) {
+        toast.error("Failed to approve request.");
+    }
+  };
+
+  const handleRejectRequest = async (request) => {
+    try {
+        await rejectJoinRequest(room.id, request);
+        setRoom(prev => ({
+            ...prev,
+            pendingRequests: (prev.pendingRequests || []).filter(r => r.uid !== request.uid)
+        }));
+        toast.success("Request rejected.");
+    } catch (e) {
+        toast.error("Failed to reject request.");
     }
   };
 
@@ -375,7 +408,9 @@ export default function ChatSettings() {
                     </div>
                     <div>
                         <h2 className="text-sm font-bold text-slate-800 dark:text-slate-100">Members</h2>
-                        <p className="text-[11px] text-slate-500">{room.members?.length || 0} participants</p>
+                        <p className="text-[11px] text-slate-500">
+                            {isGlobal ? totalUsersCount : (room.members?.length || 0)} participants
+                        </p>
                     </div>
                 </div>
                 
@@ -385,6 +420,47 @@ export default function ChatSettings() {
                 >
                     View All
                 </button>
+              </div>
+          )}
+
+          {/* Join Requests (Admins/Members can see) */}
+          {!isPrivate && !isGlobal && room.pendingRequests?.length > 0 && (
+              <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/30 rounded-xl p-4 space-y-3 shadow-sm animate-slideDown">
+                  <div className="flex items-center gap-2 mb-1">
+                      <UserPlus className="w-4 h-4 text-amber-600" />
+                      <h2 className="text-[10px] font-black text-amber-700 dark:text-amber-400 uppercase tracking-widest">Pending Requests</h2>
+                  </div>
+                  <div className="space-y-2">
+                      {room.pendingRequests.map((req) => (
+                          <div key={req.uid} className="flex items-center justify-between bg-white dark:bg-black p-2.5 rounded-xl border border-amber-200/50 dark:border-amber-800/30 shadow-sm">
+                              <div className="flex items-center gap-2.5 min-w-0">
+                                  <div className="w-8 h-8 rounded-full overflow-hidden bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center text-xs shrink-0 font-black text-amber-600">
+                                      {req.photo ? <img src={req.photo} alt="" className="w-full h-full object-cover" /> : req.name?.charAt(0)}
+                                  </div>
+                                  <div className="flex flex-col min-w-0">
+                                      <span className="text-xs font-bold truncate text-slate-800 dark:text-slate-200">{req.name}</span>
+                                      <span className="text-[9px] text-slate-500 font-medium">Requested to join</span>
+                                  </div>
+                              </div>
+                              <div className="flex items-center gap-1.5 shrink-0">
+                                  <button 
+                                    onClick={() => handleApproveRequest(req)}
+                                    className="p-1.5 bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-500/10 text-emerald-600 rounded-lg transition-all active:scale-95"
+                                    title="Approve"
+                                  >
+                                      <UserCheck className="w-4 h-4" />
+                                  </button>
+                                  <button 
+                                    onClick={() => handleRejectRequest(req)}
+                                    className="p-1.5 bg-rose-50 hover:bg-rose-100 dark:bg-rose-500/10 text-rose-500 rounded-lg transition-all active:scale-95"
+                                    title="Reject"
+                                  >
+                                      <UserX className="w-4 h-4" />
+                                  </button>
+                              </div>
+                          </div>
+                      ))}
+                  </div>
               </div>
           )}
 

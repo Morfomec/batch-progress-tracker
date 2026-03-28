@@ -31,12 +31,49 @@ export const createGroupChat = async (name, creatorId) => {
     type: "group",
     members: [creatorId], // Creator joins automatically
     adminId: creatorId,   // Assign admin role to creator
+    pendingRequests: [],  // Initialize pending requests
     createdAt: serverTimestamp(),
   });
 };
 
 /**
- * Joins a Group Chat
+ * Requests to join a Group Chat
+ */
+export const requestJoinGroupChat = async (roomId, userId, userData) => {
+  const roomRef = doc(db, "chatRooms", roomId);
+  await updateDoc(roomRef, {
+    pendingRequests: arrayUnion({
+      uid: userId,
+      name: userData.name,
+      photo: userData.photo,
+      timestamp: new Date().toISOString()
+    })
+  });
+};
+
+/**
+ * Approves a Join Request
+ */
+export const approveJoinRequest = async (roomId, userId, userData) => {
+  const roomRef = doc(db, "chatRooms", roomId);
+  await updateDoc(roomRef, {
+    members: arrayUnion(userId),
+    pendingRequests: arrayRemove(userData) // userData must match exactly for arrayRemove
+  });
+};
+
+/**
+ * Rejects a Join Request
+ */
+export const rejectJoinRequest = async (roomId, userData) => {
+  const roomRef = doc(db, "chatRooms", roomId);
+  await updateDoc(roomRef, {
+    pendingRequests: arrayRemove(userData)
+  });
+};
+
+/**
+ * Joins a Group Chat (Legacy / Direct) - Keep for backward compatibility if needed, but we'll use requests mostly
  */
 export const joinGroupChat = async (roomId, userId) => {
   const roomRef = doc(db, "chatRooms", roomId);

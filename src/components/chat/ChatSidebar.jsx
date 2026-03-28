@@ -173,12 +173,18 @@ export default function ChatSidebar({
                   )}
                   <span className="truncate">{room.name}</span>
                 </div>
-                <button
-                  onClick={() => onJoinRoom(room.id)}
-                  className="px-2 py-0.5 text-xs font-semibold bg-emerald-100 hover:bg-emerald-200 dark:bg-[#248046] dark:hover:bg-[#1a6334] text-emerald-700 dark:text-white rounded transition-colors opacity-0 group-hover:opacity-100 shrink-0"
-                >
-                  Join
-                </button>
+                {room.pendingRequests?.some(r => r.uid === userId) ? (
+                  <span className="px-2 py-0.5 text-[10px] font-bold bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 rounded transition-colors shrink-0">
+                    Pending
+                  </span>
+                ) : (
+                  <button
+                    onClick={() => onJoinRoom(room.id, true)}
+                    className="px-2 py-0.5 text-xs font-semibold bg-emerald-100 hover:bg-emerald-200 dark:bg-[#248046] dark:hover:bg-[#1a6334] text-emerald-700 dark:text-white rounded transition-colors opacity-0 group-hover:opacity-100 shrink-0"
+                  >
+                    Request
+                  </button>
+                )}
               </div>
             ))}
           </div>
