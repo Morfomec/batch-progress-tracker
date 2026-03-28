@@ -86,12 +86,18 @@ export default function HelpPage() {
           let currentContent = snap.data().content;
           
           // Auto-update footer for Super Admin if it's the old version
-          if (isSuperAdmin && (currentContent.includes("Connect with Admin") || currentContent.includes("Connect with me") || currentContent.includes("Anything in your mind?"))) {
-            // Clean up the footer from instructions - it's already in the separate card now
-            currentContent = currentContent.replace(/Anything in your mind\?.*Connect with me.*/g, "")
-                                           .replace(/Have questions\?.*Connect with Admin.*/g, "")
-                                           .replace(/---.*Connect with me.*/g, "---")
-                                           .trim();
+          if (isSuperAdmin && (currentContent.toLowerCase().includes("connect with") || currentContent.toLowerCase().includes("have questions?"))) {
+            // Very aggressive cleanup to ensure no redundant footers remain in the DB
+            currentContent = currentContent
+              .split('\n')
+              .filter(line => !line.toLowerCase().includes("connect with") && !line.toLowerCase().includes("have questions?"))
+              .join('\n')
+              .trim();
+            
+            // Re-add a clean divider if it was stripped
+            if (!currentContent.endsWith("---")) {
+              currentContent += "\n\n---";
+            }
             
             const ref = doc(db, "config", "appHelp");
             setDoc(ref, { 
@@ -209,6 +215,10 @@ export default function HelpPage() {
           <span dangerouslySetInnerHTML={{ __html: line.slice(2).replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') }} />
         </div>
       );
+
+      // Hide any mentions of "Connect" or "questions" in the content - it's already in the separate card
+      if (line.toLowerCase().includes("connect with") || line.toLowerCase().includes("have questions?")) return null;
+
       if (line.startsWith("*") && line.endsWith("*") && !line.startsWith("**")) return (
         <p key={i} className="text-sm italic text-slate-500 dark:text-slate-400 mt-4">{line.slice(1, -1)}</p>
       );
@@ -305,26 +315,24 @@ export default function HelpPage() {
           )}
         </div>
 
-        {/* Connect with Admin Card */}
-        {!isSuperAdmin && (
-          <div className="flex justify-center mt-16 mb-12">
-            <div className="animate-float-slight glow-box bg-white/90 dark:bg-slate-900/90 rounded-full border border-indigo-100/60 dark:border-indigo-800/40 px-10 py-5 flex flex-col md:flex-row items-center gap-8 shadow-2xl backdrop-blur-lg">
-              <h3 className="font-extrabold text-slate-800 dark:text-white text-xl tracking-tight whitespace-nowrap">Anything in your mind?</h3>
-              <div className="w-px h-8 bg-slate-200 dark:bg-slate-700 hidden md:block"></div>
-              <button
-                onClick={handleConnectAdmin}
-                disabled={startingChat}
-                className="group relative flex items-center gap-3 px-8 py-3 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold transition-all hover:scale-105 active:scale-95 disabled:opacity-70 text-base whitespace-nowrap shadow-xl shadow-indigo-500/30"
-              >
-                <div className="absolute inset-0 rounded-full bg-indigo-400 blur-xl opacity-0 group-hover:opacity-40 transition-opacity"></div>
-                <span className="relative flex items-center gap-2">
-                  {startingChat ? <Loader2 className="w-4 h-4 animate-spin" /> : <Heart className="w-5 h-5 fill-rose-400 text-rose-400 drop-shadow-md group-hover:scale-125 transition-transform" />}
-                  Connect with me
-                </span>
-              </button>
-            </div>
+        {/* Connect with Admin Card (Shown to everyone, for preview/actual use) */}
+        <div className="flex justify-center mt-16 mb-12">
+          <div className="animate-float-slight glow-box bg-white/90 dark:bg-slate-900/90 rounded-full border border-indigo-100/60 dark:border-indigo-800/40 px-10 py-5 flex flex-col md:flex-row items-center gap-8 shadow-2xl backdrop-blur-lg">
+            <h3 className="font-extrabold text-slate-800 dark:text-white text-xl tracking-tight whitespace-nowrap">Anything in your mind?</h3>
+            <div className="w-px h-8 bg-slate-200 dark:bg-slate-700 hidden md:block"></div>
+            <button
+              onClick={handleConnectAdmin}
+              disabled={startingChat}
+              className="group relative flex items-center gap-3 px-8 py-3 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold transition-all hover:scale-105 active:scale-95 disabled:opacity-70 text-base whitespace-nowrap shadow-xl shadow-indigo-500/30"
+            >
+              <div className="absolute inset-0 rounded-full bg-indigo-400 blur-xl opacity-0 group-hover:opacity-40 transition-opacity"></div>
+              <span className="relative flex items-center gap-2">
+                {startingChat ? <Loader2 className="w-4 h-4 animate-spin" /> : <Heart className="w-5 h-5 fill-rose-400 text-rose-400 drop-shadow-md group-hover:scale-125 transition-transform" />}
+                Connect with me
+              </span>
+            </button>
           </div>
-        )}
+        </div>
       </div>
     </div>
   );
