@@ -61,9 +61,7 @@ Click any notification to jump directly to the related content. Chat message not
 | **Batch Admin** | Manage their own batch |
 | **Coordinator** | Manage English Kicks scores |
 | **Member** | Standard access |
-
----
-Anything in your mind? **Connect with me ❤️**`;
+---`;
 
 export default function HelpPage() {
   const { user, userProfile, isAdmin } = useAuth();
@@ -88,9 +86,12 @@ export default function HelpPage() {
           let currentContent = snap.data().content;
           
           // Auto-update footer for Super Admin if it's the old version
-          if (isSuperAdmin && (currentContent.includes("Connect with Admin") || currentContent.includes("Have questions?"))) {
-            currentContent = currentContent.replace(/Have questions\?.*Connect with Admin.*/g, "Anything in your mind? **Connect with me ❤️**")
-                                           .replace(/Have questions\?.*Connect with me.*/g, "Anything in your mind? **Connect with me ❤️**");
+          if (isSuperAdmin && (currentContent.includes("Connect with Admin") || currentContent.includes("Connect with me") || currentContent.includes("Anything in your mind?"))) {
+            // Clean up the footer from instructions - it's already in the separate card now
+            currentContent = currentContent.replace(/Anything in your mind\?.*Connect with me.*/g, "")
+                                           .replace(/Have questions\?.*Connect with Admin.*/g, "")
+                                           .replace(/---.*Connect with me.*/g, "---")
+                                           .trim();
             
             const ref = doc(db, "config", "appHelp");
             setDoc(ref, { 
@@ -223,19 +224,20 @@ export default function HelpPage() {
     <div className="min-h-screen p-4 sm:p-6 lg:p-8 transition-colors duration-300">
       <style>{`
         @keyframes float {
-          0%, 100% { transform: translateY(0px); }
-          50% { transform: translateY(-10px); }
+          0%, 100% { transform: translateY(0px) rotate(0deg); }
+          50% { transform: translateY(-8px) rotate(0.5deg); }
         }
-        .animate-float {
-          animation: float 6s ease-in-out infinite;
+        .animate-float-slight {
+          animation: float 8s ease-in-out infinite;
         }
-        .glow-border {
-          box-shadow: 0 0 20px rgba(99, 102, 241, 0.1);
-          transition: all 0.5s ease;
+        .glow-box {
+          box-shadow: 0 0 25px rgba(99, 102, 241, 0.05);
+          transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        .glow-border:hover {
-          box-shadow: 0 0 30px rgba(99, 102, 241, 0.2);
+        .glow-box:hover {
+          box-shadow: 0 0 40px rgba(99, 102, 241, 0.15);
           border-color: rgba(99, 102, 241, 0.4);
+          transform: scale(1.02);
         }
       `}</style>
       <div className="max-w-3xl mx-auto space-y-6">
@@ -305,18 +307,18 @@ export default function HelpPage() {
 
         {/* Connect with Admin Card */}
         {!isSuperAdmin && (
-          <div className="flex justify-center mt-12 mb-8">
-            <div className="animate-float glow-border bg-gradient-to-r from-indigo-50/80 via-white to-purple-50/80 dark:from-indigo-900/10 dark:via-slate-900 dark:to-purple-900/10 rounded-full border border-indigo-100/50 dark:border-indigo-800/30 px-8 py-4 flex flex-col md:flex-row items-center gap-6 shadow-2xl backdrop-blur-md">
-              <h3 className="font-extrabold text-slate-800 dark:text-white text-lg tracking-tight whitespace-nowrap">Anything in your mind?</h3>
-              <div className="w-px h-6 bg-slate-200 dark:bg-slate-700 hidden md:block"></div>
+          <div className="flex justify-center mt-16 mb-12">
+            <div className="animate-float-slight glow-box bg-white/90 dark:bg-slate-900/90 rounded-full border border-indigo-100/60 dark:border-indigo-800/40 px-10 py-5 flex flex-col md:flex-row items-center gap-8 shadow-2xl backdrop-blur-lg">
+              <h3 className="font-extrabold text-slate-800 dark:text-white text-xl tracking-tight whitespace-nowrap">Anything in your mind?</h3>
+              <div className="w-px h-8 bg-slate-200 dark:bg-slate-700 hidden md:block"></div>
               <button
                 onClick={handleConnectAdmin}
                 disabled={startingChat}
-                className="group relative flex items-center gap-2 px-6 py-2.5 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold transition-all hover:scale-105 active:scale-95 disabled:opacity-70 text-sm whitespace-nowrap shadow-md shadow-indigo-500/20"
+                className="group relative flex items-center gap-3 px-8 py-3 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold transition-all hover:scale-105 active:scale-95 disabled:opacity-70 text-base whitespace-nowrap shadow-xl shadow-indigo-500/30"
               >
-                <div className="absolute inset-0 rounded-full bg-indigo-400 blur-md opacity-0 group-hover:opacity-40 transition-opacity"></div>
+                <div className="absolute inset-0 rounded-full bg-indigo-400 blur-xl opacity-0 group-hover:opacity-40 transition-opacity"></div>
                 <span className="relative flex items-center gap-2">
-                  {startingChat ? <Loader2 className="w-4 h-4 animate-spin" /> : <Heart className="w-4 h-4 fill-current text-rose-300 group-hover:scale-125 transition-transform" />}
+                  {startingChat ? <Loader2 className="w-4 h-4 animate-spin" /> : <Heart className="w-5 h-5 fill-rose-400 text-rose-400 drop-shadow-md group-hover:scale-125 transition-transform" />}
                   Connect with me
                 </span>
               </button>
