@@ -318,6 +318,25 @@ export default function ChatSettings() {
            </div>
       )}
 
+      {/* SUPER ADMIN: Developer Tools (Moved to Top for Visibility) */}
+      {user?.email?.toLowerCase().trim() === 'muhammedshifil@gmail.com' && (
+          <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/30 rounded-xl p-4 flex flex-col gap-3 animate-slideDown shadow-sm">
+              <div className="flex items-center gap-3">
+                  <ShieldAlert className="w-4 h-4 text-amber-600" />
+                  <p className="text-xs font-black text-amber-700 dark:text-amber-400 uppercase tracking-tight">Main Admin - Developer Tools</p>
+              </div>
+              <p className="text-[11px] text-amber-600 dark:text-amber-500 font-medium">
+                  CAUTION: Use the button below to clear all test rooms and pokes from the database before going live.
+              </p>
+              <button
+                onClick={purgeAllData}
+                className="w-full px-3 py-2.5 bg-amber-600 hover:bg-amber-700 text-white text-xs font-black rounded-lg transition-all shadow-md active:scale-[0.98]"
+              >
+                PURGE ALL DATABASE CHAT DATA
+              </button>
+          </div>
+      )}
+
       <div className="grid grid-cols-1 gap-4">
           {/* Notifications Toggle (Compact Card) */}
           <div className="bg-white dark:bg-[#0a0a0a] border border-slate-200 dark:border-slate-800 rounded-xl p-4 flex items-center justify-between shadow-sm">
@@ -390,40 +409,24 @@ export default function ChatSettings() {
           </div>
           )}
 
-          {/* Delete Action (Admins only for Groups, anyone for Private) */}
           {(isAdmin || isPrivate) && !isGlobal && (
-              <div className="bg-rose-50/50 dark:bg-rose-950/20 border border-rose-100 dark:border-rose-900/30 rounded-xl p-4 flex items-center justify-between mt-4">
-                  <div className="flex items-center gap-3">
-                      <ShieldAlert className="w-4 h-4 text-rose-500" />
-                      <p className="text-xs font-bold text-rose-700 dark:text-rose-400">Danger Zone</p>
+              <div className="bg-rose-50/50 dark:bg-rose-950/20 border border-rose-100 dark:border-rose-900/30 rounded-xl p-4 flex flex-col gap-3 mt-4">
+                  <div className="flex items-center gap-2">
+                       <ShieldAlert className="w-4 h-4 text-rose-500" />
+                       <span className="text-xs font-bold text-rose-700 dark:text-rose-400 uppercase tracking-wider">Danger Zone</span>
                   </div>
+                  <p className="text-[11px] text-rose-600 dark:text-rose-500">
+                      {isPrivate ? "Deleting this chat will remove it for both participants forever." : "Deleting this group will remove all messages and members."}
+                  </p>
                   <button
                     onClick={() => setConfirmDialog({ isOpen: true, type: 'delete' })}
-                    className="px-3 py-1.5 text-rose-600 hover:text-rose-700 text-xs font-black uppercase tracking-wider transition-colors"
+                    className="w-full py-2 bg-rose-600 hover:bg-rose-700 text-white text-xs font-black rounded-lg transition-colors shadow-sm"
                   >
-                    {isPrivate ? "Delete Chat" : "Delete Group"}
+                    {isPrivate ? "DELETE CONVERSATION" : "DELETE GROUP"}
                   </button>
               </div>
           )}
 
-          {/* TEMPORARY: Purge Test Data Button (Only for you during setup) */}
-          {user.email === 'muhammedshifil@gmail.com' && (
-              <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-100 dark:border-amber-900/30 rounded-xl p-4 flex flex-col gap-3 mt-8">
-                  <div className="flex items-center gap-3">
-                      <ShieldAlert className="w-4 h-4 text-amber-500" />
-                      <p className="text-xs font-bold text-amber-700 dark:text-amber-400">Developer Tools</p>
-                  </div>
-                  <p className="text-[11px] text-amber-600 dark:text-amber-500">
-                      Use this to clear all test data from the database before switching projects or going live.
-                  </p>
-                  <button
-                    onClick={purgeAllData}
-                    className="w-full px-3 py-2 bg-amber-600 hover:bg-amber-700 text-white text-xs font-black rounded-lg transition-colors"
-                  >
-                    PURGE ALL CHAT & POKE DATA
-                  </button>
-              </div>
-          )}
       </div>
 
       {/* Members Modal (Keep as is but slightly more compact) */}
