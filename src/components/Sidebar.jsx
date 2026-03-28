@@ -23,7 +23,7 @@ function Sidebar({ groupContext = {}, onClose }) {
     { name: 'Batch Mates', icon: Users, path: '/dashboard/peers' },
     { name: 'My Progress', icon: UserCircle, path: '/dashboard/my-progress' },
     { name: 'English Kicks', icon: Zap, path: '/dashboard/english-kick' },
-    { name: 'Chat', icon: MessageSquare, path: '/dashboard/chat' },
+    { name: 'Chat', icon: MessageSquare, path: '/dashboard/chat', hideIfNoGroups: true },
     { name: 'My Profile', icon: UserIcon, path: '/dashboard/my-profile' },
   ];
 
@@ -107,6 +107,9 @@ function Sidebar({ groupContext = {}, onClose }) {
           <p className="px-3 text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-3">Main Menu</p>
           <nav className="space-y-1">
             {navItems.map((item) => {
+              // Hide Chat if user has no batches (unless they are admin)
+              if (item.hideIfNoGroups && (!groups || groups.length === 0) && !isAdmin) return null;
+
               const isActive = location.pathname === item.path || (item.path !== "/dashboard" && location.pathname.startsWith(item.path));
               return (
                 <Link

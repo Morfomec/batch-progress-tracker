@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useOutletContext, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { 
   subscribeToChatRooms, 
@@ -16,7 +17,17 @@ import toast from "react-hot-toast";
 import { X, Loader2 } from "lucide-react";
 
 export default function Chat() {
-  const { user, userProfile } = useAuth();
+  const { user, userProfile, isAdmin, loading: authLoading } = useAuth();
+  const { groups } = useOutletContext() || {};
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  // Access Restriction: Must have at least one batch (unless admin)
+  useEffect(() => {
+    if (!authLoading && !isAdmin && (!groups || groups.length === 0)) {
+        navigate("/dashboard");
+    }
+  }, [groups, isAdmin, authLoading, navigate]);
   const [rooms, setRooms] = useState([]);
   const [activeRoomId, setActiveRoomId] = useState(null);
   const [showMobileSidebar, setShowMobileSidebar] = useState(false);

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useOutletContext } from "react-router-dom";
 import { doc, getDoc, collection, getDocs, updateDoc, writeBatch } from "firebase/firestore";
 import { db } from "../firebase/firebaseConfig";
 import { ArrowLeft, LogOut, Trash2, Camera, Check, Settings, User, Search, Bell, BellOff, Loader2, Hash, X, ExternalLink, Edit2, ShieldAlert } from "lucide-react";
@@ -11,7 +11,15 @@ import { UserMinus, ShieldX, UserPlus, UserCheck, UserX } from "lucide-react";
 export default function ChatSettings() {
   const { roomId: roomIdParam } = useParams();
   const navigate = useNavigate();
-  const { user, userProfile } = useAuth();
+  const { user, userProfile, isAdmin: isSystemAdmin, loading: authLoading } = useAuth();
+  const { groups } = useOutletContext() || {};
+
+  // Access Restriction: Must have at least one batch (unless admin)
+  useEffect(() => {
+    if (!authLoading && !isSystemAdmin && (!groups || groups.length === 0)) {
+        navigate("/dashboard");
+    }
+  }, [groups, isSystemAdmin, authLoading, navigate]);
   
   const [room, setRoom] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -287,7 +295,7 @@ export default function ChatSettings() {
 
   if (!room) return null;
 
-  const isAdmin = room.adminId === user.uid;
+  const isRoomAdmin = room.adminId === user.uid;
   const isGlobal = room.type === 'global';
   const isPrivate = room.type === 'private';
   const filteredMembers = membersList.filter(m => m.name.toLowerCase().includes(searchQuery.toLowerCase()));
@@ -493,7 +501,7 @@ export default function ChatSettings() {
           </div>
           )}
 
-          {(isAdmin || isPrivate) && !isGlobal && (
+          {(isRoomAdmin || isPrivate) && !isGlobal && (
               <div className="bg-rose-50/50 dark:bg-rose-950/20 border border-rose-100 dark:border-rose-900/30 rounded-xl p-4 flex flex-col gap-3 mt-4">
                   <div className="flex items-center gap-2">
                        <ShieldAlert className="w-4 h-4 text-rose-500" />
@@ -552,7 +560,7 @@ export default function ChatSettings() {
                             </button>
                             
                             {/* Kick/Ban UI for Admins & SuperAdmin */}
-                            {(isAdmin || user.email === 'muhammedshifil@gmail.com') && m.id !== user.uid && (
+                            {(isRoomAdmin || user.email === 'muhammedshifil@gmail.com') && m.id !== user.uid && (
                                 <>
                                     <button 
                                         onClick={() => handleKickUser(m.id)} 
