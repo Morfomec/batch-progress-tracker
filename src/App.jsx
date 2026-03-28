@@ -1,5 +1,6 @@
 import { Routes, Route } from "react-router-dom";
 import ErrorBoundary from "./components/ErrorBoundary";
+import NotificationManager from "./components/NotificationManager";
 
 import Login from "./pages/Login";
 import Register from "./pages/Register";
@@ -16,6 +17,8 @@ import PeerProfile from "./pages/PeerProfile";
 import MyProfile from "./pages/MyProfile";
 import Peers from "./pages/Peers";
 import EnglishKick from "./pages/EnglishKick";
+import Chat from "./pages/Chat";
+import ChatSettings from "./pages/ChatSettings";
 
 import ProtectedRoute from "./components/ProtectedRoute";
 import AdminRoute from "./components/AdminRoute";
@@ -41,6 +44,7 @@ function App() {
           },
         }}
       />
+      <NotificationManager />
       <ErrorBoundary>
         <Routes>
 
@@ -67,6 +71,8 @@ function App() {
                 <Route path="my-progress" element={<MyProgress />} />
                 <Route path="peers" element={<Peers />} />
                 <Route path="english-kick" element={<EnglishKick />} />
+                <Route path="chat" element={<Chat />} />
+                <Route path="chat/:roomId/settings" element={<ChatSettings />} />
                 {/* SETTINGS (Non-group specific) */}
                 <Route path="settings" element={<Settings />} />
                 <Route path="my-profile" element={<MyProfile />} />

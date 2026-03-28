@@ -1,0 +1,216 @@
+import { useState, useEffect } from "react";
+import { useAuth } from "../context/AuthContext";
+import { 
+  subscribeToChatRooms, 
+  joinGroupChat, 
+  leaveGroupChat, 
+  createGroupChat,
+  initializeGlobalChat
+} from "../firebase/chatService";
+import { collection, query, where, getDocs, documentId } from "firebase/firestore";
+import { db } from "../firebase/firebaseConfig";
+import ChatSidebar from "../components/chat/ChatSidebar";
+import ChatWindow from "../components/chat/ChatWindow";
+import toast from "react-hot-toast";
+import { X, Loader2 } from "lucide-react";
+
+export default function Chat() {
+  const { user, userProfile } = useAuth();
+  const [rooms, setRooms] = useState([]);
+  const [activeRoomId, setActiveRoomId] = useState(null);
+  const [showMobileSidebar, setShowMobileSidebar] = useState(false);
+  const [peerProfiles, setPeerProfiles] = useState({});
+  
+  // Custom Modal State
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [newGroupName, setNewGroupName] = useState("");
+  const [creatingGroup, setCreatingGroup] = useState(false);
+
+  useEffect(() => {
+    initializeGlobalChat().catch(err => console.error("Error init global chat:", err));
+
+    const unsubscribe = subscribeToChatRooms((fetchedRooms) => {
+      setRooms(fetchedRooms);
+      if (!activeRoomId) {
+        const globalRoom = fetchedRooms.find(r => r.type === 'global');
+        if (globalRoom) setActiveRoomId(globalRoom.id);
+      }
+    });
+
+    return () => unsubscribe();
+  }, [activeRoomId]);
+
+  // Fetch Profiles for ALL relevant users (Peers in private chats + members of active room)
+  useEffect(() => {
+    const fetchRelevantProfiles = async () => {
+      if (!user?.uid || rooms.length === 0) return;
+
+      const idsToFetch = new Set();
+      
+      // 1. Peers from private chats (for sidebar)
+      rooms.forEach(room => {
+        if (room.type === 'private' && room.members?.includes(user.uid)) {
+          const peerId = room.members.find(id => id !== user.uid);
+          if (peerId && !peerProfiles[peerId]) {
+            idsToFetch.add(peerId);
+          }
+        }
+      });
+
+      // 2. Members of the active room (for chat window header and message names)
+      const activeRoom = rooms.find(r => r.id === activeRoomId);
+      if (activeRoom && activeRoom.members) {
+          activeRoom.members.forEach(mId => {
+              if (mId !== user.uid && !peerProfiles[mId]) {
+                  idsToFetch.add(mId);
+              }
+          });
+      }
+
+      if (idsToFetch.size === 0) return;
+
+      try {
+        // Firestore 'in' query limit is 30. If more, we should chunk or handle differently.
+        // For now, assume < 30 relevant users for the current view.
+        const idArray = Array.from(idsToFetch).slice(0, 30);
+        const q = query(
+          collection(db, "users"),
+          where(documentId(), "in", idArray)
+        );
+        const snap = await getDocs(q);
+        const newProfiles = { ...peerProfiles };
+        snap.forEach(doc => {
+          newProfiles[doc.id] = doc.data();
+        });
+        setPeerProfiles(newProfiles);
+      } catch (error) {
+        console.error("Error fetching peer profiles:", error);
+      }
+    };
+
+    fetchRelevantProfiles();
+  }, [rooms, user?.uid, activeRoomId, peerProfiles]);
+
+  const handleJoinRoom = async (roomId) => {
+    try {
+      await joinGroupChat(roomId, user.uid);
+      setActiveRoomId(roomId);
+      toast.success("Joined group chat!");
+    } catch (error) {
+      toast.error("Failed to join group.");
+    }
+  };
+
+  const handleLeaveRoom = async (roomId) => {
+    try {
+      await leaveGroupChat(roomId, user.uid);
+      const globalRoom = rooms.find(r => r.type === 'global');
+      setActiveRoomId(globalRoom?.id || null);
+      toast.success("Left group chat.");
+    } catch (error) {
+      toast.error("Failed to leave group.");
+    }
+  };
+
+  const handleCreateRoomSubmit = async (e) => {
+    e.preventDefault();
+    if (!newGroupName?.trim()) return;
+    
+    setCreatingGroup(true);
+    try {
+      await createGroupChat(newGroupName.trim(), user.uid);
+      toast.success(`Group "${newGroupName}" created!`);
+      setShowCreateModal(false);
+      setNewGroupName("");
+    } catch (error) {
+      toast.error("Failed to create group.");
+    } finally {
+      setCreatingGroup(false);
+    }
+  };
+
+  const handleSelectRoom = (roomId) => {
+    setActiveRoomId(roomId);
+    setShowMobileSidebar(false);
+  };
+
+  const activeRoom = rooms.find(r => r.id === activeRoomId);
+  const userName = userProfile?.fullName || userProfile?.nickName || user?.displayName || "User";
+
+  return (
+    <div className="absolute inset-0 flex bg-white dark:bg-black overflow-hidden text-sm">
+      <div 
+        className={`${showMobileSidebar ? 'flex absolute inset-0 z-20' : 'hidden md:flex'} md:relative flex-col w-full md:w-72 lg:w-80 shrink-0 border-r border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-[#0a0a0a] transition-all`}
+      >
+        <ChatSidebar 
+          rooms={rooms}
+          activeRoomId={activeRoomId}
+          onSelectRoom={(room) => handleSelectRoom(room.id)}
+          onJoinRoom={handleJoinRoom}
+          userId={user?.uid}
+          userProfile={userProfile}
+          peerProfiles={peerProfiles}
+          onCreateRoom={() => setShowCreateModal(true)}
+        />
+      </div>
+
+      <div className={`${showMobileSidebar ? 'hidden md:flex' : 'flex'} flex-1 flex-col overflow-hidden relative bg-white dark:bg-black`}>
+        <ChatWindow 
+          activeRoom={activeRoom}
+          userId={user?.uid}
+          userName={userName}
+          userPhoto={userProfile?.photoURL || user?.photoURL || null}
+          peerProfiles={peerProfiles}
+          onLeaveRoom={handleLeaveRoom}
+          onMenuClick={() => setShowMobileSidebar(true)}
+        />
+      </div>
+
+      {showCreateModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fadeIn">
+          <div className="bg-white dark:bg-[#1a1a1a] rounded-2xl shadow-2xl w-full max-w-md overflow-hidden border border-slate-200 dark:border-slate-800 flex flex-col scale-100 transition-transform">
+            <div className="flex items-center justify-between p-4 sm:p-5 border-b border-slate-100 dark:border-slate-800/80">
+              <h3 className="text-lg font-bold text-slate-800 dark:text-white">Create New Group</h3>
+              <button 
+                onClick={() => setShowCreateModal(false)}
+                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors bg-slate-100 dark:bg-slate-800/50 hover:bg-slate-200 dark:hover:bg-slate-700 p-1.5 rounded-full"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <form onSubmit={handleCreateRoomSubmit} className="p-4 sm:p-5">
+              <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Group Name</label>
+              <input
+                type="text"
+                autoFocus
+                value={newGroupName}
+                onChange={(e) => setNewGroupName(e.target.value)}
+                placeholder="e.g. Project Avengers"
+                className="w-full px-4 py-3 bg-slate-50 dark:bg-black border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white rounded-xl focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 outline-none transition-all placeholder-slate-400"
+                required
+              />
+              
+              <div className="mt-6 flex justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={() => setShowCreateModal(false)}
+                  className="px-5 py-2.5 rounded-xl text-slate-600 dark:text-slate-300 font-medium hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={creatingGroup || !newGroupName.trim()}
+                  className="px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 dark:disabled:bg-indigo-800 disabled:cursor-not-allowed text-white font-bold shadow-md transition-all flex items-center gap-2"
+                >
+                  {creatingGroup ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
+                  Create Group
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

@@ -7,10 +7,8 @@ import { Bell, Check, Trash2, X } from "lucide-react";
 function NotificationDropdown() {
     const { user } = useAuth();
     const [notifications, setNotifications] = useState([]);
-    const [prevUnreadCount, setPrevUnreadCount] = useState(0);
     const [isOpen, setIsOpen] = useState(false);
     const dropdownRef = useRef(null);
-    const audioRef = useRef(new Audio("https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3"));
 
     useEffect(() => {
         if (!user) return;
@@ -29,12 +27,6 @@ function NotificationDropdown() {
 
             const unreadCount = data.filter(n => n.unread).length;
 
-            // Play sound if unread count increases
-            if (unreadCount > prevUnreadCount) {
-                audioRef.current.play().catch(e => console.log("Audio play blocked by browser:", e));
-            }
-            setPrevUnreadCount(unreadCount);
-
             // Set PWA badge if supported
             if ("setAppBadge" in navigator) {
                 if (unreadCount > 0) {
@@ -46,7 +38,7 @@ function NotificationDropdown() {
         });
 
         return () => unsubscribe();
-    }, [user, prevUnreadCount]);
+    }, [user]);
 
     useEffect(() => {
         function handleClickOutside(event) {
@@ -166,10 +158,6 @@ function NotificationDropdown() {
                                                 {notification.type === 'success' ? (
                                                     <div className={`w-8 h-8 rounded-full flex items-center justify-center ${notification.unread ? 'bg-emerald-500 text-white shadow-emerald-500/20' : 'bg-emerald-100 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400'} shadow-sm`}>
                                                         <Check className="w-4 h-4" />
-                                                    </div>
-                                                ) : notification.type === 'alert' ? (
-                                                    <div className={`w-8 h-8 rounded-full flex items-center justify-center ${notification.unread ? 'bg-amber-500 text-white shadow-amber-500/20' : 'bg-amber-100 text-amber-600 dark:bg-amber-500/20 dark:text-amber-400'} shadow-sm`}>
-                                                        <Bell className="w-4 h-4" />
                                                     </div>
                                                 ) : (
                                                     <div className={`w-8 h-8 rounded-full flex items-center justify-center ${notification.unread ? 'bg-indigo-500 text-white shadow-indigo-500/20' : 'bg-indigo-100 text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-400'} shadow-sm`}>
