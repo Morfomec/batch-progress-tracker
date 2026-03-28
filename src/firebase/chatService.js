@@ -1,4 +1,4 @@
-import { collection, doc, addDoc, onSnapshot, query, orderBy, serverTimestamp, getDocs, updateDoc, arrayUnion, arrayRemove, setDoc, getDoc, deleteDoc } from "firebase/firestore";
+import { collection, doc, addDoc, onSnapshot, query, orderBy, serverTimestamp, getDocs, updateDoc, arrayUnion, arrayRemove, setDoc, getDoc, deleteDoc, where, or } from "firebase/firestore";
 import { db } from "./firebaseConfig";
 
 // -------------------------------------------------------------
@@ -56,11 +56,26 @@ export const leaveGroupChat = async (roomId, userId) => {
 };
 
 /**
- * Subscribe to all chat rooms (for sidebar)
+ * Subscribe to allowed chat rooms (Global, Groups, and User's Private chats)
  */
-export const subscribeToChatRooms = (callback) => {
+export const subscribeToChatRooms = (userId, callback) => {
+  if (!userId) return () => {};
+  
   const chatRoomsRef = collection(db, "chatRooms");
-  const q = query(chatRoomsRef, orderBy("createdAt", "asc"));
+  
+  // Query for rooms that are:
+  // 1. Global (everyone sees)
+  // 2. Group (everyone sees for discovery)
+  // 3. Private AND the user is a member
+  const q = query(
+    chatRoomsRef, 
+    or(
+      where("type", "==", "global"),
+      where("type", "==", "group"),
+      where("members", "array-contains", userId)
+    ),
+    orderBy("createdAt", "asc")
+  );
   
   return onSnapshot(q, (snapshot) => {
     const rooms = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));

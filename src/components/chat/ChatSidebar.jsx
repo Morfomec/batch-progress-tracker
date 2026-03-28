@@ -85,7 +85,6 @@ export default function ChatSidebar({
             Public
           </div>
           {globalRoom && (
-            globalRoom.members?.includes(userId) ? (
               <div
                 className={`w-full group/item flex items-center justify-between gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer ${
                   activeRoomId === globalRoom.id
@@ -113,22 +112,6 @@ export default function ChatSidebar({
                   )}
                 </button>
               </div>
-            ) : (
-              <div
-                className="w-full flex items-center justify-between gap-2 px-3 py-2 rounded-lg text-sm font-medium text-slate-600 dark:text-[#949ba4] hover:bg-slate-200/50 dark:hover:bg-[#35373c] transition-colors mb-0.5 group"
-              >
-                <div className="flex items-center gap-2 min-w-0">
-                  <Globe className="w-4 h-4 shrink-0 text-[#408A71]" />
-                  <span className="truncate">{globalRoom.name || "Global Chat"}</span>
-                </div>
-                <button
-                  onClick={() => onJoinRoom(globalRoom.id)}
-                  className="px-2 py-0.5 text-xs font-semibold bg-emerald-100 hover:bg-emerald-200 dark:bg-[#248046] dark:hover:bg-[#1a6334] text-emerald-700 dark:text-white rounded transition-colors opacity-0 group-hover:opacity-100 shrink-0"
-                >
-                  Join
-                </button>
-              </div>
-            )
           )}
         </div>
 

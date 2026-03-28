@@ -208,7 +208,7 @@ export default function ChatWindow({ activeRoom, userId, userName, userPhoto, pe
       )}
 
       {/* Input Area */}
-      {activeRoom?.members?.includes(userId) ? (
+      {(activeRoom?.members?.includes(userId) || activeRoom?.type === 'global') ? (
       <div className="px-3 pb-3 sm:px-4 sm:pb-4 pt-2 bg-white dark:bg-[#0a0a0a] shrink-0 border-t border-slate-100 dark:border-slate-900">
         <form onSubmit={handleSend} className="relative flex items-end bg-slate-100 dark:bg-zinc-900 rounded-2xl overflow-hidden shadow-inner outline outline-1 outline-transparent focus-within:outline-indigo-500/30 transition-all">
           <button

@@ -27,9 +27,10 @@ export default function Chat() {
   const [creatingGroup, setCreatingGroup] = useState(false);
 
   useEffect(() => {
+    if (!user?.uid) return;
     initializeGlobalChat().catch(err => console.error("Error init global chat:", err));
 
-    const unsubscribe = subscribeToChatRooms((fetchedRooms) => {
+    const unsubscribe = subscribeToChatRooms(user.uid, (fetchedRooms) => {
       // Filter out rooms where the user is BANNED
       const filteredRooms = fetchedRooms.filter(r => !r.bannedUsers?.includes(user?.uid));
       setRooms(filteredRooms);

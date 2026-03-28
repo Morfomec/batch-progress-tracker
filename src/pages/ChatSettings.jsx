@@ -43,10 +43,18 @@ export default function ChatSettings() {
       try {
         const docRef = doc(db, "chatRooms", roomIdParam);
         const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-          const data = { id: docSnap.id, ...docSnap.data() };
-          setRoom(data);
-          setEditNameValue(data.name || "");
+          if (docSnap.exists()) {
+            const data = { id: docSnap.id, ...docSnap.data() };
+            
+            // Privacy Check: If private chat, user MUST be a member
+            if (data.type === 'private' && !data.members?.includes(user?.uid)) {
+                toast.error("You don't have permission to view this chat's settings.");
+                navigate("/dashboard/chat");
+                return;
+            }
+
+            setRoom(data);
+            setEditNameValue(data.name || "");
 
           if (data.type === 'private') {
             const peerId = data.members?.find(id => id !== user.uid);
@@ -103,8 +111,8 @@ export default function ChatSettings() {
       });
 
       // Super Admin sees EVERYONE in Global Chat or Groups
-      // Regular users only see room members
-      if (!isSuperAdmin) {
+      // Regular users only see room members (except for Global Chat where everyone is a member)
+      if (!isSuperAdmin && room.type !== 'global') {
         users = users.filter(u => room.members?.includes(u.id));
       }
       
