@@ -30,9 +30,12 @@ export default function Chat() {
     initializeGlobalChat().catch(err => console.error("Error init global chat:", err));
 
     const unsubscribe = subscribeToChatRooms((fetchedRooms) => {
-      setRooms(fetchedRooms);
+      // Filter out rooms where the user is BANNED
+      const filteredRooms = fetchedRooms.filter(r => !r.bannedUsers?.includes(user?.uid));
+      setRooms(filteredRooms);
+
       if (!activeRoomId) {
-        const globalRoom = fetchedRooms.find(r => r.type === 'global');
+        const globalRoom = filteredRooms.find(r => r.type === 'global');
         if (globalRoom) setActiveRoomId(globalRoom.id);
       }
     });

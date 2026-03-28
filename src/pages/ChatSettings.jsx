@@ -1,11 +1,12 @@
 import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { doc, getDoc, collection, getDocs, updateDoc } from "firebase/firestore";
+import { doc, getDoc, collection, getDocs, updateDoc, writeBatch } from "firebase/firestore";
 import { db } from "../firebase/firebaseConfig";
 import { ArrowLeft, LogOut, Trash2, Camera, Check, Settings, User, Search, Bell, BellOff, Loader2, Hash, X, ExternalLink, Edit2, ShieldAlert } from "lucide-react";
 import toast from "react-hot-toast";
 import { useAuth } from "../context/AuthContext";
-import { updateGroupName, deleteGroupChat, updateGroupIcon } from "../firebase/chatService";
+import { updateGroupName, deleteGroupChat, updateGroupIcon, kickUserFromRoom, banUserFromRoom } from "../firebase/chatService";
+import { UserMinus, ShieldX } from "lucide-react";
 
 export default function ChatSettings() {
   const { roomId: roomIdParam } = useParams();
@@ -84,7 +85,8 @@ export default function ChatSettings() {
 
   const handleOpenMembersModal = async () => {
     setShowMembersModal(true);
-    if (membersList.length > 0) return;
+    // Refresh members list always if SuperAdmin to get latest registrations
+    const isSuperAdmin = user.email === 'muhammedshifil@gmail.com';
     
     setLoadingMembers(true);
     try {
@@ -95,17 +97,45 @@ export default function ChatSettings() {
         users.push({
           id: doc.id,
           name: d.fullName || d.nickName || d.displayName || d.email || "Unknown User",
-          photo: d.photoURL || null
+          photo: d.photoURL || null,
+          email: d.email 
         });
       });
 
-      users = users.filter(u => room.members?.includes(u.id));
+      // Super Admin sees EVERYONE in Global Chat or Groups
+      // Regular users only see room members
+      if (!isSuperAdmin) {
+        users = users.filter(u => room.members?.includes(u.id));
+      }
+      
       users.sort((a,b) => a.name.localeCompare(b.name));
       setMembersList(users);
     } catch (err) {
       console.error("Failed to fetch members", err);
     } finally {
       setLoadingMembers(false);
+    }
+  };
+
+  const handleKickUser = async (targetUserId) => {
+    if (!window.confirm("Remove this user from the chat?")) return;
+    try {
+        await kickUserFromRoom(room.id, targetUserId);
+        setMembersList(prev => prev.filter(m => m.id !== targetUserId));
+        toast.success("User removed from chat.");
+    } catch (e) {
+        toast.error("Failed to remove user.");
+    }
+  };
+
+  const handleBanUser = async (targetUserId) => {
+    if (!window.confirm("BAN this user? They will be kicked and unable to re-enter this chat.")) return;
+    try {
+        await banUserFromRoom(room.id, targetUserId);
+        setMembersList(prev => prev.filter(m => m.id !== targetUserId));
+        toast.success("User BANNED from room.");
+    } catch (e) {
+        toast.error("Failed to ban user.");
     }
   };
 
@@ -131,6 +161,28 @@ export default function ChatSettings() {
       }
     }
     setConfirmDialog({ isOpen: false, type: null });
+  };
+
+  const purgeAllData = async () => {
+    if (!window.confirm("CRITICAL: This will delete ALL chat rooms and pokes for EVERYONE. Are you absolutely sure?")) return;
+    setLoading(true);
+    try {
+        const roomsSnap = await getDocs(collection(db, "chatRooms"));
+        const pokesSnap = await getDocs(collection(db, "pokes"));
+        
+        const batch = writeBatch(db);
+        roomsSnap.forEach(d => batch.delete(d.ref));
+        pokesSnap.forEach(d => batch.delete(d.ref));
+        
+        await batch.commit();
+        toast.success("All test data purged!");
+        navigate("/dashboard/chat");
+    } catch (err) {
+        console.error("Purge failed", err);
+        toast.error("Failed to purge data");
+    } finally {
+        setLoading(false);
+    }
   };
 
   const handleExitClick = () => {
@@ -353,6 +405,25 @@ export default function ChatSettings() {
                   </button>
               </div>
           )}
+
+          {/* TEMPORARY: Purge Test Data Button (Only for you during setup) */}
+          {user.email === 'muhammedshifil@gmail.com' && (
+              <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-100 dark:border-amber-900/30 rounded-xl p-4 flex flex-col gap-3 mt-8">
+                  <div className="flex items-center gap-3">
+                      <ShieldAlert className="w-4 h-4 text-amber-500" />
+                      <p className="text-xs font-bold text-amber-700 dark:text-amber-400">Developer Tools</p>
+                  </div>
+                  <p className="text-[11px] text-amber-600 dark:text-amber-500">
+                      Use this to clear all test data from the database before switching projects or going live.
+                  </p>
+                  <button
+                    onClick={purgeAllData}
+                    className="w-full px-3 py-2 bg-amber-600 hover:bg-amber-700 text-white text-xs font-black rounded-lg transition-colors"
+                  >
+                    PURGE ALL CHAT & POKE DATA
+                  </button>
+              </div>
+          )}
       </div>
 
       {/* Members Modal (Keep as is but slightly more compact) */}
@@ -388,9 +459,31 @@ export default function ChatSettings() {
                             </div>
                             <span className="text-[13px] font-medium text-slate-700 dark:text-slate-300 truncate">{m.name}</span>
                           </div>
-                          <button onClick={() => navigate(`/dashboard/profile/${m.id}`)} className="p-1.5 text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-full">
-                            <ExternalLink className="w-3.5 h-3.5" />
-                          </button>
+                          <div className="flex items-center gap-1">
+                            <button onClick={() => navigate(`/dashboard/profile/${m.id}`)} className="p-1.5 text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-full" title="View Profile">
+                                <ExternalLink className="w-3.5 h-3.5" />
+                            </button>
+                            
+                            {/* Kick/Ban UI for Admins & SuperAdmin */}
+                            {(isAdmin || user.email === 'muhammedshifil@gmail.com') && m.id !== user.uid && (
+                                <>
+                                    <button 
+                                        onClick={() => handleKickUser(m.id)} 
+                                        className="p-1.5 text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-500/10 rounded-full" 
+                                        title="Kick User"
+                                    >
+                                        <UserMinus className="w-3.5 h-3.5" />
+                                    </button>
+                                    <button 
+                                        onClick={() => handleBanUser(m.id)} 
+                                        className="p-1.5 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/10 rounded-full" 
+                                        title="BAN User"
+                                    >
+                                        <ShieldX className="w-3.5 h-3.5" />
+                                    </button>
+                                </>
+                            )}
+                          </div>
                         </div>
                       ))
                     )}

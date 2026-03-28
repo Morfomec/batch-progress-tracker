@@ -174,3 +174,26 @@ export const deleteGroupChat = async (roomId) => {
   const roomRef = doc(db, "chatRooms", roomId);
   await deleteDoc(roomRef);
 };
+
+/**
+ * Kicks a user from a group chat
+ */
+export const kickUserFromRoom = async (roomId, targetUserId) => {
+    if (!roomId || !targetUserId) return;
+    const roomRef = doc(db, "chatRooms", roomId);
+    await updateDoc(roomRef, {
+        members: arrayRemove(targetUserId)
+    });
+};
+
+/**
+ * Bans a user from a room (prevents re-entry)
+ */
+export const banUserFromRoom = async (roomId, targetUserId) => {
+    if (!roomId || !targetUserId) return;
+    const roomRef = doc(db, "chatRooms", roomId);
+    await updateDoc(roomRef, {
+        bannedUsers: arrayUnion(targetUserId),
+        members: arrayRemove(targetUserId) // Also kick them if they were a member
+    });
+};
