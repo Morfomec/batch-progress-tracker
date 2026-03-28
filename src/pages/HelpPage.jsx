@@ -63,7 +63,7 @@ Click any notification to jump directly to the related content. Chat message not
 | **Member** | Standard access |
 
 ---
-*Have questions? Use the **Connect with me** button below!*`;
+Anything in your mind? **Connect with me ❤️**`;
 
 export default function HelpPage() {
   const { user, userProfile, isAdmin } = useAuth();
@@ -85,7 +85,22 @@ export default function HelpPage() {
         const ref = doc(db, "config", "appHelp");
         const snap = await getDoc(ref);
         if (snap.exists() && snap.data().content) {
-          setContent(snap.data().content);
+          let currentContent = snap.data().content;
+          
+          // Auto-update footer for Super Admin if it's the old version
+          if (isSuperAdmin && (currentContent.includes("Connect with Admin") || currentContent.includes("Have questions?"))) {
+            currentContent = currentContent.replace(/Have questions\?.*Connect with Admin.*/g, "Anything in your mind? **Connect with me ❤️**")
+                                           .replace(/Have questions\?.*Connect with me.*/g, "Anything in your mind? **Connect with me ❤️**");
+            
+            const ref = doc(db, "config", "appHelp");
+            setDoc(ref, { 
+              content: currentContent, 
+              adminUid: user?.uid,
+              updatedAt: new Date().toISOString()
+            }, { merge: true });
+          }
+          
+          setContent(currentContent);
           setSuperAdminUid(snap.data().adminUid || null);
         } else {
           // First time — seed with defaults
