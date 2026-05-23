@@ -331,8 +331,8 @@ function AdminGroupDetails() {
                                             <Tooltip 
                                                 contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
                                             />
-                                            <Area type="monotone" dataKey="total" stroke="#3b82f6" fillOpacity={1} fill="url(#colorTotal)" strokeWidth={2} />
-                                            <Area type="monotone" dataKey="unique" stroke="#f59e0b" fillOpacity={1} fill="url(#colorUnique)" strokeWidth={2} />
+                                            <Area type="monotone" dataKey="total" stroke="#3b82f6" fillOpacity={1} fill="url(#colorTotal)" strokeWidth={2} dot={{r: 4, fill: '#3b82f6'}} activeDot={{r: 6}} />
+                                            <Area type="monotone" dataKey="unique" stroke="#f59e0b" fillOpacity={1} fill="url(#colorUnique)" strokeWidth={2} dot={{r: 4, fill: '#f59e0b'}} activeDot={{r: 6}} />
                                         </AreaChart>
                                     </ResponsiveContainer>
                                 ) : (

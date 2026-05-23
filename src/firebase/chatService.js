@@ -29,9 +29,9 @@ export const initialize1QADChat = async () => {
   const qadSnap = await getDoc(qadRef);
   if (!qadSnap.exists()) {
     await setDoc(qadRef, {
-      name: "1QAD (Daily LeetCode)",
+      name: "1QAD",
       type: "1qad",
-      members: [], 
+      members: [],
       createdAt: serverTimestamp(),
     });
   }
@@ -144,13 +144,13 @@ export const leaveGroupChat = async (roomId, userId) => {
  * Subscribe to allowed chat rooms (Global, Groups, and User's Private chats)
  */
 export const subscribeToChatRooms = (userId, callback) => {
-  if (!userId) return () => {};
-  
+  if (!userId) return () => { };
+
   const chatRoomsRef = collection(db, "chatRooms");
-  
+
   // Query 1: Global, 1QAD, and Group rooms (Discovery)
   const qPublic = query(
-    chatRoomsRef, 
+    chatRoomsRef,
     where("type", "in", ["global", "1qad", "group"])
   );
 
@@ -171,9 +171,9 @@ export const subscribeToChatRooms = (userId, callback) => {
     const unique = Array.from(new Map(all.map(r => [r.id, r])).values());
     // Sort by createdAt (JS sort since we merged)
     unique.sort((a, b) => {
-        const timeA = a.createdAt?.toMillis?.() || 0;
-        const timeB = b.createdAt?.toMillis?.() || 0;
-        return timeA - timeB;
+      const timeA = a.createdAt?.toMillis?.() || 0;
+      const timeB = b.createdAt?.toMillis?.() || 0;
+      return timeA - timeB;
     });
     callback(unique);
   };
@@ -203,7 +203,7 @@ export const subscribeToChatRooms = (userId, callback) => {
  */
 export const sendMessage = async (roomId, senderId, senderName, senderPhoto, text, imageUrl = null) => {
   if (!text.trim() && !imageUrl) return;
-  
+
   // 1. Add Message to room
   const messagesRef = collection(db, "chatRooms", roomId, "messages");
   await addDoc(messagesRef, {
@@ -237,7 +237,7 @@ export const sendMessage = async (roomId, senderId, senderName, senderPhoto, tex
       if (memberSnap.exists()) {
         const memberData = memberSnap.data();
         const isMuted = !!memberData.mutedChats?.[roomId];
-        
+
         if (!isMuted) {
           const notifMsg = imageUrl && !text.trim() ? "Sent an image" : (text.length > 50 ? text.substring(0, 47) + "..." : text);
           const notifRef = collection(db, "users", memberId, "notifications");
@@ -262,10 +262,10 @@ export const sendMessage = async (roomId, senderId, senderName, senderPhoto, tex
  * Subscribe to messages for a specific room
  */
 export const subscribeToMessages = (roomId, callback) => {
-  if (!roomId) return () => {};
+  if (!roomId) return () => { };
   const messagesRef = collection(db, "chatRooms", roomId, "messages");
   const q = query(messagesRef, orderBy("timestamp", "asc"));
-  
+
   return onSnapshot(q, (snapshot) => {
     const messages = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     callback(messages);
@@ -307,21 +307,21 @@ export const deleteGroupChat = async (roomId) => {
  * Kicks a user from a group chat
  */
 export const kickUserFromRoom = async (roomId, targetUserId) => {
-    if (!roomId || !targetUserId) return;
-    const roomRef = doc(db, "chatRooms", roomId);
-    await updateDoc(roomRef, {
-        members: arrayRemove(targetUserId)
-    });
+  if (!roomId || !targetUserId) return;
+  const roomRef = doc(db, "chatRooms", roomId);
+  await updateDoc(roomRef, {
+    members: arrayRemove(targetUserId)
+  });
 };
 
 /**
  * Bans a user from a room (prevents re-entry)
  */
 export const banUserFromRoom = async (roomId, targetUserId) => {
-    if (!roomId || !targetUserId) return;
-    const roomRef = doc(db, "chatRooms", roomId);
-    await updateDoc(roomRef, {
-        bannedUsers: arrayUnion(targetUserId),
-        members: arrayRemove(targetUserId) // Also kick them if they were a member
-    });
+  if (!roomId || !targetUserId) return;
+  const roomRef = doc(db, "chatRooms", roomId);
+  await updateDoc(roomRef, {
+    bannedUsers: arrayUnion(targetUserId),
+    members: arrayRemove(targetUserId) // Also kick them if they were a member
+  });
 };

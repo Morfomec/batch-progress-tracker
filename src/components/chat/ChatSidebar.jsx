@@ -3,17 +3,17 @@ import { doc, updateDoc } from "firebase/firestore";
 import { db } from "../../firebase/firebaseConfig";
 import toast from "react-hot-toast";
 
-export default function ChatSidebar({ 
-  rooms, 
-  activeRoomId, 
-  onSelectRoom, 
-  onJoinRoom, 
-  userId, 
+export default function ChatSidebar({
+  rooms,
+  activeRoomId,
+  onSelectRoom,
+  onJoinRoom,
+  userId,
   userProfile,
   peerProfiles = {},
-  onCreateRoom 
+  onCreateRoom
 }) {
-  
+
   const handleToggleMute = async (e, roomId) => {
     e.stopPropagation();
     if (!userId) return;
@@ -43,33 +43,33 @@ export default function ChatSidebar({
 
   const getRoomIcon = (room) => {
     if (room.type === 'private') {
-        const peerId = room.members?.find(id => id !== userId);
-        const peer = peerProfiles[peerId];
-        if (peer?.photoURL) {
-            return <img src={peer.photoURL} alt="" className="w-8 h-8 rounded-full object-cover shrink-0" />;
-        }
-        const peerName = peer?.fullName || peer?.nickName || peer?.displayName || "User";
-        return (
-            <img 
-              src={`https://ui-avatars.com/api/?name=${encodeURIComponent(peerName)}&background=6366f1&color=fff&size=64`} 
-              alt="" 
-              className="w-8 h-8 rounded-full object-cover shrink-0" 
-            />
-        );
+      const peerId = room.members?.find(id => id !== userId);
+      const peer = peerProfiles[peerId];
+      if (peer?.photoURL) {
+        return <img src={peer.photoURL} alt="" className="w-8 h-8 rounded-full object-cover shrink-0" />;
+      }
+      const peerName = peer?.fullName || peer?.nickName || peer?.displayName || "User";
+      return (
+        <img
+          src={`https://ui-avatars.com/api/?name=${encodeURIComponent(peerName)}&background=6366f1&color=fff&size=64`}
+          alt=""
+          className="w-8 h-8 rounded-full object-cover shrink-0"
+        />
+      );
     }
     if (room.iconEmoji) {
-        return <div className="text-[18px] flex items-center justify-center w-8 h-8 bg-slate-100 dark:bg-slate-800 rounded-md shrink-0 leading-none">{room.iconEmoji}</div>;
+      return <div className="text-[18px] flex items-center justify-center w-8 h-8 bg-slate-100 dark:bg-slate-800 rounded-md shrink-0 leading-none">{room.iconEmoji}</div>;
     }
     if (room.iconUrl) {
-        return <img src={room.iconUrl} alt="" className="w-8 h-8 rounded-md object-cover shrink-0" />;
+      return <img src={room.iconUrl} alt="" className="w-8 h-8 rounded-md object-cover shrink-0" />;
     }
     const groupName = room.name || "Group";
     return (
-        <img 
-          src={`https://ui-avatars.com/api/?name=${encodeURIComponent(groupName)}&background=e2e8f0&color=475569&size=64`} 
-          alt="" 
-          className="w-8 h-8 rounded-md object-cover shrink-0 dark:opacity-80" 
-        />
+      <img
+        src={`https://ui-avatars.com/api/?name=${encodeURIComponent(groupName)}&background=e2e8f0&color=475569&size=64`}
+        alt=""
+        className="w-8 h-8 rounded-md object-cover shrink-0 dark:opacity-80"
+      />
     );
   };
 
@@ -87,7 +87,7 @@ export default function ChatSidebar({
           <Users className="w-5 h-5 text-indigo-500" />
           Chats
         </h2>
-        <button 
+        <button
           onClick={onCreateRoom}
           className="p-1.5 bg-indigo-100 hover:bg-indigo-200 dark:bg-indigo-900/50 dark:hover:bg-indigo-800 text-indigo-700 dark:text-indigo-300 rounded-md transition-colors"
           title="Create Group"
@@ -103,66 +103,62 @@ export default function ChatSidebar({
             Public
           </div>
           {globalRoom && (
-              <div
-                className={`w-full group/item flex items-center justify-between gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer ${
-                  activeRoomId === globalRoom.id
-                    ? "bg-indigo-100 dark:bg-indigo-900/50 text-indigo-800 dark:text-indigo-200"
-                    : "text-slate-700 dark:text-slate-400 hover:bg-slate-200/50 dark:hover:bg-slate-800"
+            <div
+              className={`w-full group/item flex items-center justify-between gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer ${activeRoomId === globalRoom.id
+                  ? "bg-indigo-100 dark:bg-indigo-900/50 text-indigo-800 dark:text-indigo-200"
+                  : "text-slate-700 dark:text-slate-400 hover:bg-slate-200/50 dark:hover:bg-slate-800"
                 }`}
-                onClick={() => onSelectRoom(globalRoom)}
-              >
-                <div className="flex items-center gap-2 min-w-0">
-                  <div className="w-8 h-8 rounded-full bg-[#408A71]/10 flex items-center justify-center shrink-0">
-                    <Globe className="w-4 h-4 text-[#408A71]" />
-                  </div>
-                  <span className="truncate">{globalRoom.name || "Global Chat"}</span>
+              onClick={() => onSelectRoom(globalRoom)}
+            >
+              <div className="flex items-center gap-2 min-w-0">
+                <div className="w-8 h-8 rounded-full bg-[#408A71]/10 flex items-center justify-center shrink-0">
+                  <Globe className="w-4 h-4 text-[#408A71]" />
                 </div>
-                
-                <button
-                  onClick={(e) => handleToggleMute(e, globalRoom.id)}
-                  className={`p-1 rounded-md opacity-0 group-hover/item:opacity-100 transition-all hover:bg-white dark:hover:bg-slate-700 ${
-                    userProfile?.mutedChats?.[globalRoom.id] ? "text-amber-500 opacity-100" : "text-slate-400"
-                  }`}
-                  title={userProfile?.mutedChats?.[globalRoom.id] ? "Unmute" : "Mute"}
-                >
-                  {userProfile?.mutedChats?.[globalRoom.id] ? (
-                    <BellOff className="w-3.5 h-3.5" />
-                  ) : (
-                    <Bell className="w-3.5 h-3.5" />
-                  )}
-                </button>
+                <span className="truncate">{globalRoom.name || "Global Chat"}</span>
               </div>
+
+              <button
+                onClick={(e) => handleToggleMute(e, globalRoom.id)}
+                className={`p-1 rounded-md opacity-0 group-hover/item:opacity-100 transition-all hover:bg-white dark:hover:bg-slate-700 ${userProfile?.mutedChats?.[globalRoom.id] ? "text-amber-500 opacity-100" : "text-slate-400"
+                  }`}
+                title={userProfile?.mutedChats?.[globalRoom.id] ? "Unmute" : "Mute"}
+              >
+                {userProfile?.mutedChats?.[globalRoom.id] ? (
+                  <BellOff className="w-3.5 h-3.5" />
+                ) : (
+                  <Bell className="w-3.5 h-3.5" />
+                )}
+              </button>
+            </div>
           )}
           {qadRoom && (
-              <div
-                className={`w-full group/item flex items-center justify-between gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer mt-1 ${
-                  activeRoomId === qadRoom.id
-                    ? "bg-amber-100 dark:bg-amber-900/50 text-amber-800 dark:text-amber-200"
-                    : "text-slate-700 dark:text-slate-400 hover:bg-slate-200/50 dark:hover:bg-slate-800"
+            <div
+              className={`w-full group/item flex items-center justify-between gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer mt-1 ${activeRoomId === qadRoom.id
+                  ? "bg-amber-100 dark:bg-amber-900/50 text-amber-800 dark:text-amber-200"
+                  : "text-slate-700 dark:text-slate-400 hover:bg-slate-200/50 dark:hover:bg-slate-800"
                 }`}
-                onClick={() => onSelectRoom(qadRoom)}
-              >
-                <div className="flex items-center gap-2 min-w-0">
-                  <div className="w-8 h-8 rounded-full bg-amber-500/10 flex items-center justify-center shrink-0">
-                    <Code2 className="w-4 h-4 text-amber-500" />
-                  </div>
-                  <span className="truncate">{qadRoom.name || "1QAD (Daily LeetCode)"}</span>
+              onClick={() => onSelectRoom(qadRoom)}
+            >
+              <div className="flex items-center gap-2 min-w-0">
+                <div className="w-8 h-8 rounded-full bg-amber-500/10 flex items-center justify-center shrink-0">
+                  <Code2 className="w-4 h-4 text-amber-500" />
                 </div>
-                
-                <button
-                  onClick={(e) => handleToggleMute(e, qadRoom.id)}
-                  className={`p-1 rounded-md opacity-0 group-hover/item:opacity-100 transition-all hover:bg-white dark:hover:bg-slate-700 ${
-                    userProfile?.mutedChats?.[qadRoom.id] ? "text-amber-500 opacity-100" : "text-slate-400"
-                  }`}
-                  title={userProfile?.mutedChats?.[qadRoom.id] ? "Unmute" : "Mute"}
-                >
-                  {userProfile?.mutedChats?.[qadRoom.id] ? (
-                    <BellOff className="w-3.5 h-3.5" />
-                  ) : (
-                    <Bell className="w-3.5 h-3.5" />
-                  )}
-                </button>
+                <span className="truncate">{qadRoom.name || "1QAD"}</span>
               </div>
+
+              <button
+                onClick={(e) => handleToggleMute(e, qadRoom.id)}
+                className={`p-1 rounded-md opacity-0 group-hover/item:opacity-100 transition-all hover:bg-white dark:hover:bg-slate-700 ${userProfile?.mutedChats?.[qadRoom.id] ? "text-amber-500 opacity-100" : "text-slate-400"
+                  }`}
+                title={userProfile?.mutedChats?.[qadRoom.id] ? "Unmute" : "Mute"}
+              >
+                {userProfile?.mutedChats?.[qadRoom.id] ? (
+                  <BellOff className="w-3.5 h-3.5" />
+                ) : (
+                  <Bell className="w-3.5 h-3.5" />
+                )}
+              </button>
+            </div>
           )}
         </div>
 
@@ -175,23 +171,21 @@ export default function ChatSidebar({
             {joinedRooms.map(room => (
               <div
                 key={room.id}
-                className={`w-full group/item flex items-center justify-between gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors mb-0.5 cursor-pointer ${
-                  activeRoomId === room.id
+                className={`w-full group/item flex items-center justify-between gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors mb-0.5 cursor-pointer ${activeRoomId === room.id
                     ? "bg-indigo-100 dark:bg-indigo-900/50 text-indigo-800 dark:text-indigo-200"
                     : "text-slate-700 dark:text-slate-400 hover:bg-slate-200/50 dark:hover:bg-slate-800"
-                }`}
+                  }`}
                 onClick={() => onSelectRoom(room)}
               >
                 <div className="flex items-center gap-2 min-w-0 flex-1">
                   {getRoomIcon(room)}
                   <span className="truncate">{getRoomName(room)}</span>
                 </div>
-                
+
                 <button
                   onClick={(e) => handleToggleMute(e, room.id)}
-                  className={`p-1 rounded-md opacity-0 group-hover/item:opacity-100 transition-all hover:bg-white dark:hover:bg-slate-700 ${
-                    userProfile?.mutedChats?.[room.id] ? "text-amber-500 opacity-100" : "text-slate-400"
-                  }`}
+                  className={`p-1 rounded-md opacity-0 group-hover/item:opacity-100 transition-all hover:bg-white dark:hover:bg-slate-700 ${userProfile?.mutedChats?.[room.id] ? "text-amber-500 opacity-100" : "text-slate-400"
+                    }`}
                   title={userProfile?.mutedChats?.[room.id] ? "Unmute" : "Mute"}
                 >
                   {userProfile?.mutedChats?.[room.id] ? (
@@ -218,7 +212,7 @@ export default function ChatSidebar({
               >
                 <div className="flex items-center gap-2 min-w-0">
                   <div className="grayscale hover:grayscale-0 transition-all shrink-0 flex items-center">
-                     {getRoomIcon(room)}
+                    {getRoomIcon(room)}
                   </div>
                   <span className="truncate">{room.name}</span>
                 </div>
