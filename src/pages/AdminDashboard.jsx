@@ -5,7 +5,7 @@ import { ShieldCheck, Users, BookOpen, ChevronRight, Activity, X, ChevronLeft } 
 import { Link } from "react-router-dom";
 
 function AdminDashboard() {
-    const [stats, setStats] = useState({ totalUsers: 0, totalGroups: 0 });
+    const [stats, setStats] = useState({ totalUsers: 0, totalGroups: 0, totalViews: 0 });
     const [groups, setGroups] = useState([]);
     const [usersList, setUsersList] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -32,6 +32,7 @@ function AdminDashboard() {
                 const totalGroups = groupsSnap.size;
 
                 // We need to fetch the member count for each group to display it
+                let totalViewsCount = 0;
                 const groupData = await Promise.all(groupsSnap.docs.map(async (groupDoc) => {
                     const progressSnap = await getDocs(collection(db, "groups", groupDoc.id, "progress"));
 
@@ -41,14 +42,17 @@ function AdminDashboard() {
                         uniqueUsers.add(doc.data().userId);
                     });
 
+                    const data = groupDoc.data();
+                    totalViewsCount += (data.totalViews || 0);
+
                     return {
                         id: groupDoc.id,
-                        ...groupDoc.data(),
+                        ...data,
                         activeMembers: uniqueUsers.size,
                     };
                 }));
 
-                setStats({ totalUsers, totalGroups });
+                setStats({ totalUsers, totalGroups, totalViews: totalViewsCount });
                 setGroups(groupData);
                 setUsersList(usersData);
 
@@ -104,7 +108,7 @@ function AdminDashboard() {
                 </div>
 
                 {/* Stats row */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div
                         onClick={() => setShowUsersModal(true)}
                         className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl rounded-[2rem] p-6 border border-slate-200/50 dark:border-white/5 shadow-xl flex items-center gap-6 group hover:-translate-y-1 transition-all duration-300 cursor-pointer"
@@ -125,6 +129,16 @@ function AdminDashboard() {
                         <div>
                             <p className="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Active Batches</p>
                             <p className="text-4xl font-black text-slate-800 dark:text-slate-100">{stats.totalGroups}</p>
+                        </div>
+                    </div>
+
+                    <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl rounded-[2rem] p-6 border border-slate-200/50 dark:border-white/5 shadow-xl flex items-center gap-6 group hover:-translate-y-1 transition-all duration-300">
+                        <div className="w-16 h-16 rounded-2xl bg-sky-50 dark:bg-sky-900/30 flex items-center justify-center shadow-sm border border-sky-100 dark:border-sky-800 group-hover:scale-110 transition-transform">
+                            <span className="text-3xl">👁️</span>
+                        </div>
+                        <div>
+                            <p className="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Platform Views</p>
+                            <p className="text-4xl font-black text-slate-800 dark:text-slate-100">{stats.totalViews}</p>
                         </div>
                     </div>
                 </div>

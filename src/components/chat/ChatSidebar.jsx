@@ -48,12 +48,29 @@ export default function ChatSidebar({
         if (peer?.photoURL) {
             return <img src={peer.photoURL} alt="" className="w-5 h-5 rounded-full object-cover shrink-0" />;
         }
-        return <User className="w-4 h-4 text-slate-400 dark:text-slate-500 shrink-0" />;
+        const peerName = peer?.fullName || peer?.nickName || peer?.displayName || "User";
+        return (
+            <img 
+              src={`https://ui-avatars.com/api/?name=${encodeURIComponent(peerName)}&background=6366f1&color=fff&size=64`} 
+              alt="" 
+              className="w-5 h-5 rounded-full object-cover shrink-0" 
+            />
+        );
+    }
+    if (room.iconEmoji) {
+        return <div className="text-[14px] flex items-center justify-center w-5 h-5 bg-slate-100 dark:bg-slate-800 rounded-md shrink-0 leading-none">{room.iconEmoji}</div>;
     }
     if (room.iconUrl) {
-        return <img src={room.iconUrl} alt="" className="w-5 h-5 rounded-full object-cover shrink-0" />;
+        return <img src={room.iconUrl} alt="" className="w-5 h-5 rounded-md object-cover shrink-0" />;
     }
-    return <Hash className="w-4 h-4 text-slate-400 dark:text-slate-500 shrink-0" />;
+    const groupName = room.name || "Group";
+    return (
+        <img 
+          src={`https://ui-avatars.com/api/?name=${encodeURIComponent(groupName)}&background=e2e8f0&color=475569&size=64`} 
+          alt="" 
+          className="w-5 h-5 rounded-md object-cover shrink-0 dark:opacity-80" 
+        />
+    );
   };
 
   // Separate into global, joined, and discover
@@ -166,11 +183,9 @@ export default function ChatSidebar({
                 className="w-full flex items-center justify-between gap-2 px-3 py-2 rounded-lg text-sm font-medium text-slate-600 dark:text-[#949ba4] hover:bg-slate-200/50 dark:hover:bg-[#35373c] transition-colors mb-0.5 group"
               >
                 <div className="flex items-center gap-2 min-w-0">
-                  {room.iconUrl ? (
-                     <img src={room.iconUrl} alt="" className="w-5 h-5 rounded-full object-cover shrink-0 grayscale hover:grayscale-0 transition-all" />
-                  ) : (
-                     <Hash className="w-4 h-4 shrink-0" />
-                  )}
+                  <div className="grayscale hover:grayscale-0 transition-all shrink-0 flex items-center">
+                     {getRoomIcon(room)}
+                  </div>
                   <span className="truncate">{room.name}</span>
                 </div>
                 {room.pendingRequests?.some(r => r.uid === userId) ? (

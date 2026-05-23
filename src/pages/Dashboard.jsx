@@ -245,7 +245,7 @@ import { LogOut } from "lucide-react";
 import { Link, useOutletContext } from "react-router-dom";
 import { db } from "../firebase/firebaseConfig";
 import { useAuth } from "../context/AuthContext";
-import { collection, getDocs, orderBy, query, addDoc, serverTimestamp, where, limit } from "firebase/firestore";
+import { collection, getDocs, orderBy, query, addDoc, serverTimestamp, where, limit, doc, updateDoc, increment, arrayUnion } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import { calculateScore } from "../utils/calculateScore";
 import { Activity, Target, LayoutDashboard, CheckCircle2, Medal, Clock, TrendingUp, Users, FileText, BarChart, ExternalLink, ChevronRight, Award, Trophy, Play, Calendar, Zap, AlertCircle, X, Check, UsersIcon, ShieldAlert, Sparkles, Target as TargetIcon, Copy, PlusCircle } from "lucide-react";
@@ -271,6 +271,41 @@ function Dashboard() {
 
     const [latestUpdates, setLatestUpdates] = useState([]);
     const [copiedContent, setCopiedContent] = useState(false);
+
+    // Track analytics
+    useEffect(() => {
+        if (group?.id && user?.uid) {
+            const visitKey = `visited_${group.id}`;
+            // Allow logging one view per hour to build the time-series graph
+            const lastVisit = sessionStorage.getItem(visitKey);
+            const now = Date.now();
+            
+            let lastVisitTime = 0;
+            if (lastVisit === 'true') {
+                lastVisitTime = 0; // Force update if they have the old format
+            } else if (lastVisit) {
+                lastVisitTime = parseInt(lastVisit) || 0;
+            }
+            
+            if (!lastVisit || (now - lastVisitTime) > 3600000) { // 1 hour cooldown
+                sessionStorage.setItem(visitKey, now.toString());
+                
+                // Add view event to subcollection for chart
+                addDoc(collection(db, 'groups', group.id, 'views'), {
+                    userId: user.uid,
+                    userName: userProfile?.nickName || userProfile?.fullName || user?.displayName || user?.email || "Unknown User",
+                    timestamp: serverTimestamp()
+                }).catch(err => console.error("Analytics event error:", err));
+
+                // Still increment total stats for the quick cards
+                const groupRef = doc(db, 'groups', group.id);
+                updateDoc(groupRef, {
+                    totalViews: increment(1),
+                    visitedBy: arrayUnion(user.uid)
+                }).catch(err => console.error("Analytics total error:", err));
+            }
+        }
+    }, [group?.id, user?.uid, userProfile]);
 
     const handleCopyCode = () => {
         if (group?.groupCode) {

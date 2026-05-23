@@ -9,6 +9,8 @@ export default function ChatWindow({ activeRoom, userId, userName, userPhoto, pe
   const navigate = useNavigate();
   
   const [messages, setMessages] = useState([]);
+  const [pendingRequests, setPendingRequests] = useState([]);
+  const [showIconPicker, setShowIconPicker] = useState(false);
   const [inputText, setInputText] = useState("");
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 
@@ -67,6 +69,21 @@ export default function ChatWindow({ activeRoom, userId, userName, userPhoto, pe
     : 0;
   
   // Resolve Peer Profile for Header
+
+  const handleIconEmojiSelect = async (emojiObject) => {
+    if (!isPrivate) {
+      try {
+        const { doc, updateDoc } = await import("firebase/firestore");
+        const { db } = await import("../../firebase/firebaseConfig");
+        const roomRef = doc(db, "chatRooms", activeRoom.id);
+        await updateDoc(roomRef, { iconEmoji: emojiObject.emoji, iconUrl: null });
+        setShowIconPicker(false);
+      } catch (error) {
+        console.error("Failed to update icon:", error);
+      }
+    }
+  };
+
   let displayRoomName = activeRoom.name || "Chat Room";
   let displayRoomIcon = null;
 
@@ -81,6 +98,8 @@ export default function ChatWindow({ activeRoom, userId, userName, userPhoto, pe
     } else {
       displayRoomName = "Private Chat";
     }
+  } else if (activeRoom.iconEmoji) {
+    displayRoomIcon = <div className="text-2xl flex items-center justify-center w-8 h-8 bg-slate-100 dark:bg-slate-800 rounded-lg">{activeRoom.iconEmoji}</div>;
   } else if (activeRoom.iconUrl) {
     displayRoomIcon = <img src={activeRoom.iconUrl} alt="Group Icon" className="w-8 h-8 rounded-full object-cover shrink-0 shadow-sm" />;
   }
@@ -90,6 +109,30 @@ export default function ChatWindow({ activeRoom, userId, userName, userPhoto, pe
         <div className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center shrink-0">
           {isGlobal ? <GlobeIcon /> : isPrivate ? <User className="w-4 h-4 text-indigo-500" /> : <HashIcon />}
         </div>
+    );
+  }
+
+  // Wrap group icon with emoji picker toggle
+  if (!isPrivate) {
+    displayRoomIcon = (
+      <div className="relative group/icon cursor-pointer" onClick={() => setShowIconPicker(!showIconPicker)}>
+        <div className="group-hover/icon:opacity-80 transition-opacity">
+          {displayRoomIcon}
+        </div>
+        {showIconPicker && (
+          <div className="absolute top-10 left-0 z-50 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+             <div className="fixed inset-0" onClick={() => setShowIconPicker(false)}></div>
+             <div className="relative z-10">
+               <EmojiPicker 
+                 onEmojiClick={handleIconEmojiSelect}
+                 theme="auto"
+                 skinTonesDisabled
+                 searchDisabled
+               />
+             </div>
+          </div>
+        )}
+      </div>
     );
   }
 

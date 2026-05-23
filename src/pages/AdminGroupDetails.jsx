@@ -6,11 +6,34 @@ import { ArrowLeft, Users, Edit3, Trash2, X, Save, PlusCircle, Calendar } from "
 import toast from "react-hot-toast";
 import { calculateScore } from "../utils/calculateScore";
 
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+
+const timeAgo = (date) => {
+    const seconds = Math.floor((new Date() - date) / 1000);
+    let interval = seconds / 31536000;
+    if (interval > 1) return Math.floor(interval) + " years ago";
+    interval = seconds / 2592000;
+    if (interval > 1) return Math.floor(interval) + " months ago";
+    interval = seconds / 86400;
+    if (interval > 1) return Math.floor(interval) + " days ago";
+    interval = seconds / 3600;
+    if (interval > 1) return Math.floor(interval) + " hours ago";
+    interval = seconds / 60;
+    if (interval > 1) return Math.floor(interval) + " minutes ago";
+    if (seconds < 10) return "just now";
+    return Math.floor(seconds) + " seconds ago";
+};
+
 function AdminGroupDetails() {
     const { groupId } = useParams();
     const [groupData, setGroupData] = useState(null);
     const [progressList, setProgressList] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [chatMessagesCount, setChatMessagesCount] = useState(0);
+    
+    // Notion Analytics State
+    const [chartData, setChartData] = useState([]);
+    const [viewersList, setViewersList] = useState([]);
 
     const [editingItem, setEditingItem] = useState(null);
     const [editData, setEditData] = useState({});
@@ -62,6 +85,62 @@ function AdminGroupDetails() {
             const snapshot = await getDocs(q);
             const pData = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
             setProgressList(pData);
+
+            // Fetch chat messages count
+            try {
+                const messagesSnap = await getDocs(collection(db, "chatRooms", groupId, "messages"));
+                setChatMessagesCount(messagesSnap.size);
+            } catch (err) {
+                console.error("No chat room or error fetching messages:", err);
+            }
+
+            // Fetch view events for Notion analytics
+            try {
+                const viewsSnap = await getDocs(query(collection(db, "groups", groupId, "views"), orderBy("timestamp", "asc")));
+                const viewsMap = new Map(); // YYYY-MM-DD -> { name, total, uniqueSet }
+                const userLatestView = new Map(); // userId -> { userName, timestamp }
+
+                viewsSnap.docs.forEach(d => {
+                    const data = d.data();
+                    if (!data.timestamp) return;
+                    
+                    const dateObj = data.timestamp.toDate();
+                    const dayStr = dateObj.toISOString().split('T')[0]; // "2023-10-15"
+
+                    if (!viewsMap.has(dayStr)) {
+                        viewsMap.set(dayStr, { name: dayStr, total: 0, uniqueSet: new Set() });
+                    }
+                    
+                    const dayData = viewsMap.get(dayStr);
+                    dayData.total += 1;
+                    dayData.uniqueSet.add(data.userId);
+
+                    userLatestView.set(data.userId, {
+                        userId: data.userId,
+                        userName: data.userName,
+                        timestamp: dateObj
+                    });
+                });
+
+                // Format chart data
+                const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+                const finalChartData = Array.from(viewsMap.values()).map(d => {
+                    const [year, month, day] = d.name.split('-');
+                    const formattedDate = `${monthNames[parseInt(month, 10) - 1]} ${parseInt(day, 10)}`;
+                    return {
+                        name: formattedDate,
+                        total: d.total,
+                        unique: d.uniqueSet.size
+                    };
+                });
+                setChartData(finalChartData);
+
+                // Format viewers list
+                const finalViewers = Array.from(userLatestView.values()).sort((a, b) => b.timestamp - a.timestamp);
+                setViewersList(finalViewers);
+            } catch (err) {
+                console.error("Error fetching view events:", err);
+            }
         } catch (error) {
             console.error("Error fetching admin group data", error);
         } finally {
@@ -206,6 +285,86 @@ function AdminGroupDetails() {
                         <div>
                             <p className="text-2xl font-black text-slate-800 dark:text-slate-100">{progressList.length}</p>
                             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Submissions</p>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Traffic & Analytics Section (Notion Style) */}
+                <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl rounded-[2rem] shadow-2xl border border-slate-200/50 dark:border-white/5 overflow-hidden transition-colors duration-300 p-6 md:p-8">
+                    <div className="mb-8">
+                        <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+                            <span className="text-rose-500">📈</span> Traffic Analytics
+                        </h2>
+                        <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Detailed view history for this batch</p>
+                    </div>
+
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                        {/* Chart Area */}
+                        <div className="lg:col-span-2 space-y-4">
+                            <div className="flex items-center gap-4 text-sm font-semibold mb-4">
+                                <div className="flex items-center gap-1.5 text-blue-600 dark:text-blue-400">
+                                    <div className="w-3 h-3 rounded-sm bg-blue-500"></div>
+                                    Total Views
+                                </div>
+                                <div className="flex items-center gap-1.5 text-amber-600 dark:text-amber-400">
+                                    <div className="w-3 h-3 rounded-sm bg-amber-500"></div>
+                                    Unique Views
+                                </div>
+                            </div>
+                            
+                            <div className="h-[300px] w-full bg-slate-50/50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl p-4">
+                                {chartData.length > 0 ? (
+                                    <ResponsiveContainer width="100%" height="100%">
+                                        <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                                            <defs>
+                                                <linearGradient id="colorTotal" x1="0" y1="0" x2="0" y2="1">
+                                                    <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.8}/>
+                                                    <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
+                                                </linearGradient>
+                                                <linearGradient id="colorUnique" x1="0" y1="0" x2="0" y2="1">
+                                                    <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.8}/>
+                                                    <stop offset="95%" stopColor="#f59e0b" stopOpacity={0}/>
+                                                </linearGradient>
+                                            </defs>
+                                            <XAxis dataKey="name" tick={{fontSize: 12, fill: '#64748b'}} axisLine={false} tickLine={false} />
+                                            <YAxis tick={{fontSize: 12, fill: '#64748b'}} axisLine={false} tickLine={false} />
+                                            <Tooltip 
+                                                contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
+                                            />
+                                            <Area type="monotone" dataKey="total" stroke="#3b82f6" fillOpacity={1} fill="url(#colorTotal)" strokeWidth={2} />
+                                            <Area type="monotone" dataKey="unique" stroke="#f59e0b" fillOpacity={1} fill="url(#colorUnique)" strokeWidth={2} />
+                                        </AreaChart>
+                                    </ResponsiveContainer>
+                                ) : (
+                                    <div className="w-full h-full flex items-center justify-center text-slate-400 text-sm">
+                                        Not enough data to display chart yet.
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Viewers List */}
+                        <div className="bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-5 border border-slate-100 dark:border-slate-800 flex flex-col max-h-[350px]">
+                            <h3 className="text-sm font-bold text-slate-800 dark:text-slate-200 mb-4 px-2">Viewers</h3>
+                            <div className="overflow-y-auto pr-2 space-y-1 flex-1">
+                                {viewersList.length > 0 ? viewersList.map(viewer => (
+                                    <div key={viewer.userId} className="flex items-center justify-between p-2 rounded-xl hover:bg-slate-200/50 dark:hover:bg-slate-700/50 transition-colors group">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-xs font-bold text-slate-600 dark:text-slate-300 shrink-0">
+                                                {(viewer.userName || "U").charAt(0).toUpperCase()}
+                                            </div>
+                                            <p className="text-sm font-medium text-slate-700 dark:text-slate-300 truncate max-w-[120px]">
+                                                {viewer.userName}
+                                            </p>
+                                        </div>
+                                        <p className="text-[11px] text-slate-400 dark:text-slate-500 font-medium whitespace-nowrap">
+                                            {timeAgo(viewer.timestamp)}
+                                        </p>
+                                    </div>
+                                )) : (
+                                    <p className="text-sm text-slate-500 text-center py-8">No viewers logged yet.</p>
+                                )}
+                            </div>
                         </div>
                     </div>
                 </div>
