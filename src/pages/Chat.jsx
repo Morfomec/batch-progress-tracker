@@ -20,7 +20,7 @@ import { X, Loader2 } from "lucide-react";
 
 export default function Chat() {
   const { user, userProfile, isAdmin, loading: authLoading } = useAuth();
-  const { groups } = useOutletContext() || {};
+  const { groups, group: activeGroup } = useOutletContext() || {};
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -240,6 +240,7 @@ export default function Chat() {
           onLeaveRoom={handleLeaveRoom}
           onMenuClick={() => setShowMobileSidebar(true)}
           groups={groups}
+          activeGroup={activeGroup}
         />
       </div>
 
