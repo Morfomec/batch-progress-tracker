@@ -15,6 +15,7 @@ function MyProfile() {
     const [nickName, setNickName] = useState("");
     const [emoji, setEmoji] = useState("");
     const [status, setStatus] = useState("");
+    const [leetcodeUsername, setLeetcodeUsername] = useState("");
     const [loading, setLoading] = useState(false);
 
     const STATUS_PRESETS = [
@@ -44,6 +45,7 @@ function MyProfile() {
             setNickName(userProfile.nickName || "");
             setEmoji(userProfile.emoji || "");
             setStatus(userProfile.status || "");
+            setLeetcodeUsername(userProfile.leetcodeUsername || "");
         }
     }, [userProfile]);
 
@@ -59,6 +61,7 @@ function MyProfile() {
                 nickName,
                 emoji,
                 status: status.trim(),
+                leetcodeUsername: leetcodeUsername.trim(),
             });
 
             setSuccessMsg("Profile updated successfully!");
@@ -320,7 +323,31 @@ function MyProfile() {
                                 />
                                 <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">Used on leaderboards and recent activity.</p>
                             </div>
-                        </div>
+                            <div>
+                                <div className="flex items-center justify-between mb-2">
+                                    <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300">LeetCode Username</label>
+                                    {leetcodeUsername && (
+                                        <button 
+                                            type="button" 
+                                            onClick={() => setLeetcodeUsername("")}
+                                            className="text-xs text-rose-500 hover:text-rose-600 dark:text-rose-400 dark:hover:text-rose-300 font-bold transition-colors outline-none"
+                                        >
+                                            Remove
+                                        </button>
+                                    )}
+                                </div>
+                                <input
+                                    type="text"
+                                    value={leetcodeUsername}
+                                    onChange={(e) => setLeetcodeUsername(e.target.value)}
+                                    className="w-full px-4 py-3 bg-amber-50/50 dark:bg-amber-900/10 border border-amber-200/50 dark:border-amber-700/50 text-slate-900 dark:text-white rounded-xl focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500/50 outline-none transition-all placeholder-slate-400 dark:placeholder-slate-500/80 backdrop-blur-sm pr-10"
+                                    placeholder="Enter your leetcode username"
+                                />
+                                <p className="mt-2 text-xs text-amber-600/80 dark:text-amber-500/80 font-medium">Required to earn streaks on daily 1QAD coding challenges.</p>
+                            </div>
+                            
+                            {/* Empty spacer to force Status section underneath LeetCode on the left */}
+                            <div className="hidden md:block"></div>
 
                         {/* Status Section */}
                         <div>
@@ -329,25 +356,8 @@ function MyProfile() {
                                 Status
                                 <span className="text-xs font-normal text-slate-400">(visible to others)</span>
                             </label>
-                            {/* Preset chips */}
-                            <div className="flex flex-wrap gap-2 mb-3">
-                                {STATUS_PRESETS.map((preset) => (
-                                    <button
-                                        key={preset}
-                                        type="button"
-                                        onClick={() => setStatus(status === preset ? "" : preset)}
-                                        className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-all ${
-                                            status === preset
-                                                ? "bg-indigo-600 text-white border-indigo-600 shadow-md"
-                                                : "bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-indigo-400 hover:text-indigo-600 dark:hover:text-indigo-400"
-                                        }`}
-                                    >
-                                        {preset}
-                                    </button>
-                                ))}
-                            </div>
                             {/* Custom status input */}
-                            <div className="relative">
+                            <div className="relative mb-3">
                                 <input
                                     type="text"
                                     value={status}
@@ -366,7 +376,28 @@ function MyProfile() {
                                     </button>
                                 )}
                             </div>
-                            <p className="mt-1 text-xs text-slate-400 text-right">{status.length}/80</p>
+                            <div className="flex items-center justify-between mb-3">
+                                <span className="text-xs text-slate-500 font-medium">Suggestions</span>
+                                <p className="text-xs text-slate-400">{status.length}/80</p>
+                            </div>
+                            {/* Preset chips */}
+                            <div className="flex flex-wrap gap-2">
+                                {STATUS_PRESETS.map((preset) => (
+                                    <button
+                                        key={preset}
+                                        type="button"
+                                        onClick={() => setStatus(status === preset ? "" : preset)}
+                                        className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-all ${
+                                            status === preset
+                                                ? "bg-indigo-600 text-white border-indigo-600 shadow-md"
+                                                : "bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-indigo-400 hover:text-indigo-600 dark:hover:text-indigo-400"
+                                        }`}
+                                    >
+                                        {preset}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
                         </div>
 
                         <div className="pt-4 flex flex-col sm:flex-row items-center gap-4">

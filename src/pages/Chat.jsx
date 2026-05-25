@@ -236,6 +236,7 @@ export default function Chat() {
           userId={user?.uid}
           userName={userName}
           userPhoto={userProfile?.photoURL || user?.photoURL || null}
+          userProfile={userProfile}
           peerProfiles={peerProfiles}
           onLeaveRoom={handleLeaveRoom}
           onMenuClick={() => setShowMobileSidebar(true)}

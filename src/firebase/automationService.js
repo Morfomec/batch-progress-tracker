@@ -8,7 +8,30 @@ import { leetcodeQuestions } from "../utils/leetcodeQuestions";
  */
 export const triggerDailyLeetcodePost = async () => {
     try {
-        const today = new Date().toISOString().split("T")[0]; // e.g. "2026-05-23"
+        // Get current time in IST
+        const istTimeStr = new Date().toLocaleString("en-US", {
+            timeZone: "Asia/Kolkata",
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit",
+            hour: "2-digit",
+            hour12: false
+        });
+        
+        // Format: "MM/DD/YYYY, HH"
+        const [datePart, hourPart] = istTimeStr.split(", ");
+        const [month, day, year] = datePart.split("/");
+        const currentHour = parseInt(hourPart, 10);
+        
+        // Build a logical date
+        const logicalDate = new Date(year, parseInt(month, 10) - 1, parseInt(day, 10));
+        
+        // If it's before 6 AM IST, consider it the previous day's cycle
+        if (currentHour < 6) {
+            logicalDate.setDate(logicalDate.getDate() - 1);
+        }
+        
+        const today = `${logicalDate.getFullYear()}-${String(logicalDate.getMonth() + 1).padStart(2, '0')}-${String(logicalDate.getDate()).padStart(2, '0')}`;
         const qadRef = doc(db, "chatRooms", "1qad");
 
         await runTransaction(db, async (transaction) => {

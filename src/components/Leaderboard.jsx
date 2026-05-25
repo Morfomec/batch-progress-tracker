@@ -24,7 +24,8 @@ function Leaderboard({ groupId }) {
                     userDocsMap[d.id] = {
                         name: data?.nickName || data?.fullName || data?.displayName || data?.email || "Unknown",
                         emoji: data?.emoji || "",
-                        photoURL: data?.photoURL || null
+                        photoURL: data?.photoURL || null,
+                        leetcodeStreak: data?.leetcodeStreak || 0
                     };
                 });
 
@@ -41,6 +42,7 @@ function Leaderboard({ groupId }) {
                             userName: userInfo.name || entry.userName || "Unknown",
                             emoji: userInfo.emoji || "",
                             photoURL: userInfo.photoURL || null,
+                            leetcodeStreak: userInfo.leetcodeStreak || 0,
                             totalScore: 0
                         };
                     }
@@ -152,6 +154,11 @@ function Leaderboard({ groupId }) {
                                                 {user.userName}
                                                 {user.emoji && <span className="text-lg leading-none">{user.emoji}</span>}
                                             </p>
+                                            {user.leetcodeStreak > 0 && (
+                                                <div className="text-[10px] font-bold text-amber-600 dark:text-amber-500 bg-amber-50 dark:bg-amber-500/10 px-1.5 py-0.5 rounded flex items-center gap-1 w-fit mt-0.5 border border-amber-200/50 dark:border-amber-700/30">
+                                                    🔥 {user.leetcodeStreak} Day Streak
+                                                </div>
+                                            )}
                                         </div>
                                     </Link>
                                 </div>

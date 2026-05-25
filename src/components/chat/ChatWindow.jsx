@@ -1,13 +1,15 @@
 import { useState, useEffect, useRef } from "react";
-import { Send, LogOut, AlignLeft, Smile, PlusCircle, Settings, Hash, User, Users, MessageSquare, UserPlus, CheckCircle, Check, Trophy, ChevronDown, Edit2, Trash2, Info, Loader2, Code2 } from "lucide-react";
+import { Send, LogOut, AlignLeft, Smile, PlusCircle, Settings, Hash, User, Users, MessageSquare, UserPlus, CheckCircle, Check, Trophy, ChevronDown, Edit2, Trash2, Info, Loader2, Code2, Flame, X } from "lucide-react";
 import { subscribeToMessages, sendMessage, editMessage, deleteMessage, markRoomAsRead } from "../../firebase/chatService";
 import { db } from "../../firebase/firebaseConfig";
-import { doc, updateDoc, arrayUnion, arrayRemove } from "firebase/firestore";
-import EmojiPicker from 'emoji-picker-react';
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
+import { doc, updateDoc, arrayUnion, arrayRemove } from "firebase/firestore";
+import EmojiPicker from 'emoji-picker-react';
+import { verifyLeetCodeSubmission } from "../../utils/leetcodeApi";
+import LeetCodeLeaderboard from "./LeetCodeLeaderboard";
 
-export default function ChatWindow({ activeRoom, userId, userName, userPhoto, peerProfiles = {}, onLeaveRoom, onMenuClick, groups = [] }) {
+export default function ChatWindow({ activeRoom, userId, userName, userPhoto, userProfile, peerProfiles = {}, onLeaveRoom, onMenuClick, groups = [] }) {
   const navigate = useNavigate();
   
   const [messages, setMessages] = useState([]);
@@ -16,6 +18,11 @@ export default function ChatWindow({ activeRoom, userId, userName, userPhoto, pe
   const [inputText, setInputText] = useState("");
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [showPolledUsersModal, setShowPolledUsersModal] = useState(null);
+  const [showMobileLeaderboard, setShowMobileLeaderboard] = useState(false);
+  
+  // Missing Username Modal State
+  const [showMissingUsernameModal, setShowMissingUsernameModal] = useState(false);
+  const [pendingPollVote, setPendingPollVote] = useState(null);
   
   // Message Options State
   const [openMenuId, setOpenMenuId] = useState(null);
@@ -119,22 +126,99 @@ export default function ChatWindow({ activeRoom, userId, userName, userPhoto, pe
         });
         toast.success("Vote removed");
       } else {
-        // Add vote
+        // Add vote - VERIFY LEETCODE FIRST
+        if (!userProfile?.leetcodeUsername) {
+            setPendingPollVote(msg);
+            setShowMissingUsernameModal(true);
+            return;
+        }
+
+        const toastId = toast.loading("Verifying with LeetCode...");
+        
+        try {
+            const verificationStatus = await verifyLeetCodeSubmission(userProfile.leetcodeUsername, msg.questionData.url);
+            
+            if (verificationStatus === "UNVERIFIED") {
+                toast.dismiss(toastId);
+                toast.error("Not solved recently on LeetCode. Please check your username!");
+                return;
+            }
+            
+            toast.dismiss(toastId);
+            if (verificationStatus === "LENIENT") {
+                toast.success("LeetCode servers down, but we trust you! 🙌");
+            }
+        } catch (apiError) {
+            toast.dismiss(toastId);
+            toast.error(apiError.message || "Failed to verify LeetCode submission.");
+            return;
+        }
+
         const batchName = groups && groups.length > 0 ? groups[0].name : "No Batch";
+        
+        const currentStreak = userProfile?.leetcodeStreak || 0;
+        const newStreak = currentStreak + 1;
+
         const pollData = {
           uid: userId || "unknown",
           name: userName || "Unknown User",
           photo: userPhoto || null,
-          batch: batchName || "No Batch"
+          batch: batchName || "No Batch",
+          streak: newStreak
         };
+        
         await updateDoc(msgRef, {
           pollResponses: arrayUnion(pollData)
         });
-        toast.success("Marked as done!");
+
+        // Update user profile streak
+        const userRef = doc(db, "users", userId);
+        await updateDoc(userRef, {
+            leetcodeStreak: newStreak,
+            lastLeetcodeSolve: new Date().toISOString()
+        });
+
+        toast.success(`Verified! Streak: 🔥 ${newStreak}`);
       }
     } catch (err) {
-      console.error("Error voting on poll:", err);
-      toast.error("Failed to update status.");
+      console.error("Error toggling poll vote:", err);
+      toast.error("Failed to update vote");
+    }
+  };
+
+  const handleBypassVerification = async (e) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    
+    if (!pendingPollVote) {
+       toast.error("Error: No pending vote found");
+       return;
+    }
+    
+    const msg = pendingPollVote;
+    const msgRef = doc(db, `chatRooms/${activeRoom.id}/messages/${msg.id}`);
+    const batchName = groups && groups.length > 0 ? groups[0].name : "No Batch";
+    
+    const pollData = {
+      uid: userId || "unknown",
+      name: userName || "Unknown User",
+      photo: userPhoto || null,
+      batch: batchName || "No Batch",
+      streak: false // Explicitly false so they don't get the fire icon
+    };
+
+    try {
+      await updateDoc(msgRef, {
+        pollResponses: arrayUnion(pollData)
+      });
+      toast.success("Marked as done without streak privileges");
+      setShowMissingUsernameModal(false);
+      setPendingPollVote(null);
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to mark as done: " + err.message);
     }
   };
 
@@ -262,8 +346,10 @@ export default function ChatWindow({ activeRoom, userId, userName, userPhoto, pe
   }
 
   return (
-    <div className="flex-1 flex flex-col bg-slate-50 dark:bg-black h-full overflow-hidden w-full relative">
-      {/* Header - Fixed Height for alignment */}
+    <div className="flex-1 flex flex-row h-full overflow-hidden w-full bg-slate-50 dark:bg-black">
+      {/* Main Chat Area */}
+      <div className="flex-1 flex flex-col h-full overflow-hidden relative min-w-0">
+        {/* Header - Fixed Height for alignment */}
       <div className="h-[60px] px-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between shrink-0 bg-white/95 dark:bg-[#0a0a0a]/95 backdrop-blur-sm z-10 w-full shadow-sm">
         <div className="flex items-center gap-3">
           <button 
@@ -320,14 +406,24 @@ export default function ChatWindow({ activeRoom, userId, userName, userPhoto, pe
           >
             <Settings className="w-5 h-5" />
           </button>
+          {activeRoom?.type === '1qad' && (
+             <button
+               onClick={() => setShowMobileLeaderboard(true)}
+               className="lg:hidden p-2 text-amber-500 hover:text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-900/20 rounded-full transition-colors outline-none shrink-0"
+               title="View Streaks"
+             >
+               <Flame className="w-5 h-5" />
+             </button>
+          )}
         </div>
       </div>
 
       {/* Messages Area */}
       <div 
-        className="flex-1 overflow-y-auto px-2 sm:px-4 py-4 space-y-4 bg-slate-50/50 dark:bg-black w-full"
+        className="flex-1 overflow-y-auto px-2 sm:px-4 py-4 bg-slate-50/50 dark:bg-black w-full flex flex-col xl:flex-row gap-6 items-start"
         onClick={() => setShowEmojiPicker(false)}
       >
+        <div className="flex-1 space-y-4 w-full max-w-full xl:max-w-[calc(100%-400px-1.5rem)]">
         {roomLoadingId === activeRoom?.id ? (
            <div className="h-full w-full"></div>
         ) : messages.length === 0 ? (
@@ -544,6 +640,14 @@ export default function ChatWindow({ activeRoom, userId, userName, userPhoto, pe
           })
         )}
         <div ref={messagesEndRef} />
+        </div>
+
+        {/* Sticky Leaderboard for 1QAD (Inside Chat) */}
+        {activeRoom?.type === '1qad' && (
+          <div className="hidden xl:block w-[400px] shrink-0 sticky top-4 z-10">
+             <LeetCodeLeaderboard />
+          </div>
+        )}
       </div>
 
       {/* Emoji Picker Popup */}
@@ -625,33 +729,72 @@ export default function ChatWindow({ activeRoom, userId, userName, userPhoto, pe
               </div>
               <button 
                 onClick={() => setShowPolledUsersModal(null)}
-                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors bg-slate-100 dark:bg-slate-800/50 hover:bg-slate-200 dark:hover:bg-slate-700 p-1.5 rounded-full"
+                className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/10 rounded-full transition-colors outline-none"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                ✕
               </button>
             </div>
-            
-            <div className="overflow-y-auto max-h-[60vh] p-4 flex flex-col gap-3">
-              {showPolledUsersModal.pollResponses?.map((res, i) => (
-                <div 
-                  key={i} 
-                  onClick={() => { setShowPolledUsersModal(null); navigate(`/dashboard/profile/${res.uid}`); }}
-                  className="flex items-center gap-3 p-2 hover:bg-slate-50 dark:hover:bg-slate-800/50 rounded-lg transition-colors cursor-pointer group"
-                >
-                  <div className="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden shrink-0 shadow-sm group-hover:ring-2 ring-indigo-500/50 transition-all" title={res.name}>
-                    {res.photo ? <img src={res.photo} alt={res.name} className="w-full h-full object-cover" /> : <span className="text-sm font-bold text-slate-500 w-full h-full flex items-center justify-center">{res.name?.charAt(0)?.toUpperCase()}</span>}
-                  </div>
-                  <div className="flex flex-col">
-                    <span className="text-sm font-bold text-slate-700 dark:text-slate-200 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">{res.name}</span>
-                  </div>
-                </div>
-              ))}
-              
-              {!showPolledUsersModal.pollResponses?.length && (
-                <div className="py-8 text-center text-sm text-slate-500">
-                  No one has completed this yet!
-                </div>
-              )}
+            <div className="p-2 max-h-[60vh] overflow-y-auto custom-scrollbar">
+               {showPolledUsersModal.pollResponses?.map((res, i) => (
+                 <div key={i} className="flex items-center gap-3 p-2 hover:bg-slate-50 dark:hover:bg-white/5 rounded-xl transition-colors cursor-pointer" onClick={() => { setShowPolledUsersModal(null); navigate(`/dashboard/profile/${res.uid}`); }}>
+                   <div className="w-10 h-10 rounded-full bg-indigo-100 dark:bg-indigo-900/30 overflow-hidden shrink-0 flex items-center justify-center">
+                      {res.photo ? <img src={res.photo} alt={res.name} className="w-full h-full object-cover" /> : <span className="font-bold text-indigo-500 dark:text-indigo-400">{res.name?.charAt(0)?.toUpperCase()}</span>}
+                   </div>
+                   <div className="flex-1 min-w-0">
+                      <div className="flex flex-col">
+                        <span className="font-semibold text-sm text-slate-800 dark:text-slate-200 truncate">{res.name}</span>
+                        {res.batch && res.batch !== "No Batch" && <span className="text-[11px] text-slate-500 truncate">{res.batch}</span>}
+                      </div>
+                   </div>
+                   {/* STREAK PRIVILEGE VISUAL */}
+                   {res.streak !== undefined && res.streak !== false && (
+                     <div className="flex items-center gap-1 shrink-0 px-2 py-1 bg-amber-50 dark:bg-amber-500/10 rounded-md border border-amber-200/50 dark:border-amber-500/20" title={`${res.streak} Day LeetCode Streak`}>
+                        <span className="font-black text-amber-500 text-sm">{res.streak}</span>
+                        <span className="text-sm leading-none">🔥</span>
+                     </div>
+                   )}
+                 </div>
+               ))}
+               {!showPolledUsersModal.pollResponses?.length && (
+                 <div className="py-8 text-center text-sm text-slate-500">
+                   No one has completed this yet!
+                 </div>
+               )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Missing Username Modal */}
+      {showMissingUsernameModal && (
+        <div className="absolute inset-0 z-[60] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn">
+          <div className="bg-white dark:bg-[#1a1a1a] rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden border border-slate-200 dark:border-slate-800 flex flex-col p-6 text-center">
+            <div className="w-16 h-16 bg-amber-100 dark:bg-amber-500/20 rounded-full flex items-center justify-center mx-auto mb-4 border border-amber-200 dark:border-amber-500/30">
+               <Flame className="w-8 h-8 text-amber-500" />
+            </div>
+            <h3 className="text-xl font-bold text-slate-800 dark:text-white mb-2">Streaks Disabled</h3>
+            <p className="text-sm text-slate-600 dark:text-slate-400 mb-6">
+               Please save your LeetCode username in your profile to earn streaks, or continue without them.
+            </p>
+            <div className="flex flex-col gap-3">
+              <button 
+                onClick={() => { setShowMissingUsernameModal(false); navigate('/dashboard/my-profile'); }}
+                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-xl transition-colors shadow-sm"
+              >
+                Go to Profile
+              </button>
+              <button 
+                onClick={handleBypassVerification}
+                className="w-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold py-3 px-4 rounded-xl transition-colors"
+              >
+                Mark as done without streak
+              </button>
+              <button 
+                onClick={() => { setShowMissingUsernameModal(false); setPendingPollVote(null); }}
+                className="mt-2 text-sm text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 underline-offset-4 hover:underline outline-none"
+              >
+                Cancel
+              </button>
             </div>
           </div>
         </div>
@@ -703,6 +846,26 @@ export default function ChatWindow({ activeRoom, userId, userName, userPhoto, pe
                   </div>
                 ));
               })()}
+            </div>
+          </div>
+        </div>
+      )}
+
+      </div>
+
+      {/* Mobile Leaderboard Slider */}
+      {showMobileLeaderboard && activeRoom?.type === '1qad' && (
+        <div className="lg:hidden fixed inset-0 z-[60] flex justify-end bg-slate-900/60 backdrop-blur-sm animate-fadeIn">
+          <div className="fixed inset-0" onClick={() => setShowMobileLeaderboard(false)}></div>
+          <div className="relative w-[300px] max-w-[85vw] h-full bg-[#0a0a0a] shadow-2xl flex flex-col translate-x-0 transition-transform duration-300 border-l border-amber-500/20">
+            <button 
+              onClick={() => setShowMobileLeaderboard(false)}
+              className="absolute top-4 right-4 z-10 p-2 bg-white/10 hover:bg-white/20 rounded-full text-white/70 hover:text-white transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
+            <div className="p-4 h-full pt-16">
+               <LeetCodeLeaderboard />
             </div>
           </div>
         </div>
