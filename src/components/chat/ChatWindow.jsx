@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Send, LogOut, AlignLeft, Smile, PlusCircle, Settings, Hash, User, Users, MessageSquare, UserPlus, CheckCircle, Check, Trophy, ChevronDown, Edit2, Trash2, Info, Loader2 } from "lucide-react";
+import { Send, LogOut, AlignLeft, Smile, PlusCircle, Settings, Hash, User, Users, MessageSquare, UserPlus, CheckCircle, Check, Trophy, ChevronDown, Edit2, Trash2, Info, Loader2, Code2 } from "lucide-react";
 import { subscribeToMessages, sendMessage, editMessage, deleteMessage, markRoomAsRead } from "../../firebase/chatService";
 import { db } from "../../firebase/firebaseConfig";
 import { doc, updateDoc, arrayUnion, arrayRemove } from "firebase/firestore";
@@ -226,10 +226,14 @@ export default function ChatWindow({ activeRoom, userId, userName, userPhoto, pe
   }
 
   if (!displayRoomIcon) {
-    displayRoomIcon = (
-        <div className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center shrink-0">
-          {isGlobal ? <GlobeIcon /> : isPrivate ? <User className="w-4 h-4 text-indigo-500" /> : <HashIcon />}
-        </div>
+    displayRoomIcon = activeRoom.type === '1qad' ? (
+      <div className="w-8 h-8 rounded-full bg-amber-500/10 flex items-center justify-center shrink-0">
+        <Code2 className="w-4 h-4 text-amber-500" />
+      </div>
+    ) : (
+      <div className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center shrink-0">
+        {isGlobal ? <GlobeIcon /> : isPrivate ? <User className="w-4 h-4 text-indigo-500" /> : <HashIcon />}
+      </div>
     );
   }
 
@@ -274,17 +278,19 @@ export default function ChatWindow({ activeRoom, userId, userName, userPhoto, pe
             
             <div className="flex flex-col flex-1 w-full min-w-0">
               <h3 className="font-bold text-slate-800 dark:text-slate-100 text-sm sm:text-base truncate">
-                {displayRoomName}
+                {activeRoom.type === '1qad' ? '1QAD' : displayRoomName}
               </h3>
-              <p className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 mt-0.5 font-medium truncate">
-                {isGlobal ? "Global Chat" : isPrivate ? "Direct Message" : `${activeRoom.members?.length || 0} members`}
-              </p>
+              {activeRoom.type !== '1qad' && (
+                <p className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 mt-0.5 font-medium truncate">
+                  {isGlobal ? "Global Chat" : isPrivate ? "Direct Message" : `${activeRoom.members?.length || 0} members`}
+                </p>
+              )}
             </div>
           </div>
         </div>
         
         <div className="flex items-center gap-1">
-          {isGlobal && (
+          {activeRoom?.type !== '1qad' && activeRoom?.type !== 'private' && (
             <button
               onClick={() => navigate(`/dashboard/chat/${activeRoom.id}/settings?showMembers=true`)}
               className="flex items-center gap-1.5 px-3 py-1.5 mr-1 text-xs sm:text-sm font-bold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 dark:text-indigo-400 dark:bg-indigo-900/30 dark:hover:bg-indigo-900/50 rounded-lg transition-colors outline-none"

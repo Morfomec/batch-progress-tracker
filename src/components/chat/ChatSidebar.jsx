@@ -145,10 +145,11 @@ export default function ChatSidebar({
         </h2>
         <button
           onClick={onCreateRoom}
-          className="p-1.5 bg-indigo-100 hover:bg-indigo-200 dark:bg-indigo-900/50 dark:hover:bg-indigo-800 text-indigo-700 dark:text-indigo-300 rounded-md transition-colors"
+          className="group flex items-center gap-1.5 px-4 py-1.5 bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 text-white text-[13px] font-bold rounded-full shadow-sm hover:shadow-md transition-all active:scale-95"
           title="Create Group"
         >
-          <MessageSquarePlus className="w-4 h-4" />
+          <MessageSquarePlus className="w-4 h-4 group-hover:rotate-12 transition-transform duration-300" />
+          <span>New Group</span>
         </button>
       </div>
 
@@ -199,7 +200,7 @@ export default function ChatSidebar({
                 <div className="w-8 h-8 rounded-full bg-amber-500/10 flex items-center justify-center shrink-0">
                   <Code2 className="w-4 h-4 text-amber-500" />
                 </div>
-                <span className="truncate">{qadRoom.name || "1QAD"}</span>
+                <span className="truncate">1QAD</span>
               </div>
 
               <button
