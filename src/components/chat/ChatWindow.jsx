@@ -7,7 +7,7 @@ import EmojiPicker from 'emoji-picker-react';
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 
-export default function ChatWindow({ activeRoom, userId, userName, userPhoto, peerProfiles = {}, onLeaveRoom, onMenuClick, groups = [] }) {
+export default function ChatWindow({ activeRoom, userId, userName, userPhoto, peerProfiles = {}, onLeaveRoom, onMenuClick, groups = [], activeGroup = null }) {
   const navigate = useNavigate();
   
   const [messages, setMessages] = useState([]);
@@ -107,25 +107,40 @@ export default function ChatWindow({ activeRoom, userId, userName, userPhoto, pe
     }
   };
 
+  const pollResponseMatchesActiveBatch = (response) => {
+    if (!activeGroup?.id) return false;
+    if (response.groupId) return response.groupId === activeGroup.id;
+    return response.batch === activeGroup.groupName;
+  };
+
+  const getUserPollVote = (msg) =>
+    msg.pollResponses?.find((r) => r.uid === userId && pollResponseMatchesActiveBatch(r));
+
+  const getBatchPollResponses = (msg) =>
+    (msg.pollResponses || []).filter(pollResponseMatchesActiveBatch);
+
   const handlePollVote = async (msg) => {
+    if (!activeGroup?.id) {
+      toast.error("Select a batch from the sidebar first.");
+      return;
+    }
+
     try {
-      const existingVote = msg.pollResponses?.find(r => r.uid === userId);
+      const existingVote = getUserPollVote(msg);
       const msgRef = doc(db, `chatRooms/${activeRoom.id}/messages/${msg.id}`);
 
       if (existingVote) {
-        // Undo vote
         await updateDoc(msgRef, {
           pollResponses: arrayRemove(existingVote)
         });
         toast.success("Vote removed");
       } else {
-        // Add vote
-        const batchName = groups && groups.length > 0 ? groups[0].name : "No Batch";
         const pollData = {
           uid: userId || "unknown",
           name: userName || "Unknown User",
           photo: userPhoto || null,
-          batch: batchName || "No Batch"
+          groupId: activeGroup.id,
+          batch: activeGroup.groupName || "No Batch"
         };
         await updateDoc(msgRef, {
           pollResponses: arrayUnion(pollData)
@@ -434,13 +449,14 @@ export default function ChatWindow({ activeRoom, userId, userName, userPhoto, pe
                           <div className="mt-2">
                             <button 
                               onClick={() => handlePollVote(msg)}
+                              disabled={!activeGroup?.id}
                               className={`${
-                                msg.pollResponses?.some(r => r.uid === userId) 
+                                getUserPollVote(msg)
                                   ? 'bg-slate-200 hover:bg-slate-300 text-slate-700 dark:bg-slate-700/80 dark:hover:bg-slate-700 dark:text-slate-300 shadow-inner' 
                                   : 'bg-emerald-500 hover:bg-emerald-600 text-white shadow-sm'
-                              } font-bold py-2.5 px-4 rounded-xl text-sm transition-colors flex items-center justify-center gap-2 w-full`}
+                              } font-bold py-2.5 px-4 rounded-xl text-sm transition-colors flex items-center justify-center gap-2 w-full disabled:opacity-50 disabled:cursor-not-allowed`}
                             >
-                              {msg.pollResponses?.some(r => r.uid === userId) ? (
+                              {getUserPollVote(msg) ? (
                                 <>
                                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"/></svg>
                                   Undo
@@ -455,28 +471,41 @@ export default function ChatWindow({ activeRoom, userId, userName, userPhoto, pe
                           </div>
 
                           <div 
-                            onClick={() => msg.pollResponses?.length > 0 && setShowPolledUsersModal(msg)}
-                            className={`flex items-center gap-3 mt-1 pt-4 border-t border-slate-200/50 dark:border-slate-700/50 rounded-lg p-2 -mx-2 transition-colors ${msg.pollResponses?.length > 0 ? 'cursor-pointer hover:bg-slate-100/50 dark:hover:bg-slate-800/30' : ''}`}
+                            onClick={() => {
+                              const batchResponses = getBatchPollResponses(msg);
+                              if (batchResponses.length > 0) {
+                                setShowPolledUsersModal({ ...msg, batchPollResponses: batchResponses });
+                              }
+                            }}
+                            className={`flex items-center gap-3 mt-1 pt-4 border-t border-slate-200/50 dark:border-slate-700/50 rounded-lg p-2 -mx-2 transition-colors ${getBatchPollResponses(msg).length > 0 ? 'cursor-pointer hover:bg-slate-100/50 dark:hover:bg-slate-800/30' : ''}`}
                           >
                             <div className="flex -space-x-2 overflow-hidden shrink-0">
-                              {(msg.pollResponses || []).slice(0, 3).map((res, i) => (
+                              {getBatchPollResponses(msg).slice(0, 3).map((res, i) => (
                                 <div key={i} className="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 border-2 border-white dark:border-slate-800 flex items-center justify-center overflow-hidden shrink-0 shadow-sm" title={res.name}>
                                   {res.photo ? <img src={res.photo} alt={res.name} className="w-full h-full object-cover" /> : <span className="text-xs font-bold text-slate-500">{res.name?.charAt(0)?.toUpperCase()}</span>}
                                 </div>
                               ))}
-                              {msg.pollResponses?.length > 3 && (
+                              {getBatchPollResponses(msg).length > 3 && (
                                 <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 border-2 border-white dark:border-slate-800 flex items-center justify-center shrink-0 shadow-sm z-10">
-                                  <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400">+{msg.pollResponses.length - 3}</span>
+                                  <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400">+{getBatchPollResponses(msg).length - 3}</span>
                                 </div>
                               )}
-                              {(!msg.pollResponses || msg.pollResponses.length === 0) && (
+                              {getBatchPollResponses(msg).length === 0 && (
                                 <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 border-2 border-white dark:border-slate-800 flex items-center justify-center shrink-0 shadow-sm border-dashed">
                                   <Trophy className="w-4 h-4 text-slate-400 dark:text-slate-500" />
                                 </div>
                               )}
                             </div>
                             <span className="text-sm font-semibold text-slate-600 dark:text-slate-400">
-                              {msg.pollResponses?.length || 0} {(msg.pollResponses?.length === 1) ? 'person' : 'persons'} completed
+                              {(() => {
+                                const count = getBatchPollResponses(msg).length;
+                                return `${count} ${count === 1 ? 'person' : 'persons'} completed`;
+                              })()}
+                              {activeGroup?.groupName && (
+                                <span className="block text-xs font-medium text-slate-400 dark:text-slate-500 mt-0.5">
+                                  in {activeGroup.groupName}
+                                </span>
+                              )}
                             </span>
                           </div>
                         </div>
@@ -610,7 +639,10 @@ export default function ChatWindow({ activeRoom, userId, userName, userPhoto, pe
             <div className="flex items-center justify-between p-4 border-b border-slate-100 dark:border-slate-800/80">
               <div>
                 <h3 className="text-lg font-bold text-slate-800 dark:text-white leading-none">Completed By</h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">{showPolledUsersModal.questionData?.title}</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                  {showPolledUsersModal.questionData?.title}
+                  {activeGroup?.groupName && ` · ${activeGroup.groupName}`}
+                </p>
               </div>
               <button 
                 onClick={() => setShowPolledUsersModal(null)}
@@ -621,19 +653,19 @@ export default function ChatWindow({ activeRoom, userId, userName, userPhoto, pe
             </div>
             
             <div className="overflow-y-auto max-h-[60vh] p-4 flex flex-col gap-3">
-              {showPolledUsersModal.pollResponses?.map((res, i) => (
+              {(showPolledUsersModal.batchPollResponses || getBatchPollResponses(showPolledUsersModal)).map((res, i) => (
                 <div key={i} className="flex items-center gap-3 p-2 hover:bg-slate-50 dark:hover:bg-slate-800/50 rounded-lg transition-colors">
                   <div className="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden shrink-0 shadow-sm" title={res.name}>
                     {res.photo ? <img src={res.photo} alt={res.name} className="w-full h-full object-cover" /> : <span className="text-sm font-bold text-slate-500 w-full h-full flex items-center justify-center">{res.name?.charAt(0)?.toUpperCase()}</span>}
                   </div>
                   <div className="flex flex-col">
                     <span className="text-sm font-bold text-slate-700 dark:text-slate-200">{res.name}</span>
-                    <span className="text-xs font-medium text-slate-500 dark:text-slate-400">{res.batch || "Unknown Batch"}</span>
+                    <span className="text-xs font-medium text-slate-500 dark:text-slate-400">{res.batch || activeGroup?.groupName || "Unknown Batch"}</span>
                   </div>
                 </div>
               ))}
               
-              {!showPolledUsersModal.pollResponses?.length && (
+              {!(showPolledUsersModal.batchPollResponses || getBatchPollResponses(showPolledUsersModal)).length && (
                 <div className="py-8 text-center text-sm text-slate-500">
                   No one has completed this yet!
                 </div>
