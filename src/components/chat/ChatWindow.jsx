@@ -506,7 +506,7 @@ export default function ChatWindow({ activeRoom, userId, userName, userPhoto, us
                         : 'bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-100 dark:border-slate-700/50 rounded-tl-md'
                     }`}>
                       {msg.type === '1qad_poll' ? (
-                        <div className="flex flex-col gap-4 min-w-[280px] sm:min-w-[360px] mt-1 p-3">
+                        <div className="flex flex-col gap-4 w-[280px] sm:w-[360px] max-w-[80vw] mt-1 p-3">
                           <div className="flex flex-col gap-2">
                             {msg.questionData ? (
                                 <>
