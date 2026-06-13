@@ -1,9 +1,9 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNovaCall } from '../../hooks/useNovaCall';
-import { X, Mic, MicOff, PhoneOff, Sparkles, Loader2 } from 'lucide-react';
+import { X, Mic, MicOff, PhoneOff, Sparkles, Loader2, Clock } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { db } from '../../firebase/firebaseConfig';
-import { doc, setDoc, increment } from 'firebase/firestore';
+import { doc, setDoc, getDoc, increment, collection, addDoc, serverTimestamp } from 'firebase/firestore';
 
 export default function NovaVideoCall({ isOpen, onClose, activeRoom, userId }) {
   const {
@@ -20,14 +20,73 @@ export default function NovaVideoCall({ isOpen, onClose, activeRoom, userId }) {
     toggleMute
   } = useNovaCall();
 
-  // Watch for summary generation to add points
+  const [callsLeft, setCallsLeft] = useState(null);
+  const DAILY_LIMIT = 9999; // Set back to 3 for production
+
+  // Fetch usage data when modal opens
   useEffect(() => {
-    if (summary && summary.pointsEarned > 0 && activeRoom?.groupId && userId) {
+    if (isOpen && userId) {
+      const fetchUsage = async () => {
+        try {
+          const pointRef = doc(db, "users", userId, "novaUsage", "daily");
+          const docSnap = await getDoc(pointRef);
+          
+          const today = new Date().toISOString().split('T')[0];
+          let currentCalls = 0;
+          
+          if (docSnap.exists()) {
+            const data = docSnap.data();
+            if (data.lastCallDate === today) {
+              currentCalls = data.novaCallsToday || 0;
+            }
+          }
+          
+          setCallsLeft(Math.max(0, DAILY_LIMIT - currentCalls));
+        } catch (err) {
+          console.error("Failed to fetch usage:", err);
+          setCallsLeft(DAILY_LIMIT); // fallback to allow calls if DB fails
+        }
+      };
+      fetchUsage();
+    }
+  }, [isOpen, userId]);
+
+  // Watch for summary generation to add points and update usage
+  useEffect(() => {
+    if (summary && summary.pointsEarned > 0 && userId) {
       const addPoint = async () => {
         try {
-          const pointRef = doc(db, "groups", activeRoom.groupId, "englishKick", userId);
-          await setDoc(pointRef, { points: increment(1) }, { merge: true });
-          toast.success("Added 1 English Kick point for your effort!");
+          const today = new Date().toISOString().split('T')[0];
+          
+          // First update the daily usage
+          const usageRef = doc(db, "users", userId, "novaUsage", "daily");
+          const docSnap = await getDoc(usageRef);
+          let currentCalls = 0;
+          if (docSnap.exists() && docSnap.data().lastCallDate === today) {
+            currentCalls = docSnap.data().novaCallsToday || 0;
+          }
+          await setDoc(usageRef, { 
+            novaCallsToday: currentCalls + 1,
+            lastCallDate: today
+          }, { merge: true });
+          
+          setCallsLeft(Math.max(0, DAILY_LIMIT - (currentCalls + 1)));
+
+          // Then add the points to the group if they are in one
+          if (activeRoom?.groupId) {
+            const pointRef = doc(db, "groups", activeRoom.groupId, "englishKick", userId);
+            await setDoc(pointRef, { points: increment(1) }, { merge: true });
+            toast.success("Added 1 English Kick point for your effort!");
+          }
+
+          // Save the full feedback history
+          const historyRef = collection(db, "users", userId, "novaHistory");
+          await addDoc(historyRef, {
+            score: summary.score,
+            feedback: summary.feedback,
+            pointsEarned: summary.pointsEarned,
+            createdAt: serverTimestamp()
+          });
         } catch (err) {
           console.error("Failed to add point:", err);
         }
@@ -36,16 +95,16 @@ export default function NovaVideoCall({ isOpen, onClose, activeRoom, userId }) {
     }
   }, [summary, activeRoom?.groupId, userId]);
 
-  // Start call automatically when modal opens
+  // Start call automatically when modal opens and usage is checked
   useEffect(() => {
-    if (isOpen && !isActive && !summary && status !== 'complete') {
+    if (isOpen && callsLeft !== null && callsLeft > 0 && !isActive && !summary && status !== 'complete') {
       startCall();
     }
     // Cleanup if closed abruptly
     return () => {
       if (isActive) endCall();
     };
-  }, [isOpen]);
+  }, [isOpen, callsLeft]);
 
   if (!isOpen) return null;
 
@@ -57,7 +116,7 @@ export default function NovaVideoCall({ isOpen, onClose, activeRoom, userId }) {
 
   const renderActiveCall = () => (
     <div className="flex flex-col items-center justify-between h-full w-full p-6 relative overflow-hidden">
-      
+
       {/* Premium Minimalist Voice UI */}
       <div className="absolute inset-0 z-0 bg-[#0a0f1c] flex items-center justify-center overflow-hidden">
         {/* Core AI Orb */}
@@ -101,8 +160,16 @@ export default function NovaVideoCall({ isOpen, onClose, activeRoom, userId }) {
         {formatTime(timeLeft)}
       </div>
 
-      <div className="absolute top-6 left-6 text-white/50 text-sm font-medium uppercase tracking-widest z-20 bg-slate-900/40 px-3 py-1 rounded-lg backdrop-blur-md">
-        Nova Call Session
+      <div className="absolute top-6 left-6 flex flex-col gap-2 z-20">
+        <div className="text-white/50 text-sm font-medium uppercase tracking-widest bg-slate-900/40 px-3 py-1 rounded-lg backdrop-blur-md">
+          Nova Call Session
+        </div>
+        {callsLeft !== null && (
+          <div className="text-amber-300 text-xs font-bold uppercase tracking-widest bg-amber-500/10 border border-amber-500/20 px-3 py-1 rounded-lg backdrop-blur-md shadow-lg flex items-center gap-2 w-fit">
+            <Clock className="w-3 h-3" />
+            {DAILY_LIMIT > 100 ? 'DEV MODE: UNLIMITED' : `${callsLeft} ${callsLeft === 1 ? 'Call' : 'Calls'} Left Today`}
+          </div>
+        )}
       </div>
 
       {/* Spacer to push content down */}
@@ -123,13 +190,13 @@ export default function NovaVideoCall({ isOpen, onClose, activeRoom, userId }) {
 
       {/* Controls */}
       <div className="flex items-center gap-6 pb-4 z-20">
-        <button 
+        <button
           onClick={toggleMute}
           className={`w-14 h-14 rounded-full flex items-center justify-center transition-all shadow-lg ${isMuted ? 'bg-rose-500/20 text-rose-500 hover:bg-rose-500/30 border border-rose-500/30' : 'bg-slate-700/70 text-white hover:bg-slate-600/70 border border-slate-600/50'} backdrop-blur-xl`}
         >
           {isMuted ? <MicOff className="w-6 h-6" /> : <Mic className="w-6 h-6" />}
         </button>
-        <button 
+        <button
           onClick={endCall}
           className="w-16 h-16 rounded-full bg-rose-600 hover:bg-rose-700 text-white flex items-center justify-center shadow-lg shadow-rose-600/30 transition-all hover:scale-105 border border-rose-500"
         >
@@ -157,7 +224,7 @@ export default function NovaVideoCall({ isOpen, onClose, activeRoom, userId }) {
           You earned 1 English Kick point!
         </div>
       )}
-      <button 
+      <button
         onClick={onClose}
         className="px-8 py-3 bg-white text-black font-bold rounded-xl hover:bg-slate-200 transition-colors"
       >
@@ -170,18 +237,27 @@ export default function NovaVideoCall({ isOpen, onClose, activeRoom, userId }) {
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 md:p-12">
       {/* Backdrop */}
       <div className="absolute inset-0 bg-black/80 backdrop-blur-xl" onClick={status === 'complete' ? onClose : undefined}></div>
-      
+
       {/* Modal Container */}
       <div className="relative w-full h-full max-w-5xl max-h-[800px] bg-slate-900/80 border border-slate-700/50 rounded-3xl overflow-hidden shadow-2xl flex flex-col">
         {hasError ? (
           <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
-            {/* Background ambient glow for error state */}
-            <div className="absolute inset-0 z-0 bg-[#0a0f1c] flex items-center justify-center">
-                <div className="w-96 h-96 bg-rose-500/5 blur-[120px] rounded-full"></div>
+            {/* Show simple icon in error state */}
+            <div className="w-24 h-24 bg-rose-500/20 rounded-full flex items-center justify-center mb-6">
+              <PhoneOff className="w-10 h-10 text-rose-400" />
             </div>
             <h3 className="text-2xl font-bold text-white mb-4">Browser Not Supported</h3>
             <p className="text-slate-400 mb-6 max-w-md">Your browser does not support the Web Speech API required for this feature. Please try Chrome or Edge.</p>
             <button onClick={onClose} className="px-8 py-3 bg-slate-700 hover:bg-slate-600 text-white font-bold rounded-xl transition-colors">Close</button>
+          </div>
+        ) : callsLeft === 0 ? (
+          <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
+            <div className="w-24 h-24 bg-amber-500/20 rounded-full flex items-center justify-center mb-6">
+              <Clock className="w-10 h-10 text-amber-400" />
+            </div>
+            <h3 className="text-2xl font-bold text-white mb-4">Daily Limit Reached</h3>
+            <p className="text-slate-400 mb-6 max-w-md">You have used all {DAILY_LIMIT} of your Nova AI practice calls for today. Great job practicing! Come back tomorrow for more.</p>
+            <button onClick={onClose} className="px-8 py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl transition-colors">Return to Chat</button>
           </div>
         ) : status === 'complete' && summary ? (
           renderSummary()

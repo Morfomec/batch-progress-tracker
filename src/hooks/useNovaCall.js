@@ -63,8 +63,13 @@ export function useNovaCall() {
     };
 
     recognitionRef.current.onerror = (event) => {
+      if (event.error === 'no-speech') {
+        // Expected behavior when user pauses. Ignore it, onend will restart.
+        return;
+      }
+      
       console.error("Speech recognition error:", event.error);
-      if (event.error !== 'no-speech' && event.error !== 'aborted') {
+      if (event.error !== 'aborted') {
           setStatus('idle');
       }
     };
