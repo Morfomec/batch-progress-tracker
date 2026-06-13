@@ -172,7 +172,7 @@ const HumanAvatar = ({ isSpeaking, userAudioLevel }) => {
 
 export default function Avatar3D({ isSpeaking, userAudioLevel }) {
   return (
-    <div className="w-full h-full bg-slate-900 rounded-full overflow-hidden shadow-2xl border-4 border-indigo-500/20">
+    <div className="w-full h-full bg-slate-900 overflow-hidden">
       <AvatarErrorBoundary fallback={
         <Canvas camera={{ position: [0, 0, 3], fov: 50 }}>
             <ambientLight intensity={0.5} />

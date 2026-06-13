@@ -57,66 +57,58 @@ export default function NovaVideoCall({ isOpen, onClose, activeRoom, userId }) {
   };
 
   const renderActiveCall = () => (
-    <div className="flex flex-col items-center justify-center h-full w-full p-6 relative">
+    <div className="flex flex-col items-center justify-between h-full w-full p-6 relative overflow-hidden">
+      
+      {/* 3D Avatar Background */}
+      <div className="absolute inset-0 z-0 bg-slate-900">
+        {/* Full-screen pulsing glow when user speaks */}
+        {status === 'listening' && userAudioLevel > 10 && (
+          <div className="absolute inset-0 bg-emerald-500/10 transition-all duration-75 z-10 pointer-events-none" style={{ opacity: Math.min(userAudioLevel / 100, 0.4) }}></div>
+        )}
+        {/* Full-screen glow when Nova speaks */}
+        {status === 'speaking' && (
+          <div className="absolute inset-0 bg-indigo-500/10 animate-pulse z-10 pointer-events-none"></div>
+        )}
+        
+        <Avatar3D isSpeaking={status === 'speaking'} userAudioLevel={userAudioLevel} />
+      </div>
+
       {/* Timer */}
-      <div className="absolute top-6 right-6 px-4 py-2 bg-slate-900/40 rounded-full border border-slate-700/50 backdrop-blur-md text-white font-mono text-xl tracking-wider shadow-lg">
+      <div className="absolute top-6 right-6 px-4 py-2 bg-slate-900/60 rounded-full border border-slate-700/50 backdrop-blur-md text-white font-mono text-xl tracking-wider shadow-lg z-20">
         {formatTime(timeLeft)}
       </div>
 
-      <div className="absolute top-6 left-6 text-white/50 text-sm font-medium uppercase tracking-widest">
+      <div className="absolute top-6 left-6 text-white/50 text-sm font-medium uppercase tracking-widest z-20 bg-slate-900/40 px-3 py-1 rounded-lg backdrop-blur-md">
         Nova Call Session
       </div>
 
-      {/* Avatar / Visualizer */}
-      <div className="flex-1 flex items-center justify-center w-full max-w-md">
-        <div className="relative">
-          {/* Pulsing ring when NOVA is speaking */}
-          {status === 'speaking' && (
-            <>
-              <div className="absolute inset-0 rounded-full bg-indigo-500/20 blur-xl animate-pulse scale-150"></div>
-              <div className="absolute inset-0 rounded-full border-4 border-indigo-400/30 scale-110 animate-ping" style={{ animationDuration: '2s' }}></div>
-            </>
-          )}
-          
-          {/* Pulsing ring when USER is speaking (detected via audio level) */}
-          {status === 'listening' && userAudioLevel > 10 && (
-            <>
-              <div className="absolute inset-0 rounded-full bg-emerald-500/20 blur-xl transition-all duration-75" style={{ transform: `scale(${1 + userAudioLevel / 100})` }}></div>
-              <div className="absolute inset-0 rounded-full border-4 border-emerald-400/30 transition-all duration-75" style={{ transform: `scale(${1 + userAudioLevel / 150})` }}></div>
-            </>
-          )}
-          
-          {/* Main Avatar */}
-          <div className="w-40 h-40 md:w-48 md:h-48 relative z-10">
-            <Avatar3D isSpeaking={status === 'speaking'} userAudioLevel={userAudioLevel} />
-          </div>
-        </div>
-      </div>
+      {/* Spacer to push content down */}
+      <div className="flex-1 w-full"></div>
 
       {/* Status & Transcript Area */}
-      <div className="h-24 w-full flex flex-col items-center justify-center text-center px-4 mb-8">
+      <div className="z-20 w-full max-w-2xl flex flex-col items-center justify-center text-center px-6 py-4 bg-slate-900/60 backdrop-blur-md rounded-2xl border border-slate-700/50 shadow-2xl mb-6">
         <p className="text-indigo-300 text-sm font-semibold uppercase tracking-wider mb-2 flex items-center gap-2">
           {status === 'listening' && <><span className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span> Listening...</>}
           {status === 'processing' && <><Loader2 className="w-4 h-4 animate-spin text-indigo-400" /> Thinking...</>}
           {status === 'speaking' && <><span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span> Speaking</>}
           {status === 'idle' && 'Waiting...'}
         </p>
-        <p className="text-white/80 text-lg md:text-xl font-medium max-w-2xl truncate">
+        <p className="text-white/90 text-lg md:text-xl font-medium max-w-2xl min-h-[3rem] flex items-center justify-center">
           {transcript ? `"${transcript}"` : "..."}
         </p>
       </div>
 
       {/* Controls */}
-      <div className="flex items-center gap-6 pb-4">
+      <div className="flex items-center gap-6 pb-4 z-20">
         <button 
           onClick={toggleMute}
-          className={`w-14 h-14 rounded-full flex items-center justify-center transition-all ${isMuted ? 'bg-rose-500/20 text-rose-500 hover:bg-rose-500/30' : 'bg-slate-700/50 text-white hover:bg-slate-600/50'} backdrop-blur-md`}
+          className={`w-14 h-14 rounded-full flex items-center justify-center transition-all shadow-lg ${isMuted ? 'bg-rose-500/20 text-rose-500 hover:bg-rose-500/30 border border-rose-500/30' : 'bg-slate-700/70 text-white hover:bg-slate-600/70 border border-slate-600/50'} backdrop-blur-xl`}
         >
           {isMuted ? <MicOff className="w-6 h-6" /> : <Mic className="w-6 h-6" />}
         </button>
         <button 
           onClick={endCall}
-          className="w-16 h-16 rounded-full bg-rose-600 hover:bg-rose-700 text-white flex items-center justify-center shadow-lg shadow-rose-600/20 transition-all hover:scale-105"
+          className="w-16 h-16 rounded-full bg-rose-600 hover:bg-rose-700 text-white flex items-center justify-center shadow-lg shadow-rose-600/30 transition-all hover:scale-105 border border-rose-500"
         >
           <PhoneOff className="w-7 h-7" />
         </button>
@@ -161,7 +153,7 @@ export default function NovaVideoCall({ isOpen, onClose, activeRoom, userId }) {
         {hasError ? (
           <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
             {/* Show Avatar even in error state so user can see it */}
-            <div className="w-40 h-40 md:w-48 md:h-48 relative z-10 mb-8 opacity-80 grayscale-[30%] pointer-events-none">
+            <div className="absolute inset-0 z-0 opacity-40 grayscale-[50%] pointer-events-none">
               <Avatar3D isSpeaking={false} userAudioLevel={0} />
             </div>
             <h3 className="text-2xl font-bold text-white mb-4">Browser Not Supported</h3>
