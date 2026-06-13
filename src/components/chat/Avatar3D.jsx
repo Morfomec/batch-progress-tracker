@@ -207,7 +207,7 @@ export default function Avatar3D({ isSpeaking, userAudioLevel }) {
             <OrbitControls enableZoom={false} enablePan={false} enableRotate={false} />
         </Canvas>
       }>
-        <Canvas shadows camera={{ position: [0, 0, 1.2], fov: 40 }}>
+        <Canvas shadows camera={{ position: [0, 0.55, 1.2], fov: 42 }}>
           <fog attach="fog" args={['#0a0f1c', 1, 5]} />
           
           {/* Cinematic 3-Point Lighting */}
@@ -215,7 +215,7 @@ export default function Avatar3D({ isSpeaking, userAudioLevel }) {
           
           {/* Key Light (Front Right, casts shadow) */}
           <directionalLight 
-            position={[1, 1, 2]} 
+            position={[1, 1.5, 2]} 
             intensity={2} 
             color="#ffffff" 
             castShadow 
@@ -226,14 +226,14 @@ export default function Avatar3D({ isSpeaking, userAudioLevel }) {
           
           {/* Fill Light (Front Left, softer, slightly cool) */}
           <directionalLight 
-            position={[-2, 0.5, 2]} 
+            position={[-2, 1, 2]} 
             intensity={1} 
             color="#a5b4fc" 
           />
           
           {/* Rim Light (Behind, creates glowing edge) */}
           <spotLight 
-            position={[0, 2, -2]} 
+            position={[0, 2.5, -2]} 
             intensity={5} 
             color="#818cf8" 
             angle={0.8}
@@ -241,7 +241,7 @@ export default function Avatar3D({ isSpeaking, userAudioLevel }) {
           />
 
           {/* Dynamic conversational glow from the "screen" */}
-          <pointLight position={[0, -0.5, 1]} intensity={isSpeaking ? 3 : 0} color="#c084fc" distance={3} />
+          <pointLight position={[0, 0.2, 1]} intensity={isSpeaking ? 3 : 0} color="#c084fc" distance={3} />
           
           <React.Suspense fallback={null}>
             <HumanAvatar isSpeaking={isSpeaking} userAudioLevel={userAudioLevel} />
@@ -252,7 +252,7 @@ export default function Avatar3D({ isSpeaking, userAudioLevel }) {
             enableZoom={false} 
             enablePan={false} 
             enableRotate={false}
-            target={[0, 0.05, 0]}
+            target={[0, 0.55, 0]}
           />
         </Canvas>
       </AvatarErrorBoundary>
