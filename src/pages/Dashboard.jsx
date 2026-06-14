@@ -342,13 +342,23 @@ function Dashboard() {
 
         const weeklyProgressQuery = query(
             collection(db, "groups", groupId, "progress"),
-            where("userId", "==", userId),
-            where("createdAt", ">=", lastSaturday),
-            limit(1)
+            where("userId", "==", userId)
         );
 
-        const weeklySnapshot = await getDocs(weeklyProgressQuery);
-        if (weeklySnapshot.empty) {
+        let weeklySnapshot;
+        try {
+            weeklySnapshot = await getDocs(weeklyProgressQuery);
+        } catch (error) {
+            console.warn("Failed to check weekly progress:", error);
+            return;
+        }
+        
+        const hasRecentProgress = weeklySnapshot.docs.some(doc => {
+            const data = doc.data();
+            return data.createdAt && data.createdAt.toDate() >= lastSaturday;
+        });
+
+        if (!hasRecentProgress) {
             const reminderDismissed = sessionStorage.getItem(`reminder_dismissed_${userId}`);
             if (!reminderDismissed) {
                 setShowReminder(true);
@@ -757,7 +767,7 @@ function Dashboard() {
                                 >
                                     <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,0.2)_50%,transparent_75%,transparent_100%)] bg-[length:250%_250%,100%_100%] bg-[position:200%_0,0_0] bg-no-repeat group-hover:bg-[position:-200%_0,0_0] transition-[background-position] duration-1000"></div>
                                     <Map className="w-5 h-5 relative z-10" />
-                                    <span className="relative z-10">My Roadmap</span>
+                                    <span className="relative z-10">Nova Story</span>
                                 </button>
                                 <button
                                     onClick={() => setShowForm(true)}
@@ -1038,7 +1048,8 @@ function Dashboard() {
                                                             </a>
                                                         )}
                                                     </div>
-                                                </td>                                                <td className="px-4 sm:px-6 py-3 text-right whitespace-nowrap">
+                                                </td>
+                                                <td className="px-4 sm:px-6 py-3 text-right whitespace-nowrap">
                                                     <span className="font-bold text-xl text-indigo-600 dark:text-indigo-400">{item.score || 0}</span>
                                                 </td>
                                             </tr>

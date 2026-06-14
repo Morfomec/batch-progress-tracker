@@ -44,6 +44,33 @@ export class NovaCallSession {
   }
 
   async sendMessage(userText) {
+    if (!GROQ_API_KEYS[0]) {
+      console.warn("Groq API key is missing. Using fallback mock response.");
+      
+      const offlineResponses = [
+        "That's interesting! Tell me more about it.",
+        "I see. How did that make you feel?",
+        "Could you elaborate on that?",
+        "That sounds like a great experience. What did you learn from it?",
+        "Awesome! Keep practicing your English. What else is on your mind?",
+        "I understand. What do you plan to do next?",
+        "Fascinating! How did you get started with that?",
+        "Very good! Your pronunciation is getting better. Keep going!"
+      ];
+      
+      if (this.history.length <= 1) {
+        const msg = "I'm currently running in offline mode. Please add a Groq API key to hear my real voice. Until then, let's practice! Tell me about your day.";
+        this.history.push({ role: "user", content: userText });
+        this.history.push({ role: "assistant", content: msg });
+        return msg;
+      }
+      
+      const randomResponse = offlineResponses[Math.floor(Math.random() * offlineResponses.length)];
+      this.history.push({ role: "user", content: userText });
+      this.history.push({ role: "assistant", content: randomResponse });
+      return randomResponse;
+    }
+
     try {
       this.history.push({ role: "user", content: userText });
       
@@ -64,6 +91,14 @@ export class NovaCallSession {
   }
 
   async generateSummary() {
+    if (!GROQ_API_KEYS[0]) {
+      return {
+        score: 75,
+        feedback: "Offline mode: Good effort! Add an API key for real feedback.",
+        pointsEarned: 1
+      };
+    }
+
     if (this.history.length <= 1) { // 1 is system instruction
       return {
         score: 0,
