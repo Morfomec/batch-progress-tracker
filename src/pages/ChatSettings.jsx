@@ -95,7 +95,7 @@ export default function ChatSettings() {
   // Check URL params to auto-open members modal
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    if (params.get("showMembers") === "true" && room && room.type !== 'private') {
+    if (params.get("showMembers") === "true" && room) {
       handleOpenMembersModal();
     }
   }, [room]);
@@ -415,28 +415,28 @@ export default function ChatSettings() {
              </button>
           </div>
 
-          {/* Members Card (Groups Only) - Compact */}
+          {/* Members Card - Compact */}
           {!isPrivate && (
-              <div className="bg-white dark:bg-[#0a0a0a] border border-slate-200 dark:border-slate-800 rounded-xl p-4 flex items-center justify-between shadow-sm">
-                <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-lg bg-sky-100 text-sky-600 dark:bg-sky-900/20">
-                        <User className="w-4 h-4" />
-                    </div>
-                    <div>
-                        <h2 className="text-sm font-bold text-slate-800 dark:text-slate-100">Members</h2>
-                        <p className="text-[11px] text-slate-500">
-                            {isGlobal ? totalUsersCount : (room.members?.length || 0)} participants
-                        </p>
-                    </div>
-                </div>
-                
-                <button
-                    onClick={handleOpenMembersModal}
-                    className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 text-xs font-bold rounded-lg transition-colors"
-                >
-                    View All
-                </button>
+            <div className="bg-white dark:bg-[#0a0a0a] border border-slate-200 dark:border-slate-800 rounded-xl p-4 flex items-center justify-between shadow-sm">
+              <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-lg bg-sky-100 text-sky-600 dark:bg-sky-900/20">
+                      <User className="w-4 h-4" />
+                  </div>
+                  <div>
+                      <h2 className="text-sm font-bold text-slate-800 dark:text-slate-100">Members</h2>
+                      <p className="text-[11px] text-slate-500">
+                          {isGlobal ? totalUsersCount : (room.members?.length || 0)} participants
+                      </p>
+                  </div>
               </div>
+              
+              <button
+                  onClick={handleOpenMembersModal}
+                  className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 text-xs font-bold rounded-lg transition-colors"
+              >
+                  View All
+              </button>
+            </div>
           )}
 
           {/* Join Requests (Admins/Members can see) */}
