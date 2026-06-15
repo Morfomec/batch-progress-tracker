@@ -74,6 +74,7 @@ export function useNovaCall({ isExamMode = false, isInterviewMode = false, inter
         return;
       }
       
+      
       console.error("Speech recognition error:", event.error);
       if (event.error !== 'aborted') {
           setStatus('idle');
