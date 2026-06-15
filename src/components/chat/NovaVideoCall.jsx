@@ -3,7 +3,7 @@ import { useNovaCall } from '../../hooks/useNovaCall';
 import { X, Mic, MicOff, PhoneOff, Sparkles, Loader2, Clock } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { db } from '../../firebase/firebaseConfig';
-import { doc, setDoc, getDoc, increment, collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { doc, setDoc, getDoc, increment, collection, addDoc, serverTimestamp, query, orderBy, getDocs, deleteDoc } from 'firebase/firestore';
 
 export default function NovaVideoCall({ isOpen, onClose, activeRoom, userId, isExamMode = false, isInterviewMode = false, interviewStack = '', interviewTopic = '' }) {
   const {
@@ -11,6 +11,7 @@ export default function NovaVideoCall({ isOpen, onClose, activeRoom, userId, isE
     timeLeft,
     status,
     transcript,
+    novaSubtitle,
     summary,
     isMuted,
     hasError,
@@ -72,12 +73,7 @@ export default function NovaVideoCall({ isOpen, onClose, activeRoom, userId, isE
           
           setCallsLeft(Math.max(0, DAILY_LIMIT - (currentCalls + 1)));
 
-          // Then add the points to the group if they are in one
-          if (activeRoom?.groupId) {
-            const pointRef = doc(db, "groups", activeRoom.groupId, "englishKick", userId);
-            await setDoc(pointRef, { points: increment(1) }, { merge: true });
-            toast.success("Added 1 English Kick point for your effort!");
-          }
+
 
           // Save the full feedback history
           const historyRef = collection(db, "users", userId, "novaHistory");
@@ -89,6 +85,20 @@ export default function NovaVideoCall({ isOpen, onClose, activeRoom, userId, isE
             roadmap: summary.roadmap,
             createdAt: serverTimestamp()
           });
+
+          // Keep only the most recent 10 feedback items to save space
+          try {
+            const historyQuery = query(historyRef, orderBy("createdAt", "desc"));
+            const querySnapshot = await getDocs(historyQuery);
+            if (querySnapshot.docs.length > 10) {
+              const docsToDelete = querySnapshot.docs.slice(10); // get everything after the 10th item
+              for (const oldDoc of docsToDelete) {
+                await deleteDoc(oldDoc.ref);
+              }
+            }
+          } catch (pruneError) {
+            console.error("Failed to prune old history:", pruneError);
+          }
 
           // Store the current english level to user doc and local storage
           const userRef = doc(db, "users", userId);
@@ -190,8 +200,8 @@ export default function NovaVideoCall({ isOpen, onClose, activeRoom, userId, isE
           {status === 'speaking' && <><span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span> Speaking</>}
           {status === 'idle' && 'Waiting...'}
         </p>
-        <p className="text-white/90 text-lg md:text-xl font-medium max-w-2xl min-h-[3rem] flex items-center justify-center">
-          {transcript ? `"${transcript}"` : "..."}
+        <p className={`text-lg md:text-xl font-medium max-w-2xl min-h-[3rem] flex items-center justify-center ${status === 'speaking' ? 'text-emerald-300' : 'text-white/90'}`}>
+          {status === 'speaking' ? (novaSubtitle ? `"${novaSubtitle}"` : "...") : (transcript ? `"${transcript}"` : "...")}
         </p>
       </div>
 
@@ -245,12 +255,7 @@ export default function NovaVideoCall({ isOpen, onClose, activeRoom, userId, isE
           </div>
         )}
 
-        {summary.pointsEarned > 0 && (
-          <div className="mb-8 px-6 py-3 bg-amber-500/20 border border-amber-500/30 rounded-xl text-amber-300 font-bold flex items-center gap-2">
-            <Sparkles className="w-5 h-5" />
-            You earned 1 English Kick point!
-          </div>
-        )}
+
         <button
           onClick={onClose}
           className="px-8 py-3 bg-white text-black font-bold rounded-xl hover:bg-slate-200 transition-colors shrink-0"
