@@ -120,11 +120,22 @@ export default function ChatWindow({ activeRoom, userId, userName, userPhoto, us
     return response.batch === activeGroup.groupName;
   };
 
-  const getUserPollVote = (msg) =>
-    msg.pollResponses?.find((r) => r.uid === userId && pollResponseMatchesActiveBatch(r));
+  const getUserPollVote = (msg) => {
+    if (activeRoom?.type === '1qad' || msg.type === '1qad_poll') {
+      return msg.pollResponses?.find((r) => r.uid === userId);
+    }
+    return msg.pollResponses?.find((r) => r.uid === userId && pollResponseMatchesActiveBatch(r));
+  };
 
   const getBatchPollResponses = (msg) =>
     (msg.pollResponses || []).filter(pollResponseMatchesActiveBatch);
+
+  const getDisplayPollResponses = (msg) => {
+    if (activeRoom?.type === '1qad' || msg.type === '1qad_poll') {
+      return msg.pollResponses || [];
+    }
+    return getBatchPollResponses(msg);
+  };
 
   const handlePollVote = async (msg) => {
     if (!activeGroup?.id) {
@@ -578,26 +589,26 @@ export default function ChatWindow({ activeRoom, userId, userName, userPhoto, us
 
                           <div 
                             onClick={() => {
-                              const batchResponses = getBatchPollResponses(msg);
-                              if (batchResponses.length > 0) {
-                                setShowPolledUsersModal({ ...msg, batchPollResponses: batchResponses });
+                              const displayResponses = getDisplayPollResponses(msg);
+                              if (displayResponses.length > 0) {
+                                setShowPolledUsersModal({ ...msg, batchPollResponses: displayResponses });
                               }
                             }}
-                            className={`flex items-center justify-between gap-3 mt-1 pt-4 border-t border-slate-200/50 dark:border-slate-700/50 rounded-lg p-2 -mx-2 transition-colors group ${getBatchPollResponses(msg).length > 0 ? 'cursor-pointer hover:bg-slate-100/50 dark:hover:bg-slate-800/30' : ''}`}
+                            className={`flex items-center justify-between gap-3 mt-1 pt-4 border-t border-slate-200/50 dark:border-slate-700/50 rounded-lg p-2 -mx-2 transition-colors group ${getDisplayPollResponses(msg).length > 0 ? 'cursor-pointer hover:bg-slate-100/50 dark:hover:bg-slate-800/30' : ''}`}
                           >
                             <div className="flex items-center gap-3">
                               <div className="flex -space-x-2 overflow-hidden shrink-0">
-                                {getBatchPollResponses(msg).slice(0, 3).map((res, i) => (
+                                {getDisplayPollResponses(msg).slice(0, 3).map((res, i) => (
                                   <div key={i} className="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 border-2 border-white dark:border-slate-800 flex items-center justify-center overflow-hidden shrink-0 shadow-sm" title={res.name}>
                                     {res.photo ? <img src={res.photo} alt={res.name} className="w-full h-full object-cover" /> : <span className="text-xs font-bold text-slate-500">{res.name?.charAt(0)?.toUpperCase()}</span>}
                                   </div>
                                 ))}
-                                {getBatchPollResponses(msg).length > 3 && (
+                                {getDisplayPollResponses(msg).length > 3 && (
                                   <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 border-2 border-white dark:border-slate-800 flex items-center justify-center shrink-0 shadow-sm z-10">
-                                    <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400">+{getBatchPollResponses(msg).length - 3}</span>
+                                    <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400">+{getDisplayPollResponses(msg).length - 3}</span>
                                   </div>
                                 )}
-                                {getBatchPollResponses(msg).length === 0 && (
+                                {getDisplayPollResponses(msg).length === 0 && (
                                   <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 border-2 border-white dark:border-slate-800 flex items-center justify-center shrink-0 shadow-sm border-dashed">
                                     <Trophy className="w-4 h-4 text-slate-400 dark:text-slate-500" />
                                   </div>
@@ -605,17 +616,22 @@ export default function ChatWindow({ activeRoom, userId, userName, userPhoto, us
                               </div>
                               <span className="text-sm font-semibold text-slate-600 dark:text-slate-400">
                                 {(() => {
-                                  const count = getBatchPollResponses(msg).length;
+                                  const count = getDisplayPollResponses(msg).length;
                                   return `${count} ${count === 1 ? 'person' : 'persons'} completed`;
                                 })()}
-                                {activeGroup?.groupName && (
+                                {!(activeRoom?.type === '1qad' || msg.type === '1qad_poll') && activeGroup?.groupName && (
                                   <span className="block text-xs font-medium text-slate-400 dark:text-slate-500 mt-0.5">
                                     in {activeGroup.groupName}
                                   </span>
                                 )}
+                                {(activeRoom?.type === '1qad' || msg.type === '1qad_poll') && (
+                                  <span className="block text-xs font-medium text-slate-400 dark:text-slate-500 mt-0.5">
+                                    across all batches
+                                  </span>
+                                )}
                               </span>
                             </div>
-                            {getBatchPollResponses(msg).length > 0 && (
+                            {getDisplayPollResponses(msg).length > 0 && (
                               <span className="text-xs font-bold text-indigo-500 dark:text-indigo-400 opacity-80 group-hover:opacity-100 transition-opacity">View</span>
                             )}
                           </div>
@@ -760,7 +776,8 @@ export default function ChatWindow({ activeRoom, userId, userName, userPhoto, us
                 <h3 className="text-lg font-bold text-slate-800 dark:text-white leading-none">Completed By</h3>
                 <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
                   {showPolledUsersModal.questionData?.title}
-                  {activeGroup?.groupName && ` · ${activeGroup.groupName}`}
+                  {!(activeRoom?.type === '1qad' || showPolledUsersModal.type === '1qad_poll') && activeGroup?.groupName && ` · ${activeGroup.groupName}`}
+                  {(activeRoom?.type === '1qad' || showPolledUsersModal.type === '1qad_poll') && ` · All Batches`}
                 </p>
               </div>
               <button 
@@ -772,32 +789,39 @@ export default function ChatWindow({ activeRoom, userId, userName, userPhoto, us
             </div>
             
             <div className="p-2 max-h-[60vh] overflow-y-auto custom-scrollbar">
-              {(showPolledUsersModal.batchPollResponses || getBatchPollResponses(showPolledUsersModal)).map((res, i) => (
-                <div key={i} className="flex items-center gap-3 p-2 hover:bg-slate-50 dark:hover:bg-white/5 rounded-xl transition-colors cursor-pointer" onClick={() => { setShowPolledUsersModal(null); navigate(`/dashboard/profile/${res.uid}`); }}>
-                  <div className="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden shrink-0 shadow-sm" title={res.name}>
-                    {res.photo ? <img src={res.photo} alt={res.name} className="w-full h-full object-cover" /> : <span className="text-sm font-bold text-slate-500 w-full h-full flex items-center justify-center">{res.name?.charAt(0)?.toUpperCase()}</span>}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex flex-col">
-                      <span className="font-semibold text-sm text-slate-800 dark:text-slate-200 truncate">{res.name}</span>
-                      {res.batch && res.batch !== "No Batch" && <span className="text-[11px] text-slate-500 truncate">{res.batch}</span>}
+              {(() => {
+                const liveMsg = messages.find(m => m.id === showPolledUsersModal.id) || showPolledUsersModal;
+                const displayResponses = getDisplayPollResponses(liveMsg);
+                
+                if (displayResponses.length === 0) {
+                  return (
+                    <div className="py-8 text-center text-sm text-slate-500">
+                      No one has completed this yet!
                     </div>
-                  </div>
-                  {/* STREAK PRIVILEGE VISUAL */}
-                  {res.streak !== undefined && res.streak !== false && (
-                    <div className="flex items-center gap-1 shrink-0 px-2 py-1 bg-amber-50 dark:bg-amber-500/10 rounded-md border border-amber-200/50 dark:border-amber-500/20" title={`${res.streak} Day LeetCode Streak`}>
-                      <span className="font-black text-amber-500 text-sm">{res.streak}</span>
-                      <span className="text-sm leading-none">🔥</span>
+                  );
+                }
+
+                return displayResponses.map((res, i) => (
+                  <div key={i} className="flex items-center gap-3 p-2 hover:bg-slate-50 dark:hover:bg-white/5 rounded-xl transition-colors cursor-pointer" onClick={() => { setShowPolledUsersModal(null); navigate(`/dashboard/profile/${res.uid}`); }}>
+                    <div className="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden shrink-0 shadow-sm" title={res.name}>
+                      {res.photo ? <img src={res.photo} alt={res.name} className="w-full h-full object-cover" /> : <span className="text-sm font-bold text-slate-500 w-full h-full flex items-center justify-center">{res.name?.charAt(0)?.toUpperCase()}</span>}
                     </div>
-                  )}
-                </div>
-              ))}
-              
-              {!(showPolledUsersModal.batchPollResponses || getBatchPollResponses(showPolledUsersModal)).length && (
-                <div className="py-8 text-center text-sm text-slate-500">
-                  No one has completed this yet!
-                </div>
-              )}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex flex-col">
+                        <span className="font-semibold text-sm text-slate-800 dark:text-slate-200 truncate">{res.name}</span>
+                        {res.batch && res.batch !== "No Batch" && <span className="text-[11px] text-slate-500 truncate">{res.batch}</span>}
+                      </div>
+                    </div>
+                    {/* STREAK PRIVILEGE VISUAL */}
+                    {res.streak !== undefined && res.streak !== false && (
+                      <div className="flex items-center gap-1 shrink-0 px-2 py-1 bg-amber-50 dark:bg-amber-500/10 rounded-md border border-amber-200/50 dark:border-amber-500/20" title={`${res.streak} Day LeetCode Streak`}>
+                        <span className="font-black text-amber-500 text-sm">{res.streak}</span>
+                        <span className="text-sm leading-none">🔥</span>
+                      </div>
+                    )}
+                  </div>
+                ));
+              })()}
             </div>
           </div>
         </div>
