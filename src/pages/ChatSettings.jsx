@@ -531,7 +531,7 @@ export default function ChatSettings() {
 
       {/* Members Modal (Keep as is but slightly more compact) */}
       {!isPrivate && showMembersModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-fadeIn">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-fadeIn">
           <div className="bg-white dark:bg-[#111] rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 w-full max-w-sm max-h-[80vh] flex flex-col overflow-hidden">
             <div className="flex items-center justify-between p-4 border-b border-slate-100 dark:border-slate-800 shrink-0">
               <h3 className="font-bold text-sm text-slate-800 dark:text-slate-100">Room Participants</h3>

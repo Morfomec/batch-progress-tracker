@@ -423,7 +423,7 @@ export default function ChatWindow({ activeRoom, userId, userName, userPhoto, us
         className="flex-1 overflow-y-auto px-2 sm:px-4 py-4 bg-slate-50/50 dark:bg-black w-full flex flex-col xl:flex-row gap-6 items-start"
         onClick={() => setShowEmojiPicker(false)}
       >
-        <div className="flex-1 space-y-4 w-full max-w-full xl:max-w-[calc(100%-400px-1.5rem)]">
+        <div className={`flex-1 space-y-4 w-full max-w-full ${activeRoom?.type === '1qad' ? 'xl:max-w-[calc(100%-400px-1.5rem)]' : ''}`}>
         {roomLoadingId === activeRoom?.id ? (
            <div className="h-full w-full"></div>
         ) : messages.length === 0 ? (
@@ -720,7 +720,7 @@ export default function ChatWindow({ activeRoom, userId, userName, userPhoto, us
 
       {/* Polled Users Modal */}
       {showPolledUsersModal && (
-        <div className="absolute inset-0 z-[60] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn">
+        <div className="absolute inset-0 z-[100] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn">
           <div className="bg-white dark:bg-[#1a1a1a] rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden border border-slate-200 dark:border-slate-800 flex flex-col scale-100 transition-transform">
             <div className="flex items-center justify-between p-4 border-b border-slate-100 dark:border-slate-800/80">
               <div>
@@ -767,7 +767,7 @@ export default function ChatWindow({ activeRoom, userId, userName, userPhoto, us
 
       {/* Missing Username Modal */}
       {showMissingUsernameModal && (
-        <div className="absolute inset-0 z-[60] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn">
+        <div className="absolute inset-0 z-[100] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn">
           <div className="bg-white dark:bg-[#1a1a1a] rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden border border-slate-200 dark:border-slate-800 flex flex-col p-6 text-center">
             <div className="w-16 h-16 bg-amber-100 dark:bg-amber-500/20 rounded-full flex items-center justify-center mx-auto mb-4 border border-amber-200 dark:border-amber-500/30">
                <Flame className="w-8 h-8 text-amber-500" />
@@ -802,7 +802,7 @@ export default function ChatWindow({ activeRoom, userId, userName, userPhoto, us
 
       {/* Seen By Modal */}
       {showSeenByModal && (
-        <div className="absolute inset-0 z-[60] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn">
+        <div className="absolute inset-0 z-[100] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn">
           <div className="bg-white dark:bg-[#1a1a1a] rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden border border-slate-200 dark:border-slate-800 flex flex-col scale-100 transition-transform">
             <div className="flex items-center justify-between p-4 border-b border-slate-100 dark:border-slate-800/80">
               <div>
@@ -855,7 +855,7 @@ export default function ChatWindow({ activeRoom, userId, userName, userPhoto, us
 
       {/* Mobile Leaderboard Slider */}
       {showMobileLeaderboard && activeRoom?.type === '1qad' && (
-        <div className="lg:hidden fixed inset-0 z-[60] flex justify-end bg-slate-900/60 backdrop-blur-sm animate-fadeIn">
+        <div className="lg:hidden fixed inset-0 z-[100] flex justify-end bg-slate-900/60 backdrop-blur-sm animate-fadeIn">
           <div className="fixed inset-0" onClick={() => setShowMobileLeaderboard(false)}></div>
           <div className="relative w-[300px] max-w-[85vw] h-full bg-[#0a0a0a] shadow-2xl flex flex-col translate-x-0 transition-transform duration-300 border-l border-amber-500/20">
             <button 
