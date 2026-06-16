@@ -25,7 +25,7 @@ function AppLayout() {
       </div>
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-w-0 relative z-10 overflow-hidden">
+      <div className="flex-1 flex flex-col min-w-0 relative overflow-hidden">
         <Topbar onMenuClick={() => setIsMobileMenuOpen(true)} />
 
         <main className="flex-1 overflow-y-auto w-full relative">

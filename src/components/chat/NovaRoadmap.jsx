@@ -187,38 +187,38 @@ export default function NovaRoadmap({ isOpen, onClose }) {
     const userName = userProfile?.nickName || userProfile?.fullName || user?.displayName || "Student";
 
     return (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-2 sm:p-4">
             <div className="absolute inset-0 bg-slate-900/80 backdrop-blur-md" onClick={onClose}></div>
 
-            <div className="relative w-full max-w-7xl h-[95vh] bg-white dark:bg-slate-900 rounded-[2rem] shadow-2xl border border-slate-200 dark:border-slate-800 flex flex-col overflow-hidden animate-fadeIn">
+            <div className="relative w-full max-w-7xl h-[95vh] md:h-[90vh] bg-white dark:bg-slate-900 rounded-2xl sm:rounded-[2rem] shadow-2xl border border-slate-200 dark:border-slate-800 flex flex-col overflow-hidden animate-fadeIn">
                 
                 {/* Header */}
-                <div className="flex-shrink-0 flex items-center justify-between p-6 border-b border-slate-200 dark:border-slate-800 relative overflow-hidden">
-                    <div className={`absolute top-0 right-0 w-[400px] h-[400px] rounded-full blur-[80px] -translate-y-1/2 translate-x-1/3 pointer-events-none transition-colors duration-1000 ${currentStage.bgGlow}`} />
+                <div className="flex-shrink-0 flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 sm:p-5 border-b border-slate-200 dark:border-slate-800 relative overflow-hidden gap-3 sm:gap-0">
+                    <div className={`absolute top-0 right-0 w-[300px] h-[300px] rounded-full blur-[60px] -translate-y-1/2 translate-x-1/3 pointer-events-none transition-colors duration-1000 ${currentStage.bgGlow}`} />
                     
-                    <div className="relative z-10 flex items-center gap-4">
-                        <div className={`p-4 rounded-2xl bg-gradient-to-br ${currentStage.color} text-white shadow-lg`}>
-                            <Map className="w-8 h-8" />
+                    <div className="relative z-10 flex items-center gap-3 sm:gap-4 w-full sm:w-auto">
+                        <div className={`p-2.5 sm:p-3 rounded-xl sm:rounded-2xl bg-gradient-to-br ${currentStage.color} text-white shadow-lg shrink-0`}>
+                            <Map className="w-6 h-6 sm:w-7 sm:h-7" />
                         </div>
-                        <div>
-                            <h2 className="text-3xl font-black text-slate-800 dark:text-white tracking-tight">Nova Proficiency Roadmap</h2>
-                            <p className="text-slate-500 dark:text-slate-400 font-medium flex items-center gap-2 mt-1">
-                                <Target className="w-4 h-4" /> Gamified English Language Evaluation & Mastery Path
+                        <div className="min-w-0">
+                            <h2 className="text-xl sm:text-2xl font-black text-slate-800 dark:text-white tracking-tight truncate">Nova Proficiency Roadmap</h2>
+                            <p className="text-xs text-slate-500 dark:text-slate-400 font-medium flex items-center gap-1 mt-1 truncate">
+                                <Target className="w-3 h-3 shrink-0" /> <span className="truncate">Gamified English Evaluation</span>
                             </p>
                         </div>
                     </div>
                     
-                    <div className="relative z-10 flex items-center gap-3">
+                    <div className="relative z-10 flex items-center gap-2 w-full sm:w-auto justify-end">
                         <button 
                             onClick={() => setShowExamModal(true)} 
-                            className="flex items-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl transition-all shadow-md hover:shadow-lg"
+                            className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl transition-all shadow-md hover:shadow-lg text-sm"
                         >
-                            <PlayCircle className="w-5 h-5" />
+                            <PlayCircle className="w-4 h-4 shrink-0" />
                             <span className="hidden sm:inline">Start Proficiency Challenge</span>
-                            <span className="sm:hidden">Exam</span>
+                            <span className="sm:hidden">Start Challenge</span>
                         </button>
-                        <button onClick={onClose} className="p-3 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-full transition-all">
-                            <X className="w-6 h-6" />
+                        <button onClick={onClose} className="shrink-0 p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-full transition-all">
+                            <X className="w-5 h-5" />
                         </button>
                     </div>
                 </div>
@@ -232,47 +232,47 @@ export default function NovaRoadmap({ isOpen, onClose }) {
                     <div className="flex-1 overflow-y-auto custom-scrollbar">
                         
                         {/* 1. Evaluation Section */}
-                        <div className="p-6 lg:p-8 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
+                        <div className="p-4 sm:p-5 lg:p-6 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
                             <div className="max-w-4xl mx-auto text-center">
-                                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 mb-6 shadow-sm">
-                                    <Sparkles className="w-4 h-4 text-indigo-500" />
-                                    <span className="text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-widest">Stage Evaluation</span>
+                                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 mb-3 shadow-sm">
+                                    <Sparkles className="w-3 h-3 text-indigo-500" />
+                                    <span className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-widest">Stage Evaluation</span>
                                 </div>
                                 
-                                <h3 className="text-2xl sm:text-3xl font-medium text-slate-600 dark:text-slate-400 mb-4">
+                                <h3 className="text-lg sm:text-xl md:text-2xl font-medium text-slate-600 dark:text-slate-400 mb-2 px-2">
                                     {userName}, based on your history, you are currently at the
                                 </h3>
                                 
-                                <div className={`text-6xl sm:text-7xl font-black bg-gradient-to-r ${currentStage.color} bg-clip-text text-transparent drop-shadow-sm mb-6`}>
+                                <div className={`text-4xl sm:text-5xl md:text-6xl font-black bg-gradient-to-r ${currentStage.color} bg-clip-text text-transparent drop-shadow-sm mb-5 leading-tight`}>
                                     {currentStage.name} Stage
                                 </div>
                                 
-                                <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-6 shadow-lg text-left max-w-3xl mx-auto relative overflow-hidden">
+                                <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 sm:p-5 shadow-lg text-left max-w-3xl mx-auto relative overflow-hidden">
                                     <div className={`absolute top-0 left-0 w-1.5 h-full bg-gradient-to-b ${currentStage.color}`} />
-                                    <div className="flex items-start gap-4">
-                                        <div className={`p-3 rounded-xl bg-gradient-to-br ${currentStage.color} text-white shadow-md flex-shrink-0 mt-1`}>
-                                            <Info className="w-6 h-6" />
+                                    <div className="flex flex-col sm:flex-row items-start gap-3 sm:gap-4">
+                                        <div className={`p-2.5 sm:p-3 rounded-xl bg-gradient-to-br ${currentStage.color} text-white shadow-md flex-shrink-0 sm:mt-1`}>
+                                            <Info className="w-5 h-5 sm:w-6 sm:h-6" />
                                         </div>
                                         <div>
-                                            <h4 className="text-xl font-bold text-slate-800 dark:text-white mb-2">Communication Profile</h4>
-                                            <p className="text-slate-600 dark:text-slate-300 text-lg leading-relaxed">
+                                            <h4 className="text-lg sm:text-xl font-bold text-slate-800 dark:text-white mb-2">Communication Profile</h4>
+                                            <p className="text-sm sm:text-base md:text-lg text-slate-600 dark:text-slate-300 leading-relaxed">
                                                 {currentStage.evaluation}
                                             </p>
                                         </div>
                                     </div>
                                     
                                     <div className="mt-6 pt-6 border-t border-slate-100 dark:border-slate-700 flex flex-wrap items-center justify-between gap-4">
-                                        <div className="flex items-center gap-6">
-                                            <div>
-                                                <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Average Score</p>
-                                                <p className="text-2xl font-black text-slate-800 dark:text-white flex items-center gap-2">
-                                                    <Award className={`w-5 h-5 ${currentStage.textColor}`} /> {averageScore}/100
+                                        <div className="flex flex-wrap sm:flex-nowrap items-center gap-4 sm:gap-6 w-full sm:w-auto">
+                                            <div className="flex-1 sm:flex-none">
+                                                <p className="text-[10px] sm:text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Average Score</p>
+                                                <p className="text-xl sm:text-2xl font-black text-slate-800 dark:text-white flex items-center gap-1 sm:gap-2">
+                                                    <Award className={`w-4 h-4 sm:w-5 sm:h-5 ${currentStage.textColor}`} /> {averageScore}/100
                                                 </p>
                                             </div>
-                                            <div>
-                                                <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Total Sessions</p>
-                                                <p className="text-2xl font-black text-slate-800 dark:text-white flex items-center gap-2">
-                                                    <MessageCircle className="w-5 h-5 text-indigo-500" /> {history.length}
+                                            <div className="flex-1 sm:flex-none border-l border-slate-200 dark:border-slate-700 pl-4 sm:border-none sm:pl-0">
+                                                <p className="text-[10px] sm:text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Total Sessions</p>
+                                                <p className="text-xl sm:text-2xl font-black text-slate-800 dark:text-white flex items-center gap-1 sm:gap-2">
+                                                    <MessageCircle className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-500" /> {history.length}
                                                 </p>
                                             </div>
                                         </div>
@@ -321,14 +321,14 @@ export default function NovaRoadmap({ isOpen, onClose }) {
                                                     </div>
 
                                                     {/* Content Card */}
-                                                    <div className="pl-10 sm:pl-14">
-                                                        <div className={`bg-white dark:bg-slate-800 rounded-2xl p-5 sm:p-6 border ${isCurrent ? `border-indigo-200 dark:border-indigo-500/30 shadow-xl shadow-indigo-500/5` : 'border-slate-200 dark:border-slate-700 shadow-sm'} transition-all`}>
-                                                            <div className="flex justify-between items-start mb-4">
+                                                    <div className="pl-12 sm:pl-16">
+                                                        <div className={`bg-white dark:bg-slate-800 rounded-xl sm:rounded-2xl p-4 sm:p-6 border ${isCurrent ? `border-indigo-200 dark:border-indigo-500/30 shadow-xl shadow-indigo-500/5` : 'border-slate-200 dark:border-slate-700 shadow-sm'} transition-all`}>
+                                                            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-3 sm:mb-4 gap-2 sm:gap-0">
                                                                 <div>
-                                                                    <h4 className={`text-2xl font-black mb-1 ${isCurrent ? stage.textColor : isCompleted ? 'text-slate-800 dark:text-white' : 'text-slate-500 dark:text-slate-400'}`}>
+                                                                    <h4 className={`text-xl sm:text-2xl font-black mb-1 ${isCurrent ? stage.textColor : isCompleted ? 'text-slate-800 dark:text-white' : 'text-slate-500 dark:text-slate-400'}`}>
                                                                         {isLocked ? stage.name : (latestCall?.stages?.[stage.id]?.name || stage.name)}
                                                                     </h4>
-                                                                    <p className={`text-sm font-bold ${isCurrent ? 'text-slate-500 dark:text-slate-400' : 'text-slate-400 dark:text-slate-500'}`}>
+                                                                    <p className={`text-xs sm:text-sm font-bold ${isCurrent ? 'text-slate-500 dark:text-slate-400' : 'text-slate-400 dark:text-slate-500'}`}>
                                                                         Score Goal: {stage.minScore}-{stage.maxScore}
                                                                     </p>
                                                                 </div>
@@ -453,19 +453,19 @@ export default function NovaRoadmap({ isOpen, onClose }) {
 
                                 {/* Analytics Cards */}
                                 <div className="grid grid-cols-2 gap-3 mb-8">
-                                    <div className="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col justify-center items-center text-center">
-                                        <div className="w-10 h-10 bg-blue-100 dark:bg-blue-500/20 rounded-full flex items-center justify-center text-blue-500 mb-2">
-                                            <BarChart2 className="w-5 h-5" />
+                                    <div className="bg-white dark:bg-slate-800 p-4 rounded-xl sm:rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col justify-center items-center text-center">
+                                        <div className="w-8 h-8 sm:w-10 sm:h-10 bg-blue-100 dark:bg-blue-500/20 rounded-full flex items-center justify-center text-blue-500 mb-2">
+                                            <BarChart2 className="w-4 h-4 sm:w-5 sm:h-5" />
                                         </div>
-                                        <div className="text-2xl font-black text-slate-800 dark:text-white">{history.length}</div>
-                                        <div className="text-xs font-bold text-slate-500 uppercase tracking-widest mt-1">Exams Taken</div>
+                                        <div className="text-xl sm:text-2xl font-black text-slate-800 dark:text-white">{history.length}</div>
+                                        <div className="text-[10px] sm:text-xs font-bold text-slate-500 uppercase tracking-widest mt-1">Exams Taken</div>
                                     </div>
-                                    <div className="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col justify-center items-center text-center">
-                                        <div className="w-10 h-10 bg-emerald-100 dark:bg-emerald-500/20 rounded-full flex items-center justify-center text-emerald-500 mb-2">
-                                            <Target className="w-5 h-5" />
+                                    <div className="bg-white dark:bg-slate-800 p-4 rounded-xl sm:rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col justify-center items-center text-center">
+                                        <div className="w-8 h-8 sm:w-10 sm:h-10 bg-emerald-100 dark:bg-emerald-500/20 rounded-full flex items-center justify-center text-emerald-500 mb-2">
+                                            <Target className="w-4 h-4 sm:w-5 sm:h-5" />
                                         </div>
-                                        <div className="text-2xl font-black text-slate-800 dark:text-white">{averageScore}/100</div>
-                                        <div className="text-xs font-bold text-slate-500 uppercase tracking-widest mt-1">Average Score</div>
+                                        <div className="text-xl sm:text-2xl font-black text-slate-800 dark:text-white">{averageScore}/100</div>
+                                        <div className="text-[10px] sm:text-xs font-bold text-slate-500 uppercase tracking-widest mt-1">Average Score</div>
                                     </div>
                                 </div>
 
