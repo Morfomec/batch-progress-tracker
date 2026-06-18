@@ -275,6 +275,12 @@ export const editMessage = async (roomId, messageId, newText) => {
     text: newText.trim(),
     isEdited: true
   });
+
+  if (roomId === "global") {
+      import("./adminService").then(m => {
+          m.syncAnnouncementEdit(messageId, newText.trim()).catch(console.error);
+      });
+  }
 };
 
 /**

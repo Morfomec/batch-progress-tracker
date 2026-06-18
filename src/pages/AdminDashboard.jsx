@@ -202,9 +202,14 @@ function AdminDashboard() {
     };
 
     const filteredUsersForMention = usersList.filter(u => {
-        const name = u.nickName || u.displayName || u.fullName || u.email || "";
-        return name.toLowerCase().includes(mentionSearchQuery);
-    }).slice(0, 5);
+        const search = mentionSearchQuery.toLowerCase();
+        return (
+            (u.nickName && u.nickName.toLowerCase().includes(search)) ||
+            (u.displayName && u.displayName.toLowerCase().includes(search)) ||
+            (u.fullName && u.fullName.toLowerCase().includes(search)) ||
+            (u.email && u.email.toLowerCase().includes(search))
+        );
+    });
 
     return (
         <div className="min-h-screen p-4 sm:p-6 lg:p-8 transition-colors duration-300">
@@ -312,21 +317,30 @@ function AdminDashboard() {
                                     className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 rounded-xl text-sm font-medium focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all outline-none resize-none"
                                 />
                                 {showMentionDropdown && (
-                                    <div className="absolute z-20 w-64 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl mt-1 overflow-hidden" style={{ top: "100%" }}>
+                                    <div className="absolute z-20 w-64 max-h-60 overflow-y-auto custom-scrollbar bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl mt-1" style={{ top: "100%" }}>
                                         {filteredUsersForMention.length > 0 ? (
                                             filteredUsersForMention.map(u => (
                                                 <button
                                                     key={u.id}
                                                     type="button"
                                                     onClick={() => handleSelectMention(u)}
-                                                    className="w-full text-left px-4 py-2 text-sm hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors flex items-center gap-2"
+                                                    className="w-full text-left px-4 py-2 text-sm hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors flex items-center gap-3"
                                                 >
-                                                    <div className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 flex items-center justify-center text-indigo-600 dark:text-indigo-400 font-bold text-xs">
-                                                        {(u.nickName || u.displayName || u.fullName || u.email || "U").charAt(0).toUpperCase()}
+                                                    <div className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900 flex items-center justify-center text-indigo-600 dark:text-indigo-400 font-bold text-xs shrink-0 overflow-hidden">
+                                                        {u.photoURL ? (
+                                                            <img src={u.photoURL} alt="" className="w-full h-full object-cover" />
+                                                        ) : (
+                                                            (u.nickName || u.displayName || u.fullName || u.email || "U").charAt(0).toUpperCase()
+                                                        )}
                                                     </div>
-                                                    <span className="text-slate-800 dark:text-slate-200 font-medium">
-                                                        {u.nickName || u.displayName || u.fullName || u.email}
-                                                    </span>
+                                                    <div className="flex flex-col min-w-0">
+                                                        <span className="text-slate-800 dark:text-slate-200 font-medium truncate">
+                                                            {u.nickName || u.displayName || u.fullName || u.email}
+                                                        </span>
+                                                        <span className="text-[10px] text-slate-500 truncate">
+                                                            {u.fullName && u.nickName && u.fullName !== u.nickName ? u.fullName : u.email}
+                                                        </span>
+                                                    </div>
                                                 </button>
                                             ))
                                         ) : (
