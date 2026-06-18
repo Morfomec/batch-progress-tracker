@@ -134,42 +134,42 @@ function Peers() {
                         <p className="text-slate-600 dark:text-slate-400 font-medium">No mates found matching your search.</p>
                     </div>
                 ) : (
-                    <div className="flex flex-col gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                         {filteredPeers.map((peer, index) => (
                             <Link
                                 key={peer.id}
                                 to={`/dashboard/profile/${peer.id}`}
-                                className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl rounded-2xl sm:rounded-[2rem] p-3 sm:p-4 border border-slate-200/50 dark:border-white/5 shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group flex items-center justify-between gap-3"
+                                className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl rounded-[2rem] p-6 border border-slate-200/50 dark:border-white/5 shadow-md hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 group flex flex-col items-center justify-center gap-4 text-center relative overflow-hidden"
                             >
-                                <div className="flex items-center gap-5">
-                                    <div className="w-8 flex justify-center text-lg font-bold text-slate-400 dark:text-slate-500">
-                                        #{index + 1}
-                                    </div>
-                                    <div className="w-14 h-14 rounded-full border-2 border-slate-100 dark:border-slate-800 shadow-sm overflow-hidden flex items-center justify-center bg-gradient-to-br from-indigo-400 to-purple-500 dark:from-indigo-600 dark:to-purple-700 shrink-0">
-                                        {peer.photoURL ? (
-                                            <img src={peer.photoURL} alt={peer.displayName} className="w-full h-full object-cover" />
-                                        ) : (
-                                            <span className="text-xl font-bold text-white">
-                                                {peer.displayName.charAt(0).toUpperCase()}
-                                            </span>
-                                        )}
-                                    </div>
-                                    <div className="flex flex-col">
-                                        <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors flex items-center gap-2">
-                                            {peer.displayName} {peer.emoji && <span className="text-xl leading-none">{peer.emoji}</span>}
-                                        </h3>
-                                        <p className="text-sm text-slate-500 dark:text-slate-400 flex flex-col sm:flex-row sm:items-center sm:gap-4 mt-0.5">
-                                            <span className="flex items-center gap-1.5 font-medium">
-                                                Total Points: <span className="text-indigo-600 dark:text-indigo-400 font-bold">{peer.score}</span>
-                                            </span>
-                                        </p>
-                                    </div>
+                                {/* Rank Badge */}
+                                <div className="absolute top-5 left-5 w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-sm font-extrabold text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700 shadow-sm z-10">
+                                    #{index + 1}
                                 </div>
-                                <div className="hidden sm:flex items-center gap-1 text-sm font-semibold text-slate-400 group-hover:text-indigo-500 transition-colors shrink-0">
-                                    View Profile <ChevronRight className="w-4 h-4" />
+
+                                {/* Hover Glow */}
+                                <div className="absolute inset-0 bg-gradient-to-b from-indigo-500/0 via-indigo-500/0 to-indigo-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+
+                                {/* Avatar */}
+                                <div className="w-24 h-24 rounded-full border-4 border-white dark:border-slate-800 shadow-lg overflow-hidden flex items-center justify-center bg-gradient-to-br from-indigo-400 to-purple-500 dark:from-indigo-600 dark:to-purple-700 shrink-0 mt-4 relative z-10 group-hover:scale-105 transition-transform duration-300">
+                                    {peer.photoURL ? (
+                                        <img src={peer.photoURL} alt={peer.displayName} className="w-full h-full object-cover" />
+                                    ) : (
+                                        <span className="text-3xl font-black text-white">
+                                            {peer.displayName.charAt(0).toUpperCase()}
+                                        </span>
+                                    )}
                                 </div>
-                                <div className="sm:hidden flex items-center shrink-0">
-                                    <ChevronRight className="w-5 h-5 text-slate-400 group-hover:text-indigo-500" />
+
+                                {/* Details */}
+                                <div className="flex flex-col items-center relative z-10 w-full px-2">
+                                    <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors flex items-center justify-center gap-2 w-full truncate">
+                                        <span className="truncate">{peer.displayName}</span>
+                                        {peer.emoji && <span className="text-2xl leading-none shrink-0">{peer.emoji}</span>}
+                                    </h3>
+                                    <div className="mt-4 inline-flex items-center gap-2 px-4 py-1.5 bg-indigo-50 dark:bg-indigo-500/10 rounded-full border border-indigo-100 dark:border-indigo-500/20 group-hover:bg-indigo-100 dark:group-hover:bg-indigo-500/20 transition-colors">
+                                        <span className="text-[10px] font-bold text-indigo-500 dark:text-indigo-400 uppercase tracking-widest">Points</span>
+                                        <span className="text-sm font-black text-indigo-700 dark:text-indigo-300">{peer.score}</span>
+                                    </div>
                                 </div>
                             </Link>
                         ))}
