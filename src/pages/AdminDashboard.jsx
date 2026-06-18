@@ -27,6 +27,7 @@ function AdminDashboard() {
     const [showMentionDropdown, setShowMentionDropdown] = useState(false);
     const [mentionSearchQuery, setMentionSearchQuery] = useState("");
     const [mentionCursorPos, setMentionCursorPos] = useState(0);
+    const [allUsersCache, setAllUsersCache] = useState(null);
 
     // Server-side lazy loading state
     const [lastVisible, setLastVisible] = useState(null);
@@ -162,7 +163,7 @@ function AdminDashboard() {
         }
     };
 
-    const handleTextareaChange = (e) => {
+    const handleTextareaChange = async (e) => {
         const val = e.target.value;
         const cursorPosition = e.target.selectionStart;
         setAnnounceMessage(val);
@@ -176,9 +177,14 @@ function AdminDashboard() {
             setMentionSearchQuery(match[1].toLowerCase());
             setMentionCursorPos(cursorPosition);
             
-            // if we haven't loaded users, load them for searching
-            if (usersList.length === 0) {
-                loadUsers(false);
+            if (!allUsersCache) {
+                try {
+                    const snap = await getDocs(collection(db, "users"));
+                    const allU = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    setAllUsersCache(allU);
+                } catch (err) {
+                    console.error("Error fetching all users for mentions", err);
+                }
             }
         } else {
             setShowMentionDropdown(false);
@@ -201,7 +207,7 @@ function AdminDashboard() {
         }
     };
 
-    const filteredUsersForMention = usersList.filter(u => {
+    const filteredUsersForMention = (allUsersCache || []).filter(u => {
         const search = mentionSearchQuery.toLowerCase();
         return (
             (u.nickName && u.nickName.toLowerCase().includes(search)) ||
