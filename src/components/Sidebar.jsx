@@ -8,7 +8,7 @@ import { useState } from "react";
 function Sidebar({ groupContext = {}, onClose }) {
   const navigate = useNavigate();
   const location = useLocation();
-  const { isAdmin } = useAuth();
+  const { isAdmin, user } = useAuth();
 
   const { group, groups, selectGroup } = groupContext;
   const [isSwitcherOpen, setIsSwitcherOpen] = useState(false);
