@@ -27,6 +27,7 @@ export default function ChatWindow({ activeRoom, userId, userName, userPhoto, us
   
   // Message Options State
   const [openMenuId, setOpenMenuId] = useState(null);
+  const [openReactionMenuId, setOpenReactionMenuId] = useState(null);
   const [editingMessage, setEditingMessage] = useState(null);
   const [editInputText, setEditInputText] = useState("");
   const [showSeenByModal, setShowSeenByModal] = useState(null);
@@ -96,10 +97,13 @@ export default function ChatWindow({ activeRoom, userId, userName, userPhoto, us
 
   // Click away listener for message menu
   useEffect(() => {
-    const handleClickOutside = () => setOpenMenuId(null);
-    if (openMenuId) document.addEventListener("click", handleClickOutside);
+    const handleClickOutside = () => {
+      setOpenMenuId(null);
+      setOpenReactionMenuId(null);
+    };
+    if (openMenuId || openReactionMenuId) document.addEventListener("click", handleClickOutside);
     return () => document.removeEventListener("click", handleClickOutside);
-  }, [openMenuId]);
+  }, [openMenuId, openReactionMenuId]);
 
   const handleSend = async (e) => {
     if (e?.preventDefault) e.preventDefault();
@@ -651,13 +655,24 @@ export default function ChatWindow({ activeRoom, userId, userName, userPhoto, us
                           <MessageWithMentions text={msg.text} mentions={msg.mentions} className="pr-4" isMe={isMe} />
                           {msg.isEdited && <span className="text-[10px] opacity-70 mt-0.5">(edited)</span>}
                           
-                          {/* Hover Reaction Picker */}
+                          {/* Hover Reaction Button */}
                           {!msg.isDeleted && (
-                            <div className={`absolute -top-10 ${isMe ? 'right-0' : 'left-0'} flex items-center gap-1 bg-white dark:bg-slate-800 shadow-xl border border-slate-200 dark:border-slate-700 rounded-full px-2 py-1.5 opacity-0 group-hover/msg:opacity-100 transition-all z-20 scale-95 group-hover/msg:scale-100 pointer-events-none group-hover/msg:pointer-events-auto`}>
+                            <button
+                               onClick={(e) => { e.stopPropagation(); setOpenReactionMenuId(msg.id === openReactionMenuId ? null : msg.id); setOpenMenuId(null); }}
+                               className={`absolute top-1/2 -translate-y-1/2 ${isMe ? '-left-8' : '-right-8'} p-1.5 text-slate-400 hover:text-indigo-500 bg-white/50 dark:bg-slate-800/50 hover:bg-white dark:hover:bg-slate-700 rounded-full opacity-0 group-hover/msg:opacity-100 transition-all shadow-sm z-10`}
+                               title="Add Reaction"
+                            >
+                               <Smile className="w-4 h-4" />
+                            </button>
+                          )}
+
+                          {/* Reaction Picker Bar */}
+                          {openReactionMenuId === msg.id && !msg.isDeleted && (
+                            <div className={`absolute -top-10 ${isMe ? 'right-0' : 'left-0'} flex items-center gap-1 bg-white dark:bg-slate-800 shadow-2xl border border-slate-200 dark:border-slate-700 rounded-full px-2 py-1.5 z-30 animate-in fade-in zoom-in-95 duration-200`}>
                               {["👍", "❤️", "😂", "😮", "😢", "🙏"].map(emoji => (
                                 <button
                                   key={emoji}
-                                  onClick={(e) => { e.stopPropagation(); toggleReaction(activeRoom.id, msg.id, userId, emoji); }}
+                                  onClick={(e) => { e.stopPropagation(); toggleReaction(activeRoom.id, msg.id, userId, emoji); setOpenReactionMenuId(null); }}
                                   className="hover:scale-125 hover:-translate-y-1 transition-transform origin-bottom cursor-pointer text-xl leading-none p-1"
                                 >
                                   {emoji}
