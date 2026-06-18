@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Send, LogOut, AlignLeft, Smile, PlusCircle, Settings, Hash, User, Users, MessageSquare, UserPlus, CheckCircle, Check, Trophy, ChevronDown, Edit2, Trash2, Info, Loader2, Code2, Flame, X } from "lucide-react";
-import { subscribeToMessages, sendMessage, editMessage, deleteMessage, markRoomAsRead } from "../../firebase/chatService";
+import { subscribeToMessages, sendMessage, editMessage, deleteMessage, markRoomAsRead, toggleReaction } from "../../firebase/chatService";
 import { db } from "../../firebase/firebaseConfig";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
@@ -651,11 +651,26 @@ export default function ChatWindow({ activeRoom, userId, userName, userPhoto, us
                           <MessageWithMentions text={msg.text} mentions={msg.mentions} className="pr-4" isMe={isMe} />
                           {msg.isEdited && <span className="text-[10px] opacity-70 mt-0.5">(edited)</span>}
                           
+                          {/* Hover Reaction Picker */}
+                          {!msg.isDeleted && (
+                            <div className={`absolute -top-10 ${isMe ? 'right-0' : 'left-0'} flex items-center gap-1 bg-white dark:bg-slate-800 shadow-xl border border-slate-200 dark:border-slate-700 rounded-full px-2 py-1.5 opacity-0 group-hover/msg:opacity-100 transition-all z-20 scale-95 group-hover/msg:scale-100 pointer-events-none group-hover/msg:pointer-events-auto`}>
+                              {["👍", "❤️", "😂", "😮", "😢", "🙏"].map(emoji => (
+                                <button
+                                  key={emoji}
+                                  onClick={(e) => { e.stopPropagation(); toggleReaction(activeRoom.id, msg.id, userId, emoji); }}
+                                  className="hover:scale-125 hover:-translate-y-1 transition-transform origin-bottom cursor-pointer text-xl leading-none p-1"
+                                >
+                                  {emoji}
+                                </button>
+                              ))}
+                            </div>
+                          )}
+
                           {/* Dropdown Menu Arrow */}
                           {isMe && !msg.isDeleted && (
                             <button
                                onClick={(e) => { e.stopPropagation(); setOpenMenuId(msg.id === openMenuId ? null : msg.id); }}
-                               className="absolute -right-2 -top-2 p-1 bg-white/20 hover:bg-white/40 text-white rounded-full opacity-0 group-hover/msg:opacity-100 transition-opacity shadow-sm"
+                               className="absolute -right-2 -top-2 p-1 bg-white/20 hover:bg-white/40 text-white rounded-full opacity-0 group-hover/msg:opacity-100 transition-opacity shadow-sm z-10"
                             >
                                <ChevronDown className="w-3 h-3" />
                             </button>
@@ -675,6 +690,31 @@ export default function ChatWindow({ activeRoom, userId, userName, userPhoto, us
                                 </button>
                              </div>
                           )}
+                        </div>
+                      )}
+                      
+                      {/* Reactions Badge */}
+                      {msg.reactions && Object.keys(msg.reactions).length > 0 && !msg.isDeleted && (
+                        <div className={`flex flex-wrap gap-1 mt-1 ${isMe ? 'justify-end pr-2' : 'justify-start pl-2'} -mb-1`}>
+                          {(() => {
+                            const counts = {};
+                            const myReaction = msg.reactions[userId];
+                            
+                            Object.values(msg.reactions).forEach(emoji => {
+                              counts[emoji] = (counts[emoji] || 0) + 1;
+                            });
+                            
+                            return Object.entries(counts).map(([emoji, count]) => (
+                              <button
+                                key={emoji}
+                                onClick={(e) => { e.stopPropagation(); toggleReaction(activeRoom.id, msg.id, userId, emoji); }}
+                                className={`flex items-center gap-1 text-[11px] font-bold px-1.5 py-0.5 rounded-full border shadow-sm ${myReaction === emoji ? 'bg-indigo-100 dark:bg-indigo-900/60 border-indigo-300 dark:border-indigo-700 text-indigo-700 dark:text-indigo-300' : 'bg-slate-50 dark:bg-slate-800/80 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300'} hover:scale-105 transition-all`}
+                              >
+                                <span>{emoji}</span>
+                                {count > 1 && <span>{count}</span>}
+                              </button>
+                            ));
+                          })()}
                         </div>
                       )}
                     </div>

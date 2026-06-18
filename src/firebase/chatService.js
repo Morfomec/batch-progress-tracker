@@ -1,4 +1,4 @@
-import { collection, doc, addDoc, onSnapshot, query, orderBy, serverTimestamp, getDocs, updateDoc, arrayUnion, arrayRemove, setDoc, getDoc, deleteDoc, where, or, writeBatch } from "firebase/firestore";
+import { collection, doc, addDoc, onSnapshot, query, orderBy, serverTimestamp, getDocs, updateDoc, arrayUnion, arrayRemove, setDoc, getDoc, deleteDoc, where, or, writeBatch, deleteField } from "firebase/firestore";
 import { db } from "./firebaseConfig";
 
 // -------------------------------------------------------------
@@ -263,6 +263,30 @@ export const sendMessage = async (roomId, senderId, senderName, senderPhoto, tex
     }
   } catch (error) {
     console.error("Error sending notifications for message:", error);
+  }
+};
+
+/**
+ * Toggle a reaction on a message
+ */
+export const toggleReaction = async (roomId, messageId, userId, emoji) => {
+  const msgRef = doc(db, "chatRooms", roomId, "messages", messageId);
+  const msgSnap = await getDoc(msgRef);
+  if (!msgSnap.exists()) return;
+
+  const currentReactions = msgSnap.data().reactions || {};
+  const currentEmoji = currentReactions[userId];
+
+  if (currentEmoji === emoji) {
+    // If clicking the same emoji, remove it
+    await updateDoc(msgRef, {
+      [`reactions.${userId}`]: deleteField()
+    });
+  } else {
+    // Otherwise, set/update it
+    await updateDoc(msgRef, {
+      [`reactions.${userId}`]: emoji
+    });
   }
 };
 
