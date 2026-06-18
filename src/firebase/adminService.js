@@ -114,3 +114,40 @@ export const syncAnnouncementEdit = async (globalMsgId, newText) => {
         console.error("Error syncing announcement edit:", error);
     }
 };
+
+/**
+ * Synchronizes deletes made in the Global Chat room back to all users' individual notifications.
+ */
+export const syncAnnouncementDelete = async (globalMsgId) => {
+    if (!globalMsgId) return;
+    try {
+        const usersSnap = await getDocs(collection(db, "users"));
+        let batch = writeBatch(db);
+        let count = 0;
+
+        for (const userDoc of usersSnap.docs) {
+            const notifQuery = query(
+                collection(db, "users", userDoc.id, "notifications"), 
+                where("globalMsgId", "==", globalMsgId)
+            );
+            const notifSnap = await getDocs(notifQuery);
+            
+            notifSnap.forEach(docSnap => {
+                batch.delete(docSnap.ref);
+                count++;
+            });
+
+            if (count >= 400) {
+                await batch.commit();
+                batch = writeBatch(db);
+                count = 0;
+            }
+        }
+
+        if (count > 0) {
+            await batch.commit();
+        }
+    } catch (error) {
+        console.error("Error syncing announcement delete:", error);
+    }
+};

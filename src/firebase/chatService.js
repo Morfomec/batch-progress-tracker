@@ -294,6 +294,14 @@ export const deleteMessage = async (roomId, messageId) => {
     isDeleted: true,
     imageUrl: null
   });
+
+  if (roomId === "global") {
+      import("./adminService").then(m => {
+          if (m.syncAnnouncementDelete) {
+              m.syncAnnouncementDelete(messageId).catch(console.error);
+          }
+      });
+  }
 };
 
 /**
