@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { db } from "../firebase/firebaseConfig";
-import { collection, getDocs, query, orderBy, getCountFromServer, limit, startAfter } from "firebase/firestore";
-import { ShieldCheck, Users, BookOpen, ChevronRight, Activity, X, Loader2, Megaphone, Send } from "lucide-react";
+import { collection, getDocs, query, orderBy, getCountFromServer, limit, startAfter, doc, deleteDoc } from "firebase/firestore";
+import { ShieldCheck, Users, BookOpen, ChevronRight, Activity, X, Loader2, Megaphone, Send, Trash2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import toast from "react-hot-toast";
 import { broadcastAnnouncement } from "../firebase/adminService";
@@ -121,6 +121,20 @@ function AdminDashboard() {
             console.error("Error loading users", err);
         } finally {
             setLoadingUsers(false);
+        }
+    };
+
+    const handleDeleteUser = async (userId, userName) => {
+        if (!window.confirm(`Are you sure you want to permanently delete user ${userName}?`)) return;
+        
+        try {
+            await deleteDoc(doc(db, "users", userId));
+            toast.success("User deleted successfully!");
+            setUsersList(prev => prev.filter(u => u.id !== userId));
+            setStats(prev => ({ ...prev, totalUsers: Math.max(0, prev.totalUsers - 1) }));
+        } catch (error) {
+            console.error("Error deleting user:", error);
+            toast.error("Failed to delete user. Check permissions.");
         }
     };
 
@@ -446,6 +460,7 @@ function AdminDashboard() {
                                             <th className="pb-4 pt-4 px-6 font-semibold text-slate-500 dark:text-slate-400 uppercase text-xs tracking-wider">Email</th>
                                             <th className="pb-4 pt-4 px-6 font-semibold text-slate-500 dark:text-slate-400 uppercase text-xs tracking-wider">Nickname</th>
                                             <th className="pb-4 pt-4 px-6 font-semibold text-slate-500 dark:text-slate-400 uppercase text-xs tracking-wider">Privacy Mode</th>
+                                            <th className="pb-4 pt-4 px-6 font-semibold text-slate-500 dark:text-slate-400 uppercase text-xs tracking-wider text-right">Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-slate-50 dark:divide-slate-800/50">
@@ -475,6 +490,15 @@ function AdminDashboard() {
                                                     <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${user.privacyMode ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400' : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'}`}>
                                                         {user.privacyMode ? "Private" : "Public"}
                                                     </span>
+                                                </td>
+                                                <td className="py-4 px-6 text-right">
+                                                    <button
+                                                        onClick={() => handleDeleteUser(user.id, user.fullName || user.displayName || user.email || "Unknown User")}
+                                                        className="p-2 text-rose-500 hover:text-white hover:bg-rose-500 rounded-lg transition-colors border border-rose-200 dark:border-rose-900/50"
+                                                        title="Delete User"
+                                                    >
+                                                        <Trash2 className="w-4 h-4" />
+                                                    </button>
                                                 </td>
                                             </tr>
                                         ))}
