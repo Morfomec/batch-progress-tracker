@@ -174,9 +174,15 @@ function GroupInfo() {
         </h3>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-          {group.members && group.members.length > 0 ? (
-            group.members.map((member, index) => {
+          {(() => {
+            const visibleMembers = (group.members || []).filter(member => {
               const profile = memberProfiles[member];
+              return !profile?.isBlocked;
+            });
+            
+            if (visibleMembers.length > 0) {
+              return visibleMembers.map((member, index) => {
+                const profile = memberProfiles[member];
               const displayName = profile?.fullName || profile?.nickName || profile?.email || member;
               const initials = (profile?.fullName || profile?.nickName || member).substring(0, 2).toUpperCase();
               
@@ -203,12 +209,15 @@ function GroupInfo() {
                 </p>
                 </div>
               </div>
-            )})
-          ) : (
-            <div className="col-span-full text-center py-12 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-dashed border-slate-200 dark:border-slate-700">
-              <p className="text-slate-500 dark:text-slate-400 font-medium">No members found</p>
-            </div>
-          )}
+            )});
+            } else {
+              return (
+                <div className="col-span-full text-center py-12 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-dashed border-slate-200 dark:border-slate-700">
+                  <p className="text-slate-500 dark:text-slate-400 font-medium">No members found</p>
+                </div>
+              );
+            }
+          })()}
         </div>
       </div>
 

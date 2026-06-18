@@ -38,7 +38,7 @@ function Peers() {
                 // Filter members and map their details
                 const groupMembers = group.members || [];
                 const mappedPeers = groupMembers
-                    .filter(memberId => usersMap[memberId])
+                    .filter(memberId => usersMap[memberId] && !usersMap[memberId].isBlocked)
                     .map(memberId => {
                         const user = usersMap[memberId] || {};
                         const displayName = user.nickName || user.fullName || user.displayName || user.email || "Unknown";
