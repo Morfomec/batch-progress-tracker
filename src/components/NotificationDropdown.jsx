@@ -4,6 +4,7 @@ import { db } from "../firebase/firebaseConfig";
 import { useAuth } from "../context/AuthContext";
 import { Bell, Check, Trash2, X, MessageSquare } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import MessageWithMentions from "./common/MessageWithMentions";
 
 function NotificationDropdown() {
     const { user } = useAuth();
@@ -194,7 +195,7 @@ function NotificationDropdown() {
                                                     {notification.title}
                                                 </p>
                                                 <p className={`text-sm mt-1 leading-relaxed ${notification.unread ? 'text-slate-600 dark:text-slate-400' : 'text-slate-500 dark:text-slate-500'} line-clamp-2`}>
-                                                    {notification.message}
+                                                    <MessageWithMentions text={notification.message} mentions={notification.mentions} />
                                                 </p>
                                                 <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500 mt-2">
                                                     {notification.createdAt?.toDate ? notification.createdAt.toDate().toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : "Just now"}

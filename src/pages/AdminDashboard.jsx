@@ -22,6 +22,12 @@ function AdminDashboard() {
     const [announceLink, setAnnounceLink] = useState("");
     const [isBroadcasting, setIsBroadcasting] = useState(false);
     
+    // Mentions State
+    const [mentionedUsers, setMentionedUsers] = useState([]);
+    const [showMentionDropdown, setShowMentionDropdown] = useState(false);
+    const [mentionSearchQuery, setMentionSearchQuery] = useState("");
+    const [mentionCursorPos, setMentionCursorPos] = useState(0);
+
     // Server-side lazy loading state
     const [lastVisible, setLastVisible] = useState(null);
     const [loadingUsers, setLoadingUsers] = useState(false);
@@ -141,18 +147,64 @@ function AdminDashboard() {
                     uid: user.uid,
                     displayName: userProfile?.name || user.displayName || "Admin",
                     photoURL: userProfile?.photoURL || user.photoURL || null
-                }
+                },
+                mentionedUsers
             );
             toast.success(`Announcement broadcasted to ${count} users!`);
             setAnnounceTitle("");
             setAnnounceMessage("");
             setAnnounceLink("");
+            setMentionedUsers([]);
         } catch (error) {
             toast.error("Failed to broadcast announcement.");
         } finally {
             setIsBroadcasting(false);
         }
     };
+
+    const handleTextareaChange = (e) => {
+        const val = e.target.value;
+        const cursorPosition = e.target.selectionStart;
+        setAnnounceMessage(val);
+        
+        // Find if we are currently typing a mention
+        const textBeforeCursor = val.substring(0, cursorPosition);
+        const match = textBeforeCursor.match(/@([a-zA-Z0-9_]*)$/);
+        
+        if (match) {
+            setShowMentionDropdown(true);
+            setMentionSearchQuery(match[1].toLowerCase());
+            setMentionCursorPos(cursorPosition);
+            
+            // if we haven't loaded users, load them for searching
+            if (usersList.length === 0) {
+                loadUsers(false);
+            }
+        } else {
+            setShowMentionDropdown(false);
+        }
+    };
+
+    const handleSelectMention = (userToMention) => {
+        const textBeforeCursor = announceMessage.substring(0, mentionCursorPos);
+        const textAfterCursor = announceMessage.substring(mentionCursorPos);
+        
+        const textBeforeMention = textBeforeCursor.replace(/@[a-zA-Z0-9_]*$/, "");
+        const mentionName = userToMention.nickName || userToMention.displayName || userToMention.fullName || userToMention.email?.split('@')[0] || "User";
+        const mentionText = `@${mentionName} `;
+        
+        setAnnounceMessage(textBeforeMention + mentionText + textAfterCursor);
+        setShowMentionDropdown(false);
+        
+        if (!mentionedUsers.find(u => u.id === userToMention.id)) {
+            setMentionedUsers(prev => [...prev, { id: userToMention.id, name: mentionName }]);
+        }
+    };
+
+    const filteredUsersForMention = usersList.filter(u => {
+        const name = u.nickName || u.displayName || u.fullName || u.email || "";
+        return name.toLowerCase().includes(mentionSearchQuery);
+    }).slice(0, 5);
 
     return (
         <div className="min-h-screen p-4 sm:p-6 lg:p-8 transition-colors duration-300">
@@ -250,15 +302,40 @@ function AdminDashboard() {
                                 </div>
                             </div>
                             
-                            <div className="space-y-1.5">
+                            <div className="space-y-1.5 relative">
                                 <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider pl-1">Message</label>
                                 <textarea 
-                                    placeholder="Type your announcement here..."
+                                    placeholder="Type your announcement here... Use @ to mention users."
                                     value={announceMessage}
-                                    onChange={(e) => setAnnounceMessage(e.target.value)}
+                                    onChange={handleTextareaChange}
                                     rows={3}
                                     className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 rounded-xl text-sm font-medium focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all outline-none resize-none"
                                 />
+                                {showMentionDropdown && (
+                                    <div className="absolute z-20 w-64 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl mt-1 overflow-hidden" style={{ top: "100%" }}>
+                                        {filteredUsersForMention.length > 0 ? (
+                                            filteredUsersForMention.map(u => (
+                                                <button
+                                                    key={u.id}
+                                                    type="button"
+                                                    onClick={() => handleSelectMention(u)}
+                                                    className="w-full text-left px-4 py-2 text-sm hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors flex items-center gap-2"
+                                                >
+                                                    <div className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 flex items-center justify-center text-indigo-600 dark:text-indigo-400 font-bold text-xs">
+                                                        {(u.nickName || u.displayName || u.fullName || u.email || "U").charAt(0).toUpperCase()}
+                                                    </div>
+                                                    <span className="text-slate-800 dark:text-slate-200 font-medium">
+                                                        {u.nickName || u.displayName || u.fullName || u.email}
+                                                    </span>
+                                                </button>
+                                            ))
+                                        ) : (
+                                            <div className="px-4 py-3 text-sm text-slate-500 dark:text-slate-400 text-center">
+                                                No users found
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
                             </div>
 
                             <div className="flex justify-end pt-2">

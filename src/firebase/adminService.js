@@ -5,7 +5,7 @@ import { db } from "./firebaseConfig";
  * Broadcasts a custom notification to every user in the database.
  * Uses batch writes to handle potentially large numbers of users efficiently.
  */
-export const broadcastAnnouncement = async (title, message, link, sender) => {
+export const broadcastAnnouncement = async (title, message, link, sender, mentions = []) => {
     try {
         const usersSnap = await getDocs(collection(db, "users"));
         
@@ -21,7 +21,8 @@ export const broadcastAnnouncement = async (title, message, link, sender) => {
                 type: "announcement",
                 unread: true,
                 createdAt: serverTimestamp(),
-                link: link?.trim() || null
+                link: link?.trim() || null,
+                mentions: mentions
             });
             
             count++;
@@ -49,7 +50,8 @@ export const broadcastAnnouncement = async (title, message, link, sender) => {
                 senderId: sender.uid,
                 senderName: sender.displayName || "Admin",
                 senderPhoto: sender.photoURL || null,
-                timestamp: serverTimestamp()
+                timestamp: serverTimestamp(),
+                mentions: mentions
             });
         }
 

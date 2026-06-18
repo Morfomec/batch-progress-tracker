@@ -8,6 +8,7 @@ import { doc, updateDoc, arrayUnion, arrayRemove } from "firebase/firestore";
 import EmojiPicker from 'emoji-picker-react';
 import { verifyLeetCodeSubmission } from "../../utils/leetcodeApi";
 import LeetCodeLeaderboard from "./LeetCodeLeaderboard";
+import MessageWithMentions from "../common/MessageWithMentions";
 
 export default function ChatWindow({ activeRoom, userId, userName, userPhoto, userProfile, peerProfiles = {}, onLeaveRoom, onMenuClick, groups = [], activeGroup = null }) {
   const navigate = useNavigate();
@@ -636,7 +637,7 @@ export default function ChatWindow({ activeRoom, userId, userName, userPhoto, us
                         </form>
                       ) : (
                         <div className="flex flex-col group/msg relative">
-                          <span className="pr-4">{msg.text}</span>
+                          <MessageWithMentions text={msg.text} mentions={msg.mentions} className="pr-4" isMe={isMe} />
                           {msg.isEdited && <span className="text-[10px] opacity-70 mt-0.5">(edited)</span>}
                           
                           {/* Dropdown Menu Arrow */}
