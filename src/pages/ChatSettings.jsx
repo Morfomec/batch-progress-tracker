@@ -5,7 +5,7 @@ import { db } from "../firebase/firebaseConfig";
 import { ArrowLeft, LogOut, Trash2, Camera, Check, Settings, User, Search, Bell, BellOff, Loader2, Hash, X, ExternalLink, Edit2, ShieldAlert } from "lucide-react";
 import toast from "react-hot-toast";
 import { useAuth } from "../context/AuthContext";
-import { updateGroupName, deleteGroupChat, updateGroupIcon, kickUserFromRoom, banUserFromRoom, approveJoinRequest, rejectJoinRequest } from "../firebase/chatService";
+import { updateGroupName, deleteGroupChat, updateGroupIcon, kickUserFromRoom, banUserFromRoom, approveJoinRequest, rejectJoinRequest, sendMessage } from "../firebase/chatService";
 import { UserMinus, ShieldX, UserPlus, UserCheck, UserX } from "lucide-react";
 
 export default function ChatSettings() {
@@ -283,6 +283,7 @@ export default function ChatSettings() {
         if (!res.ok) throw new Error("Upload failed");
         await updateGroupIcon(room.id, data.secure_url);
         setRoom({ ...room, iconUrl: data.secure_url });
+        await sendMessage(room.id, "system", "System", null, `${userProfile?.fullName || user.displayName || "A user"} updated the group icon`, null, "system");
         toast.success("Icon updated!");
     } catch (error) {
         toast.error("Failed to upload icon.");

@@ -123,12 +123,21 @@ export default function Chat() {
 
       // 2. Members of the active room (for chat window header and message names)
       const activeRoom = rooms.find(r => r.id === activeRoomId);
-      if (activeRoom && activeRoom.members) {
-          activeRoom.members.forEach(mId => {
-              if (mId !== user.uid && !peerProfiles[mId]) {
-                  idsToFetch.add(mId);
-              }
-          });
+      if (activeRoom) {
+          if (activeRoom.members) {
+              activeRoom.members.forEach(mId => {
+                  if (mId !== user.uid && !peerProfiles[mId]) {
+                      idsToFetch.add(mId);
+                  }
+              });
+          }
+          if (activeRoom.readReceipts) {
+              Object.keys(activeRoom.readReceipts).forEach(mId => {
+                  if (mId !== user.uid && !peerProfiles[mId]) {
+                      idsToFetch.add(mId);
+                  }
+              });
+          }
       }
 
       if (idsToFetch.size === 0) return;

@@ -201,7 +201,7 @@ export const subscribeToChatRooms = (userId, callback) => {
 /**
  * Send a message to a specific room and notify members
  */
-export const sendMessage = async (roomId, senderId, senderName, senderPhoto, text, imageUrl = null) => {
+export const sendMessage = async (roomId, senderId, senderName, senderPhoto, text, imageUrl = null, type = "user") => {
   if (!text.trim() && !imageUrl) return;
 
   // 1. Add Message to room
@@ -213,6 +213,7 @@ export const sendMessage = async (roomId, senderId, senderName, senderPhoto, tex
     senderName,
     senderPhoto: senderPhoto || null,
     timestamp: serverTimestamp(),
+    type
   });
 
   // Update room to indicate it has messages (prevents it from being hidden)

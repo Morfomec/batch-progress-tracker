@@ -302,6 +302,7 @@ export default function ChatWindow({ activeRoom, userId, userName, userPhoto, us
         const { db } = await import("../../firebase/firebaseConfig");
         const roomRef = doc(db, "chatRooms", activeRoom.id);
         await updateDoc(roomRef, { iconEmoji: emojiObject.emoji, iconUrl: null });
+        await sendMessage(activeRoom.id, "system", "System", null, `${userName} changed the group icon to ${emojiObject.emoji}`, null, "system");
         setShowIconPicker(false);
       } catch (error) {
         console.error("Failed to update icon:", error);
@@ -477,6 +478,16 @@ export default function ChatWindow({ activeRoom, userId, userName, userPhoto, us
             const displaySenderName = isMe ? "You" : (senderProfile?.fullName || msg.senderName || "Unknown");
             const avatarName = isMe ? (userName || "User") : displaySenderName;
             const displaySenderPhoto = isMe ? userPhoto : (senderProfile?.photoURL || msg.senderPhoto);
+
+            if (msg.type === 'system') {
+               return (
+                 <div key={msg.id} className="flex justify-center my-3 animate-fadeIn">
+                   <div className="bg-slate-100 dark:bg-slate-800/80 border border-slate-200/50 dark:border-slate-700 text-slate-500 dark:text-slate-400 text-xs px-4 py-1.5 rounded-full font-medium shadow-sm backdrop-blur-sm text-center">
+                     {msg.text}
+                   </div>
+                 </div>
+               );
+            }
 
             return (
               <div key={msg.id} className={`flex w-full ${isMe ? 'justify-end' : 'justify-start'} ${showAvatar ? 'mt-4' : 'mt-1'}`}>
