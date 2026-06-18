@@ -1,10 +1,10 @@
 import { useOutletContext, useNavigate } from "react-router-dom";
 import { Users, Copy, CheckCircle2, Info, LogOut, Trash2 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import ConfirmModal from "../components/ConfirmModal";
 import { db } from "../firebase/firebaseConfig";
-import { doc, updateDoc, arrayRemove, deleteDoc } from "firebase/firestore";
+import { doc, updateDoc, arrayRemove, deleteDoc, collection, query, where, documentId, getDocs } from "firebase/firestore";
 import toast from "react-hot-toast";
 
 function GroupInfo() {
@@ -14,8 +14,30 @@ function GroupInfo() {
 
   const [copied, setCopied] = useState(false);
   const [modalType, setModalType] = useState(null); // 'leave' or 'delete'
+  const [memberProfiles, setMemberProfiles] = useState({});
 
   const isOwner = group?.ownerId === user?.uid;
+
+  useEffect(() => {
+    const fetchMemberProfiles = async () => {
+      if (!group || !group.members || group.members.length === 0) return;
+      const profiles = {};
+      try {
+        for (let i = 0; i < group.members.length; i += 30) {
+          const chunk = group.members.slice(i, i + 30);
+          const q = query(collection(db, "users"), where(documentId(), "in", chunk));
+          const snap = await getDocs(q);
+          snap.forEach(docSnap => {
+            profiles[docSnap.id] = docSnap.data();
+          });
+        }
+        setMemberProfiles(profiles);
+      } catch (err) {
+        console.error("Error fetching member profiles", err);
+      }
+    };
+    fetchMemberProfiles();
+  }, [group]);
 
   if (!group) return (
     <div className="flex flex-col items-center justify-center p-12 text-slate-500 dark:text-slate-400">
@@ -148,19 +170,28 @@ function GroupInfo() {
       <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl rounded-[2rem] shadow-2xl border border-slate-200/50 dark:border-white/5 p-8 transition-colors duration-300">
         <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100 mb-6 flex items-center gap-3">
           <Users className="w-6 h-6 text-indigo-500 dark:text-indigo-400" />
-          Batch Members Target
+          Batch Members
         </h3>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
           {group.members && group.members.length > 0 ? (
-            group.members.map((member, index) => (
+            group.members.map((member, index) => {
+              const profile = memberProfiles[member];
+              const displayName = profile?.fullName || profile?.nickName || profile?.email || member;
+              const initials = (profile?.fullName || profile?.nickName || member).substring(0, 2).toUpperCase();
+              
+              return (
               <div key={index} className="flex items-center gap-3 p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700/50">
-                <div className="w-10 h-10 rounded-full bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center text-indigo-600 dark:text-indigo-400 font-bold">
-                  {member.substring(0, 2).toUpperCase()}
+                <div className="w-10 h-10 rounded-full overflow-hidden bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center text-indigo-600 dark:text-indigo-400 font-bold shrink-0">
+                  {profile?.photoURL ? (
+                      <img src={profile.photoURL} alt={displayName} className="w-full h-full object-cover" />
+                  ) : (
+                      initials
+                  )}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-slate-800 dark:text-slate-200 truncate" title={member}>
-                  {member}
+                  <p className="text-sm font-semibold text-slate-800 dark:text-slate-200 truncate" title={displayName}>
+                  {displayName}
                   {member === group.ownerId && (
                     <span className="ml-2 px-1.5 py-0.5 bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 text-[10px] font-bold rounded uppercase tracking-wider">
                       Batch Admin
@@ -172,7 +203,7 @@ function GroupInfo() {
                 </p>
                 </div>
               </div>
-            ))
+            )})
           ) : (
             <div className="col-span-full text-center py-12 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-dashed border-slate-200 dark:border-slate-700">
               <p className="text-slate-500 dark:text-slate-400 font-medium">No members found</p>
