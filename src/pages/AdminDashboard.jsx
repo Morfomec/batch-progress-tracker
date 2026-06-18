@@ -268,9 +268,11 @@ function AdminDashboard() {
                 </div>
 
                 {/* Broadcast Announcement */}
-                <div className="bg-gradient-to-br from-indigo-600 to-purple-700 dark:from-indigo-900 dark:to-purple-950 rounded-[2rem] p-1 shadow-2xl relative overflow-hidden transition-all duration-300">
-                    <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-white/10 rounded-full blur-[60px] pointer-events-none translate-x-1/3 -translate-y-1/3" />
-                    <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-white/5 rounded-full blur-[40px] pointer-events-none -translate-x-1/3 translate-y-1/3" />
+                <div className="bg-gradient-to-br from-indigo-600 to-purple-700 dark:from-indigo-900 dark:to-purple-950 rounded-[2rem] p-1 shadow-2xl relative transition-all duration-300">
+                    <div className="absolute inset-0 overflow-hidden rounded-[2rem] pointer-events-none z-0">
+                        <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-white/10 rounded-full blur-[60px] translate-x-1/3 -translate-y-1/3" />
+                        <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-white/5 rounded-full blur-[40px] -translate-x-1/3 translate-y-1/3" />
+                    </div>
                     
                     <div className="bg-white dark:bg-slate-950 rounded-[1.8rem] p-6 sm:p-8 relative z-10 border border-white/20 dark:border-white/5">
                         <div className="flex items-center gap-3 mb-6">
