@@ -150,8 +150,10 @@ Thanks to everyone who has contributed to this project!
     <tr>
       <td align="center" valign="top" width="14.28%">
         <a href="https://github.com/ethicalanp">
-          <img src="https://github.com/ethicalanp" width="100px;" alt="Your Name"/><br />
+          <img src="https://github.com/ethicalanp" width="100px;" alt="img"/><br />
+          <sub><b>Muhammed Shifil </b></sub>
           <sub><b>Anupam DS </b></sub>
+          <sub><b>Mohd Swalih</b></sub>
         </a><br />
         <a title="Code">💻</a>
         <a title="Design">🎨</a>
