@@ -8,6 +8,23 @@ import { getPokeStatus, sendPoke, acceptPoke } from "../firebase/pokeService";
 import { createOrGetPrivateChat } from "../firebase/chatService";
 import toast from "react-hot-toast";
 
+// Helper to generate a stable, beautiful CSS mesh gradient from a string
+const generateMeshGradient = (seedStr) => {
+    if (!seedStr) return "linear-gradient(to right, #6366f1, #a855f7, #ec4899)";
+    let hash = 0;
+    for (let i = 0; i < seedStr.length; i++) {
+        hash = seedStr.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    const hue1 = Math.abs(hash % 360);
+    const hue2 = (hue1 + 50) % 360;
+    const hue3 = (hue1 + 100) % 360;
+
+    return `radial-gradient(circle at 10% 20%, hsl(${hue1}, 90%, 65%) 0%, transparent 70%),
+            radial-gradient(circle at 90% 80%, hsl(${hue2}, 90%, 60%) 0%, transparent 70%),
+            radial-gradient(circle at 50% 50%, hsl(${hue3}, 90%, 55%) 0%, transparent 70%),
+            linear-gradient(to right, hsl(${hue1}, 30%, 20%), hsl(${hue2}, 30%, 15%))`;
+};
+
 function PeerProfile() {
     const { userId } = useParams();
     const navigate = useNavigate();
@@ -176,8 +193,12 @@ function PeerProfile() {
 
                 {/* Profile Header Card */}
                 <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl rounded-[2rem] shadow-2xl border border-slate-200/50 dark:border-white/5 overflow-hidden relative transition-colors duration-300">
-                    <div className="h-32 sm:h-48 bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-600 dark:from-indigo-900 dark:via-purple-900 dark:to-indigo-950 relative overflow-hidden">
-                        <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+                    <div 
+                        className="h-32 sm:h-48 relative overflow-hidden"
+                        style={{ background: generateMeshGradient(userId) }}
+                    >
+                        <div className="absolute inset-0 bg-black/10 dark:bg-black/30 backdrop-blur-[2px]"></div>
+                        <div className="absolute top-0 right-0 w-64 h-64 bg-white/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
                     </div>
 
                     <div className="px-6 sm:px-10 pb-8 relative">
@@ -203,21 +224,9 @@ function PeerProfile() {
                                         </span>
                                     )}
                                 </h1>
-                                {peerProfile.status && (
-                                    <p className="text-sm font-medium text-indigo-600 dark:text-indigo-400 mt-0.5 flex items-center gap-1.5">
-                                        <span className="text-base">💬</span>
-                                        {peerProfile.status}
-                                    </p>
-                                )}
                                 <div className="flex flex-wrap items-center gap-4 text-sm font-medium text-slate-500 dark:text-slate-400 mt-2">
-                                    {peerProfile.location && (
-                                        <div className="flex items-center gap-1.5">
-                                            <MapPin className="w-4 h-4" />
-                                            {peerProfile.location}
-                                        </div>
-                                    )}
                                     {peerProfile.linkedinUrl && (
-                                        <a href={peerProfile.linkedinUrl} target="_blank" rel="noreferrer" className="flex items-center gap-1.5 text-indigo-600 dark:text-indigo-400 hover:underline">
+                                        <a href={peerProfile.linkedinUrl} target="_blank" rel="noreferrer" className="flex items-center gap-1.5 text-indigo-600 dark:text-indigo-400 hover:underline bg-indigo-50 dark:bg-indigo-900/30 px-3 py-1.5 rounded-lg transition-colors">
                                             <Linkedin className="w-4 h-4" />
                                             LinkedIn
                                         </a>
@@ -261,26 +270,41 @@ function PeerProfile() {
                                     </button>
                                 )}
 
-                                <div className="flex items-center gap-3 bg-indigo-50 dark:bg-indigo-900/30 px-5 py-3 rounded-2xl border border-indigo-100 dark:border-indigo-800 text-indigo-600 dark:text-indigo-400">
-                                    <Award className="w-8 h-8" />
-                                    <div>
-                                        <p className="text-xs font-bold uppercase tracking-wider">Total Score</p>
-                                        <p className="text-2xl font-black leading-none">{totalScore}</p>
-                                    </div>
-                                </div>
                             </div>
                         </div>
 
                         {peerProfile.bio && (
-                            <div className="mt-6 p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800">
-                                <p className="text-slate-700 dark:text-slate-300 italic">"{peerProfile.bio}"</p>
+                            <div className="mt-6 p-5 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800">
+                                <p className="text-slate-700 dark:text-slate-300 italic text-lg leading-relaxed">"{peerProfile.bio}"</p>
                             </div>
                         )}
+
+                        <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4">
+                             <div className="bg-slate-50/50 dark:bg-slate-800/30 border border-slate-200/50 dark:border-slate-700/50 rounded-2xl p-4 flex flex-col items-center justify-center text-center transition-transform hover:scale-[1.02]">
+                                 <Award className="w-6 h-6 text-indigo-500 mb-2" />
+                                 <p className="text-2xl font-black text-slate-800 dark:text-white leading-none mb-1">{totalScore}</p>
+                                 <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Total Points</p>
+                             </div>
+                             {peerProfile.leetcodeUsername && (
+                             <div className="bg-slate-50/50 dark:bg-slate-800/30 border border-slate-200/50 dark:border-slate-700/50 rounded-2xl p-4 flex flex-col items-center justify-center text-center transition-transform hover:scale-[1.02]">
+                                 <Activity className="w-6 h-6 text-amber-500 mb-2" />
+                                 <p className="text-lg font-bold text-slate-800 dark:text-white leading-tight mb-1 truncate w-full px-2" title={peerProfile.leetcodeUsername}>{peerProfile.leetcodeUsername}</p>
+                                 <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">LeetCode</p>
+                             </div>
+                             )}
+                             {peerProfile.status && (
+                             <div className="bg-slate-50/50 dark:bg-slate-800/30 border border-slate-200/50 dark:border-slate-700/50 rounded-2xl p-4 flex flex-col items-center justify-center text-center col-span-2 md:col-span-2 transition-transform hover:scale-[1.02]">
+                                 <MessageCircle className="w-6 h-6 text-emerald-500 mb-2" />
+                                 <p className="text-sm font-semibold text-slate-800 dark:text-white leading-tight mb-1">{peerProfile.status}</p>
+                                 <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Current Status</p>
+                             </div>
+                             )}
+                        </div>
                     </div>
                 </div>
 
-                {/* Progress History - Only visible to self */}
-                {user.uid === userId && (
+                {/* Progress History - Visible to self or if public */}
+                {(user.uid === userId || peerProfile.makeProgressPublic) && (
                     <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl rounded-[2rem] shadow-2xl border border-slate-200/50 dark:border-white/5 overflow-hidden transition-colors duration-300">
                         <div className="px-8 py-6 border-b border-slate-100/50 dark:border-slate-800/50 bg-slate-50/50 dark:bg-slate-800/30 flex items-center gap-3">
                             <Activity className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />

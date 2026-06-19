@@ -16,6 +16,9 @@ function MyProfile() {
     const [emoji, setEmoji] = useState("");
     const [status, setStatus] = useState("");
     const [leetcodeUsername, setLeetcodeUsername] = useState("");
+    const [bio, setBio] = useState("");
+    const [linkedinUrl, setLinkedinUrl] = useState("");
+    const [makeProgressPublic, setMakeProgressPublic] = useState(false);
     const [loading, setLoading] = useState(false);
 
     const STATUS_PRESETS = [
@@ -46,6 +49,9 @@ function MyProfile() {
             setEmoji(userProfile.emoji || "");
             setStatus(userProfile.status || "");
             setLeetcodeUsername(userProfile.leetcodeUsername || "");
+            setBio(userProfile.bio || "");
+            setLinkedinUrl(userProfile.linkedinUrl || "");
+            setMakeProgressPublic(userProfile.makeProgressPublic || false);
         }
     }, [userProfile]);
 
@@ -62,6 +68,9 @@ function MyProfile() {
                 emoji,
                 status: status.trim(),
                 leetcodeUsername: leetcodeUsername.trim(),
+                bio: bio.trim(),
+                linkedinUrl: linkedinUrl.trim(),
+                makeProgressPublic,
             });
 
             setSuccessMsg("Profile updated successfully!");
@@ -346,8 +355,45 @@ function MyProfile() {
                                 <p className="mt-2 text-xs text-amber-600/80 dark:text-amber-500/80 font-medium">Required to earn streaks on daily 1QAD coding challenges.</p>
                             </div>
                             
-                            {/* Empty spacer to force Status section underneath LeetCode on the left */}
-                            <div className="hidden md:block"></div>
+                            <div>
+                                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Bio</label>
+                                <textarea
+                                    value={bio}
+                                    onChange={(e) => setBio(e.target.value)}
+                                    className="w-full px-4 py-3 bg-white/50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/50 text-slate-900 dark:text-white rounded-xl focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500/50 outline-none transition-all placeholder-slate-400 dark:placeholder-slate-500/80 backdrop-blur-sm resize-none"
+                                    rows="2"
+                                    placeholder="Tell your peers about yourself..."
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">LinkedIn URL</label>
+                                <input
+                                    type="url"
+                                    value={linkedinUrl}
+                                    onChange={(e) => setLinkedinUrl(e.target.value)}
+                                    className="w-full px-4 py-3 bg-white/50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/50 text-slate-900 dark:text-white rounded-xl focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500/50 outline-none transition-all placeholder-slate-400 dark:placeholder-slate-500/80 backdrop-blur-sm"
+                                    placeholder="https://linkedin.com/in/..."
+                                />
+                            </div>
+                            
+                            <div className="md:col-span-2">
+                                <label className="flex items-center gap-3 cursor-pointer p-4 rounded-xl border border-slate-200 dark:border-slate-700/50 bg-white/50 dark:bg-slate-800/50 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+                                    <div className="relative">
+                                        <input 
+                                            type="checkbox" 
+                                            className="sr-only" 
+                                            checked={makeProgressPublic}
+                                            onChange={(e) => setMakeProgressPublic(e.target.checked)}
+                                        />
+                                        <div className={`block w-10 h-6 rounded-full transition-colors ${makeProgressPublic ? 'bg-indigo-500' : 'bg-slate-300 dark:bg-slate-600'}`}></div>
+                                        <div className={`absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform ${makeProgressPublic ? 'translate-x-4' : 'translate-x-0'}`}></div>
+                                    </div>
+                                    <div>
+                                        <p className="text-sm font-bold text-slate-800 dark:text-white">Make Progress History Public</p>
+                                        <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">Allow batch mates to view your recent achievements on your profile.</p>
+                                    </div>
+                                </label>
+                            </div>
 
                         {/* Status Section */}
                         <div>
