@@ -3,6 +3,7 @@ import { collection, onSnapshot, getDocs } from "firebase/firestore";
 import { db } from "../firebase/firebaseConfig";
 import { Trophy, Medal, Award } from "lucide-react";
 import { Link } from "react-router-dom";
+import { isStreakBroken } from "../utils/streakUtils";
 
 function Leaderboard({ groupId }) {
     const [leaders, setLeaders] = useState([]);
@@ -21,11 +22,17 @@ function Leaderboard({ groupId }) {
                 usersSnap.docs.forEach(d => {
                     const data = d.data();
                     privacyMap[d.id] = data?.privacyMode || false;
+                    
+                    let streak = data?.leetcodeStreak || 0;
+                    if (streak > 0 && isStreakBroken(streak, data?.lastLeetcodeSolve)) {
+                        streak = 0;
+                    }
+
                     userDocsMap[d.id] = {
                         name: data?.nickName || data?.fullName || data?.displayName || data?.email || "Unknown",
                         emoji: data?.emoji || "",
                         photoURL: data?.photoURL || null,
-                        leetcodeStreak: data?.leetcodeStreak || 0
+                        leetcodeStreak: streak
                     };
                 });
 

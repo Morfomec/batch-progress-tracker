@@ -2,7 +2,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { auth, db } from "../firebase/firebaseConfig";
 import { onAuthStateChanged } from "firebase/auth";
-import { doc, onSnapshot } from "firebase/firestore";
+import { doc, onSnapshot, updateDoc } from "firebase/firestore";
 import { isStreakBroken } from "../utils/streakUtils";
 
 const AuthContext = createContext();
@@ -25,22 +25,16 @@ export function AuthProvider({ children }) {
                         
                         // Auto-sync Google Auth photo if missing in Firestore
                         if (currentUser.photoURL && !data.photoURL) {
-                            import("firebase/firestore").then(({ updateDoc }) => {
-                                updateDoc(userDocRef, { photoURL: currentUser.photoURL }).catch(console.error);
-                            });
+                            updateDoc(userDocRef, { photoURL: currentUser.photoURL }).catch(console.error);
                         }
                         // Auto-sync name if missing
                         if (currentUser.displayName && !data.fullName) {
-                            import("firebase/firestore").then(({ updateDoc }) => {
-                                updateDoc(userDocRef, { fullName: currentUser.displayName }).catch(console.error);
-                            });
+                            updateDoc(userDocRef, { fullName: currentUser.displayName }).catch(console.error);
                         }
 
                         // Auto-reset broken LeetCode streak
                         if (data.leetcodeStreak > 0 && isStreakBroken(data.leetcodeStreak, data.lastLeetcodeSolve)) {
-                            import("firebase/firestore").then(({ updateDoc }) => {
-                                updateDoc(userDocRef, { leetcodeStreak: 0 }).catch(console.error);
-                            });
+                            updateDoc(userDocRef, { leetcodeStreak: 0 }).catch(console.error);
                             data.leetcodeStreak = 0; // Optically update local state immediately
                         }
                         

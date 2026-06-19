@@ -3,6 +3,7 @@ import { collection, query, where, orderBy, limit, onSnapshot } from "firebase/f
 import { db } from "../../firebase/firebaseConfig";
 import { Flame } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { isStreakBroken } from "../../utils/streakUtils";
 
 export default function LeetCodeLeaderboard() {
   const [leaders, setLeaders] = useState([]);
@@ -21,13 +22,23 @@ export default function LeetCodeLeaderboard() {
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const usersData = snapshot.docs.map(doc => {
         const data = doc.data();
+        let streak = data.leetcodeStreak || 0;
+        
+        // Filter out broken streaks immediately on the client side
+        if (streak > 0 && isStreakBroken(streak, data.lastLeetcodeSolve)) {
+          streak = 0;
+        }
+
         return {
           id: doc.id,
           name: data.fullName || data.nickName || data.displayName || "Unknown User",
           photoURL: data.photoURL || null,
-          streak: data.leetcodeStreak || 0
+          streak: streak
         };
-      });
+      })
+      .filter(u => u.streak > 0)
+      .sort((a, b) => b.streak - a.streak); // Re-sort since some might be zeroed out
+      
       setLeaders(usersData);
       setLoading(false);
     }, (error) => {
