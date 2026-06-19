@@ -131,9 +131,15 @@ export default function ChatWindow({ activeRoom, userId, userName, userPhoto, us
     (msg.pollResponses || []).filter(pollResponseMatchesActiveBatch);
 
   const getDisplayPollResponses = (msg) => {
+    // For the 1QAD channel or messages flagged as 1qad_poll, show ALL responses across all batches
     if (activeRoom?.type === '1qad' || msg.type === '1qad_poll') {
       return msg.pollResponses || [];
     }
+    // For a group chat room, the room itself is the scope — show ALL responses in that room
+    if (activeRoom?.type === 'group') {
+      return msg.pollResponses || [];
+    }
+    // For global or other room types, filter by the active batch
     return getBatchPollResponses(msg);
   };
 
