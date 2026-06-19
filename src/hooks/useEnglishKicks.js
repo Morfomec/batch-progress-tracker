@@ -68,8 +68,13 @@ export const useEnglishKicks = (groupId) => {
                                 };
                             });
 
-                        // Sort alphabetically
-                        mergedMembers.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
+                        // Sort by points descending, then alphabetically for ties
+                        mergedMembers.sort((a, b) => {
+                            if (b.points !== a.points) {
+                                return b.points - a.points;
+                            }
+                            return (a.name || "").localeCompare(b.name || "");
+                        });
                         setKicks(mergedMembers);
                     }
                 );
